@@ -127,7 +127,7 @@ def main(
             fg="yellow",
         )
 
-    started = time.perf_counter()
+    started = time.time()
     train_record = None
     if skip_train:
         ckpt_path = Path(checkpoint or out_dir / "best.pt")
@@ -229,7 +229,15 @@ def main(
         "model_report": model_report,
         "baseline_report": baseline_report,
         "best_valid_metric": train_record["best_valid_metric"] if train_record else None,
-        "total_seconds": time.perf_counter() - started,
+        # Carried up from the training record so the leaderboard row says *how*
+        # the run ended. Without these a capped run is indistinguishable from a
+        # completed one, which matters: the first 1M run was read as having
+        # finished its schedule when its wall-clock cap had silently failed.
+        "best_epoch": train_record["best_epoch"] if train_record else None,
+        "best_step": train_record["best_step"] if train_record else None,
+        "stopped_because": train_record["stopped_because"] if train_record else None,
+        # Wall clock, matching train.py -- see the comment on ``started`` there.
+        "total_seconds": time.time() - started,
     }
     append_record(record)
     click.echo(f"\nappended to {LEADERBOARD}")

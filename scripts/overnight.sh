@@ -25,9 +25,19 @@ say() { echo "[$(date '+%H:%M:%S')] $*" | tee -a "$LOGS/driver.log"; }
 
 remaining() { echo $(( DEADLINE_EPOCH - $(date "+%s") )); }
 
+# A stage only runs if its own cap fits in the time left, with the analysis
+# window reserved. The earlier version asked only whether 105 minutes remained,
+# which would happily launch a 3.5 h stage with 2 h left -- the stage would then
+# run until its cap and the analysis stages would be the thing that got cut.
+# Takes the stage's max_hours so the arithmetic is about the stage in hand.
 have_time_for_training() {
+    local cap_hours="$1"
     local left; left=$(remaining)
-    [ "$left" -gt $(( ANALYSIS_SECONDS + 1800 )) ]
+    local needed; needed=$(printf "%.0f" "$(echo "$cap_hours * 3600" | bc -l)")
+    # Allow one evaluation interval of overshoot: the cap is only tested at an
+    # evaluation, so a run stops at its cap plus up to one interval.
+    needed=$(( needed + 1800 ))
+    [ "$left" -gt $(( ANALYSIS_SECONDS + needed )) ]
 }
 
 say "=== overnight start, $(( $(remaining) / 60 )) minutes to deadline ==="
@@ -35,7 +45,7 @@ say "machine: $(sysctl -n hw.model), $(sysctl -n hw.ncpu) cores"
 say "git: $(git rev-parse --short HEAD)"
 
 # ---- Stage 1: the data variable (8M params, 1M shard, capped at 8.5 h) -----
-if have_time_for_training; then
+if have_time_for_training 8.5; then
     say "stage 1: small_1m -- 8M params, 1M shard, data variable"
     $PY -u scripts/run_experiment.py \
         --config configs/small_1m.yaml \
@@ -48,7 +58,7 @@ else
 fi
 
 # ---- Stage 2: the capacity variable (15M params, capped at 3.5 h) ----------
-if have_time_for_training; then
+if have_time_for_training 1.75; then
     say "stage 2: medium_1m -- 15M params, 1M shard, capacity variable"
     $PY -u scripts/run_experiment.py \
         --config configs/medium_1m.yaml \
