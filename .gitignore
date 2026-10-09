@@ -17,6 +17,13 @@ dist/
 /results/*
 !/results/.gitkeep
 !/results/leaderboard.jsonl
+# The analysis outputs are the evidence behind docs/overnight-2026-10-09.md and
+# are a few KB each. The multi-MB tqdm run logs beside them stay ignored.
+!/results/overnight/
+/results/overnight/*
+!/results/overnight/comparison.json
+!/results/overnight/scaffold_probe.json
+!/results/overnight/driver.log
 *.pt
 
 .DS_Store

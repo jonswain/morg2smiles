@@ -1,0 +1,12 @@
+[18:42:32] === overnight start, 903 minutes to deadline ===
+[18:42:32] machine: Mac14,2, 8 cores
+[18:42:32] git: 5e7d665
+[18:42:32] stage 1: small_1m -- 8M params, 1M shard, data variable
+[06:28:28] stage 1 exit=0, 197 minutes left
+[06:28:28] stage 2: medium_1m -- 15M params, 1M shard, capacity variable
+[08:27:39] stage 2 exit=0, 77 minutes left
+[08:27:39] stage 3: common evaluation of every checkpoint
+[08:56:52] stage 3 exit=0, 48 minutes left
+[08:56:52] stage 4: novel-scaffold generalisation probe
+[09:10:00] stage 4 exit=0
+[09:10:00] === overnight done, 35 minutes to spare ===

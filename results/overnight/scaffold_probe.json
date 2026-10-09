@@ -1,0 +1,102 @@
+{
+  "protocol": {
+    "eval_n": 1000,
+    "seed": 0,
+    "eval_k": 20
+  },
+  "runs": {
+    "small_100k": {
+      "checkpoint": "checkpoints/small/best.pt",
+      "train_shard": "data/shards/100k",
+      "slices": {
+        "scaffold_seen": {
+          "n_sampled": 500,
+          "n_fp_unseen": 497,
+          "recovery_at_k": {
+            "1": 0.22334004024144868,
+            "5": 0.4688128772635815,
+            "20": 0.6740442655935613
+          },
+          "structure_accuracy_at_20": 0.6599597585513078,
+          "validity": 0.8231681931723563,
+          "mean_best_tanimoto": 0.9047378169542899
+        },
+        "scaffold_novel": {
+          "n_sampled": 500,
+          "n_fp_unseen": 499,
+          "recovery_at_k": {
+            "1": 0.13627254509018036,
+            "5": 0.3527054108216433,
+            "20": 0.5470941883767535
+          },
+          "structure_accuracy_at_20": 0.533066132264529,
+          "validity": 0.7511844719547608,
+          "mean_best_tanimoto": 0.8669677637310244
+        }
+      },
+      "novel_scaffold_penalty_at_20": 0.12695007721680784
+    },
+    "small_1m": {
+      "checkpoint": "checkpoints/small_1m/best.pt",
+      "train_shard": "data/shards/1m",
+      "slices": {
+        "scaffold_seen": {
+          "n_sampled": 500,
+          "n_fp_unseen": 491,
+          "recovery_at_k": {
+            "1": 0.5723014256619144,
+            "5": 0.8309572301425662,
+            "20": 0.9042769857433809
+          },
+          "structure_accuracy_at_20": 0.8940936863543788,
+          "validity": 0.9077937520268079,
+          "mean_best_tanimoto": 0.9774023377173062
+        },
+        "scaffold_novel": {
+          "n_sampled": 500,
+          "n_fp_unseen": 494,
+          "recovery_at_k": {
+            "1": 0.4716599190283401,
+            "5": 0.7246963562753036,
+            "20": 0.8421052631578947
+          },
+          "structure_accuracy_at_20": 0.8380566801619433,
+          "validity": 0.8781808622502629,
+          "mean_best_tanimoto": 0.9609458337370538
+        }
+      },
+      "novel_scaffold_penalty_at_20": 0.0621717225854862
+    },
+    "medium_1m": {
+      "checkpoint": "checkpoints/medium_1m/best.pt",
+      "train_shard": "data/shards/1m",
+      "slices": {
+        "scaffold_seen": {
+          "n_sampled": 500,
+          "n_fp_unseen": 491,
+          "recovery_at_k": {
+            "1": 0.05091649694501019,
+            "5": 0.164969450101833,
+            "20": 0.29124236252545826
+          },
+          "structure_accuracy_at_20": 0.28105906313645623,
+          "validity": 0.5368264699856586,
+          "mean_best_tanimoto": 0.7256849826510192
+        },
+        "scaffold_novel": {
+          "n_sampled": 500,
+          "n_fp_unseen": 494,
+          "recovery_at_k": {
+            "1": 0.024291497975708502,
+            "5": 0.0931174089068826,
+            "20": 0.20647773279352227
+          },
+          "structure_accuracy_at_20": 0.19433198380566802,
+          "validity": 0.46006697787700424,
+          "mean_best_tanimoto": 0.6700594021966956
+        }
+      },
+      "novel_scaffold_penalty_at_20": 0.08476462973193599
+    }
+  }
+}
