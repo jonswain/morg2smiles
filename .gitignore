@@ -11,8 +11,12 @@ dist/
 /data/
 /checkpoints/
 /reports/
+# The leaderboard is the project's experiment ledger -- every row ties metrics
+# to a config hash and a git commit, which is what makes an iteration loop
+# auditable after the fact. Tracked deliberately. Run logs are not.
 /results/*
 !/results/.gitkeep
+!/results/leaderboard.jsonl
 *.pt
 
 .DS_Store
