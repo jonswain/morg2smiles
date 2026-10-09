@@ -284,7 +284,9 @@ class FPSetEncoder(nn.Module):
             batch_first=True,
             norm_first=True,
         )
-        self.encoder = nn.TransformerEncoder(layer, cfg.n_encoder_layers, enable_nested_tensor=False)
+        self.encoder = nn.TransformerEncoder(
+            layer, cfg.n_encoder_layers, enable_nested_tensor=False
+        )
         self.norm = nn.LayerNorm(cfg.d_model)
 
     def forward(
@@ -420,9 +422,7 @@ class Morg2SmilesModel(nn.Module):
         """
         seq = tokens.size(1)
         if offset + seq > self.cfg.max_tokens:
-            raise ValueError(
-                f"position {offset + seq} exceeds max_tokens {self.cfg.max_tokens}"
-            )
+            raise ValueError(f"position {offset + seq} exceeds max_tokens {self.cfg.max_tokens}")
 
         positions = torch.arange(offset, offset + seq, device=tokens.device)
         x = self.dropout(self.token_embedding(tokens) + self.position_embedding(positions))

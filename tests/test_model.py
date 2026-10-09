@@ -29,6 +29,7 @@ MOLECULES = [
     "O=S(=O)(N)c1ccccc1",
 ]
 
+
 def _padded_tokens(tokenizer: SmilesTokenizer, length: int) -> torch.Tensor:
     """A fixed-width token batch over MOLECULES, padded to `length`."""
     rows = []
@@ -91,9 +92,7 @@ def test_output_weight_is_tied(model):
 def test_forward_shapes_and_finiteness(model, tokenizer):
     ds = FingerprintDataset(MOLECULES, FPConfig(), tokenizer, max_tokens=TINY.max_tokens)
     batch = collate([ds[i] for i in range(len(MOLECULES))], tokenizer.pad_id)
-    logits = model(
-        batch["fp_indices"], batch["fp_counts"], batch["fp_mask"], batch["tokens"]
-    )
+    logits = model(batch["fp_indices"], batch["fp_counts"], batch["fp_mask"], batch["tokens"])
     assert logits.shape == (len(MOLECULES), batch["tokens"].size(1) - 1, len(tokenizer))
     assert torch.isfinite(logits).all()
 
@@ -119,9 +118,7 @@ def test_padded_fingerprint_bits_do_not_change_the_output(model, tokenizer):
     items = [ds[0], ds[3]]  # very different numbers of set bits
     batch = collate(items, tokenizer.pad_id)
 
-    memory, pad_mask = model.encode_fp(
-        batch["fp_indices"], batch["fp_counts"], batch["fp_mask"]
-    )
+    memory, pad_mask = model.encode_fp(batch["fp_indices"], batch["fp_counts"], batch["fp_mask"])
     tokens = batch["tokens"][:, :4]
     with torch.no_grad():
         before = model.decode_step(tokens, memory, pad_mask)
@@ -178,8 +175,20 @@ def test_position_offset_is_respected(model, tokenizer, fps):
     memory, pad_mask = model.encode_fp(indices, counts, mask)
     token = torch.tensor([[tokenizer.stoi["C"]]])
     with torch.no_grad():
-        at_zero = model.decode_step(token, memory, pad_mask, caches=model.new_caches(1, device=torch.device("cpu")), offset=0)
-        at_five = model.decode_step(token, memory, pad_mask, caches=model.new_caches(1, device=torch.device("cpu")), offset=5)
+        at_zero = model.decode_step(
+            token,
+            memory,
+            pad_mask,
+            caches=model.new_caches(1, device=torch.device("cpu")),
+            offset=0,
+        )
+        at_five = model.decode_step(
+            token,
+            memory,
+            pad_mask,
+            caches=model.new_caches(1, device=torch.device("cpu")),
+            offset=5,
+        )
     assert not torch.allclose(at_zero, at_five)
 
 
@@ -207,15 +216,15 @@ def test_sample_on_empty_input(model):
 
 def test_sampling_is_diverse_but_greedy_is_not(model, fps):
     """Low temperature should collapse to near-identical strings, high should not."""
-    cold = sample(model, fps[:1], k=8, temperature=0.01, max_tokens=24, device=torch.device("cpu"))[0]
+    cold = sample(model, fps[:1], k=8, temperature=0.01, max_tokens=24, device=torch.device("cpu"))[
+        0
+    ]
     hot = sample(model, fps[:1], k=8, temperature=2.0, max_tokens=24, device=torch.device("cpu"))[0]
     assert len(set(cold)) <= len(set(hot))
 
 
 def test_top_p_and_top_k_filtering_run(model, fps):
-    out = sample(
-        model, fps[:2], k=4, top_p=0.9, top_k=5, max_tokens=24, device=torch.device("cpu")
-    )
+    out = sample(model, fps[:2], k=4, top_p=0.9, top_k=5, max_tokens=24, device=torch.device("cpu"))
     assert len(out) == 2
 
 

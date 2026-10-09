@@ -70,10 +70,14 @@ def append_record(record: dict, path: Path = LEADERBOARD) -> None:
 @click.option("--epochs", type=int, help="Overrides the config.")
 @click.option("--eval-k", default=20, show_default=True, help="Candidate budget at evaluation.")
 @click.option("--eval-n", type=int, help="Cap evaluation molecules. Default: the whole split.")
-@click.option("--strategy", default="sample", type=click.Choice(["sample", "beam"]), show_default=True)
+@click.option(
+    "--strategy", default="sample", type=click.Choice(["sample", "beam"]), show_default=True
+)
 @click.option("--temperature", default=1.0, show_default=True)
 @click.option("--top-p", default=1.0, show_default=True)
-@click.option("--baseline/--no-baseline", default=True, show_default=True, help="Also score retrieval.")
+@click.option(
+    "--baseline/--no-baseline", default=True, show_default=True, help="Also score retrieval."
+)
 @click.option("--skip-train", is_flag=True, help="Evaluate an existing checkpoint instead.")
 @click.option("--checkpoint", type=click.Path(path_type=Path), help="With --skip-train.")
 @click.option("--note", default="", help="Free-text label for the leaderboard row.")
@@ -123,7 +127,9 @@ def main(
             out_dir=out_dir,
             scaffold=scaffold,
         )
-        model, _ = Morg2SmilesModel.load(out_dir / "best.pt", device=select_device(train_cfg.device))
+        model, _ = Morg2SmilesModel.load(
+            out_dir / "best.pt", device=select_device(train_cfg.device)
+        )
 
     # The model's own stamped fingerprint config wins over the YAML, so a
     # checkpoint can never be evaluated under settings it was not trained for.
@@ -192,7 +198,12 @@ def main(
         "train_config": train_cfg.to_dict(),
         "n_parameters": model.n_parameters,
         "checkpoint": str(out_dir / "best.pt"),
-        "generation": {"k": eval_k, "strategy": strategy, "temperature": temperature, "top_p": top_p},
+        "generation": {
+            "k": eval_k,
+            "strategy": strategy,
+            "temperature": temperature,
+            "top_p": top_p,
+        },
         "primary_metric_name": model_report["primary_metric_name"],
         "primary_metric": model_report["primary_metric"],
         "baseline_primary_metric": baseline_report["primary_metric"] if baseline_report else None,

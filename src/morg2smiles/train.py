@@ -31,7 +31,7 @@ from .data.dataset import FingerprintDataset, collate, fp_unseen_mask, load_spli
 from .evaluation import evaluate_model
 from .fingerprints import FPConfig
 from .metrics import format_report
-from .model import ModelConfig, Morg2SmilesModel, build_model, select_device
+from .model import ModelConfig, build_model, select_device
 from .tokenizer import SmilesTokenizer
 
 __all__ = ["TrainConfig", "train", "set_seed"]
@@ -159,7 +159,7 @@ def train(
     # Weight decay on matrices only. Decaying LayerNorm gains and biases is
     # the usual accidental regulariser and costs a little accuracy for nothing.
     decay, no_decay = [], []
-    for name, param in model.named_parameters():
+    for _name, param in model.named_parameters():
         if not param.requires_grad:
             continue
         (no_decay if param.ndim < 2 else decay).append(param)
@@ -178,7 +178,9 @@ def train(
     # A fixed validation subsample, so epoch-to-epoch comparisons are not noise
     # from re-drawing the molecules.
     rng = random.Random(train_cfg.seed)
-    eval_idx = sorted(rng.sample(range(len(valid_smiles)), min(train_cfg.eval_n, len(valid_smiles))))
+    eval_idx = sorted(
+        rng.sample(range(len(valid_smiles)), min(train_cfg.eval_n, len(valid_smiles)))
+    )
     eval_smiles = [valid_smiles[i] for i in eval_idx]
     full_mask = fp_unseen_mask(
         shard_dir, fp_cfg, split="valid", scaffold=scaffold, show_progress=show_progress
@@ -201,9 +203,7 @@ def train(
         model.train()
         dataset.set_epoch(epoch)
         running, n_batches = 0.0, 0
-        bar = tqdm(
-            loader, desc=f"epoch {epoch + 1}/{train_cfg.epochs}", disable=not show_progress
-        )
+        bar = tqdm(loader, desc=f"epoch {epoch + 1}/{train_cfg.epochs}", disable=not show_progress)
         for batch in bar:
             for group in optimizer.param_groups:
                 group["lr"] = train_cfg.lr * _lr_at(step, total_steps, train_cfg)
@@ -230,7 +230,9 @@ def train(
             running += loss.item()
             n_batches += 1
             step += 1
-            bar.set_postfix(loss=f"{running / n_batches:.4f}", lr=f"{optimizer.param_groups[0]['lr']:.2e}")
+            bar.set_postfix(
+                loss=f"{running / n_batches:.4f}", lr=f"{optimizer.param_groups[0]['lr']:.2e}"
+            )
 
         record = {
             "epoch": epoch + 1,

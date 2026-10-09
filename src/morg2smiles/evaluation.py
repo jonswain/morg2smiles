@@ -64,9 +64,7 @@ def generate_outcomes(
     outcomes: list[QueryOutcome] = []
 
     if strategy == "beam":
-        iterator = tqdm(
-            range(len(smiles)), desc="beam", unit=" mol", disable=not show_progress
-        )
+        iterator = tqdm(range(len(smiles)), desc="beam", unit=" mol", disable=not show_progress)
         for i in iterator:
             candidates = beam_search(model, fps[i], k=k, **kwargs)
             outcomes.append(
@@ -132,5 +130,12 @@ def evaluate_model(
     outcomes = generate_outcomes(model, smiles, k=k, fp_unseen=fp_unseen, **kwargs)
     elapsed = time.perf_counter() - started
     report = evaluate(outcomes, ks=ks, elapsed_seconds=elapsed)
-    report["generation"] = {"k": k, **{key: value for key, value in kwargs.items() if isinstance(value, (int, float, str, bool))}}
+    report["generation"] = {
+        "k": k,
+        **{
+            key: value
+            for key, value in kwargs.items()
+            if isinstance(value, (int, float, str, bool))
+        },
+    }
     return report

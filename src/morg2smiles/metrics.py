@@ -145,14 +145,15 @@ def evaluate(
         cannot accidentally sort on the memorisable one.
     """
     ks = tuple(sorted(set(int(k) for k in ks)))
-    report: dict = {"ks": list(ks), "slices": {s: _slice_metrics(_slice(outcomes, s), ks) for s in SLICES}}
+    report: dict = {
+        "ks": list(ks),
+        "slices": {s: _slice_metrics(_slice(outcomes, s), ks) for s in SLICES},
+    }
 
     unseen = report["slices"]["fp_unseen"]
     report["primary_metric"] = unseen.get("recovery_at_k", {}).get(str(max(ks)), 0.0)
     report["primary_metric_name"] = f"recovery@{max(ks)} (fp_unseen)"
-    report["fp_unseen_fraction"] = (
-        unseen["n_queries"] / len(outcomes) if outcomes else 0.0
-    )
+    report["fp_unseen_fraction"] = unseen["n_queries"] / len(outcomes) if outcomes else 0.0
 
     if elapsed_seconds:
         n_candidates = sum(o.n_candidates for o in outcomes)

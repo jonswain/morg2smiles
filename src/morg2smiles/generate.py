@@ -130,9 +130,9 @@ def sample(
         # Incremental decoding: only the new token goes through the layers, and
         # the caches supply the prefix. Without this each step would re-attend
         # over the whole prefix, which dominates evaluation cost.
-        logits = model.decode_step(
-            nxt, memory, memory_pad_mask, caches=caches, offset=position
-        )[:, -1, :]
+        logits = model.decode_step(nxt, memory, memory_pad_mask, caches=caches, offset=position)[
+            :, -1, :
+        ]
         logits = _filter_logits(logits, temperature, top_p, top_k)
         probs = logits.softmax(dim=-1)
         nxt = torch.multinomial(probs, num_samples=1, generator=generator)

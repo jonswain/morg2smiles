@@ -86,7 +86,9 @@ def analyse_mode(molecules: list[str], cfg: FPConfig, *, show_progress: bool = T
             "min": min(n_bits_set, default=0),
             "max": max(n_bits_set, default=0),
             # Density matters for the set encoder: this is its sequence length.
-            "mean_density": (mean(n_bits_set) / cfg.n_bits) if (cfg.folded and n_bits_set) else None,
+            "mean_density": (mean(n_bits_set) / cfg.n_bits)
+            if (cfg.folded and n_bits_set)
+            else None,
         },
         "total_count_mass": {"mean": mean(total_counts) if total_counts else 0.0},
     }
@@ -147,9 +149,13 @@ def format_markdown(report: dict) -> str:
             f"| {density_cell} |"
         )
 
-    lines += ["", "## Information lost to folding", "",
-              "| mode | true environments | distinct bits | lost | molecules affected |",
-              "|---|---|---|---|---|"]
+    lines += [
+        "",
+        "## Information lost to folding",
+        "",
+        "| mode | true environments | distinct bits | lost | molecules affected |",
+        "|---|---|---|---|---|",
+    ]
     for name, m in report["folding_loss"].items():
         lines.append(
             f"| `{name}` | {m['mean_true_environments']:.1f} | {m['mean_distinct_bits']:.1f} "
@@ -160,9 +166,10 @@ def format_markdown(report: dict) -> str:
     binary = report["modes"].get("folded_binary_2048", {})
     count = report["modes"].get("folded_count_2048", {})
     if binary and count:
-        delta = count["frac_molecules_uniquely_determined"] - binary[
-            "frac_molecules_uniquely_determined"
-        ]
+        delta = (
+            count["frac_molecules_uniquely_determined"]
+            - binary["frac_molecules_uniquely_determined"]
+        )
         lines += [
             "",
             "## Do counts earn their keep?",
@@ -180,7 +187,10 @@ def format_markdown(report: dict) -> str:
 @click.option("--subset", default="10k", show_default=True)
 @click.option("--data-dir", default="data", type=click.Path(path_type=Path), show_default=True)
 @click.option(
-    "--splits", default="train,valid,test", show_default=True, help="Comma-separated splits to pool."
+    "--splits",
+    default="train,valid,test",
+    show_default=True,
+    help="Comma-separated splits to pool.",
 )
 @click.option("--limit", type=int, help="Cap molecules analysed, for a quick look.")
 @click.option("--out-dir", default="reports", type=click.Path(path_type=Path), show_default=True)

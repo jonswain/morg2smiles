@@ -110,7 +110,9 @@ def test_no_duplicates_within_a_split():
 
 @needs_shard
 def test_scaffold_splits_also_disjoint():
-    splits = {name: set(load_split(SHARD, name, scaffold=True)) for name in ("train", "valid", "test")}
+    splits = {
+        name: set(load_split(SHARD, name, scaffold=True)) for name in ("train", "valid", "test")
+    }
     assert not splits["train"] & splits["test"]
     assert not splits["train"] & splits["valid"]
 

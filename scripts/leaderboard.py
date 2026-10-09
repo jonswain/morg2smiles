@@ -49,7 +49,9 @@ def _fmt(value: float | None, width: int = 9, places: int = 4) -> str:
 
 
 @click.command()
-@click.option("--path", default=str(LEADERBOARD), type=click.Path(path_type=Path), show_default=True)
+@click.option(
+    "--path", default=str(LEADERBOARD), type=click.Path(path_type=Path), show_default=True
+)
 @click.option("--split", type=click.Choice(["valid", "test"]), help="Filter by evaluation split.")
 @click.option("--limit", default=20, show_default=True)
 @click.option("--sort-by-time", is_flag=True, help="Most recent first instead of best first.")

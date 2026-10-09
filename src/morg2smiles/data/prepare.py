@@ -384,7 +384,9 @@ def prepare(
 @click.option("--max-tokens", default=128, show_default=True)
 @click.option("--processes", default=None, type=int, help="Defaults to all cores.")
 @click.option("--overwrite", is_flag=True)
-def main(subset, data_dir, release, source, seed, max_heavy_atoms, max_tokens, processes, overwrite):
+def main(
+    subset, data_dir, release, source, seed, max_heavy_atoms, max_tokens, processes, overwrite
+):
     """Prepare ChEMBL shards for training and evaluation."""
     prepare(
         subset,
