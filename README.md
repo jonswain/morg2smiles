@@ -62,24 +62,31 @@ bits, never the string:
 
 ```console
 $ morg2smiles invert "CC(=O)Oc1ccccc1C(=O)O" --checkpoint checkpoints/small/best.pt --k 20
-    =  c1(C(=O)O)c(OC(=O)C)cccc1
-    =  OC(=O)c1ccccc1OC(C)=O
-    =  O=C(O)c1c(OC(=O)C)cccc1
-    =  O=C(C)Oc1ccccc1C(=O)O
-    =  CC(Oc1ccccc1C(=O)O)=O
-    ...                              (18 of 20 exact)
- 0.74  CC(=O)c1ccccc1OC(=O)C
- 0.00  O=c1c(OC(C)=O)cccc1OC(=O)C
+    =  c1(OC(=O)C)ccccc1C(O)=O
+ 0.86  O(C(=O)c1ccccc1OC(C)=O)c1ccccc1C(=O)O
+ 0.74  CC(=O)c1ccccc1OC(C)=O
+ 0.63  c1ccccc1C(Oc1c(C(=O)O)cccc1)=O
 ```
 
 A line marked `=` is an exact fingerprint match; anything else shows its
-Tanimoto to the target. Those 18 matches are all the same molecule — aspirin,
-written 18 different ways, a side effect of training on randomised SMILES. It
-also exposes a real inefficiency: candidates are deduplicated as *strings*, so
-18 spellings of one molecule consume 18 of the 20 budget slots. Across the
-evaluation that costs about 4 slots in 20 (19.7 distinct strings collapse to
-11.5 distinct molecules). Canonicalising before deduplication is free recovery
-and is not yet done.
+Tanimoto to the target. Aspirin is recovered first try.
+
+Only four candidates come back from a budget of 20, and that is the honest
+output rather than a bug: candidates are deduplicated **by molecule**, and the
+model is so confident about aspirin that 40 sampled strings collapse to six
+distinct molecules. Diversity turns out to be target-dependent, which is the
+behaviour you want:
+
+| target | distinct molecules from 40 draws | exact matches |
+|---|---|---|
+| aspirin | 6 | 1 |
+| caffeine | 20 | 1 |
+| an imatinib fragment | 20 | 0 |
+
+Easy targets get a confident answer and little exploration; hard ones get the
+full breadth of the budget spent searching. Earlier versions deduplicated by
+*string*, which hid this entirely — inverting aspirin returned "18 of 20 exact
+matches" that were 18 spellings of one molecule.
 
 Or from Python:
 
@@ -96,6 +103,18 @@ model.generate(fp, k=20)        # oracle-verified matches first
 The headline number is **`recovery@k` on the `fp_unseen` slice**: the fraction
 of held-out fingerprints, *absent from the training set*, for which at least
 one of k distinct guesses reproduces the fingerprint exactly.
+
+One of the k slots buys a **distinct molecule**, not a distinct string. Two
+spellings of one molecule are one guess, and an unparseable string is not a
+guess at all — RDKit rejects it locally and for free, so no caller spending
+oracle queries would ever spend one on it. Both facts are easy to get wrong and
+each inflates or deflates the headline by several points, so every report
+records which budget produced it and the leaderboard refuses to rank rows from
+different budgets together.
+
+**Evaluation is seeded.** Unseeded, two evaluations of the same checkpoint
+differed by 2.2 points — about 1.4 standard errors at n≈1000. Nothing smaller
+than roughly 4 points on that sample size is a real difference.
 
 Every metric is reported on two slices:
 
@@ -209,17 +228,20 @@ target.
 
 ## Results
 
-An 8M-parameter model, four hours on a laptop, ChEMBL 100k:
+An 8M-parameter model, four hours on a laptop, ChEMBL 100k, scored under the
+molecule budget with a fixed evaluation seed:
 
 | | rec@1 | rec@5 | **rec@20** | struct@20 | validity |
 |---|---|---|---|---|---|
-| **decoder** (`fp_unseen`, n=995) | 0.1538 | 0.3729 | **0.5367** | 0.5246 | 0.782 |
+| **decoder** (`fp_unseen`, n=995) | 0.1588 | 0.4000 | **0.5508** | 0.5367 | 0.785 |
 | retrieval baseline (`fp_unseen`) | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 1.000 |
 
 **More than half of held-out Morgan fingerprints can be inverted exactly within
 20 guesses.** The learning curve was still climbing when the epoch budget ran
 out. Full numbers, the per-epoch curve and the caveats are in
-[`docs/phase1-results.md`](docs/phase1-results.md).
+[`docs/phase1-results.md`](docs/phase1-results.md); the scaling experiments that
+followed are in
+[`docs/overnight-2026-10-09.md`](docs/overnight-2026-10-09.md).
 
 The retrieval baseline scores exactly zero on the primary slice, which is the
 point of that slice: since the fingerprint is near-injective, a held-out
@@ -283,17 +305,19 @@ missing.
 
 Phase 1 complete: harness, oracle, metrics, baseline, recoverability analysis
 and a trained decoder that clears the go/no-go gate (`recovery@20` on
-`fp_unseen` must beat retrieval — 0.5367 vs 0.0000).
+`fp_unseen` must beat retrieval — 0.5508 vs 0.0000).
 
 Next: exhaust the cheap levers before buying parameters. The curve had not
 flattened at 12 epochs, 21.8% of samples are still unparseable, and the
-20-candidate budget leaks ~4 slots to respellings — all of which say more
-training and better search before `configs/base.yaml`.
+model is still only exploring a fraction of its budget on hard targets — all of
+which said more training and better data before more parameters. Those
+experiments ran overnight on 2026-10-09; see
+[`docs/overnight-2026-10-09.md`](docs/overnight-2026-10-09.md).
 
 ## Development
 
 ```bash
-pytest -q                          # 313 tests, offline; data-dependent ones self-skip
+pytest -q                          # 323 tests, offline; data-dependent ones self-skip
 ruff check src tests scripts
 ruff format src tests scripts
 ```

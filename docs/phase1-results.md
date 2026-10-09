@@ -1,5 +1,13 @@
 # Phase 1 results
 
+> **Numbers below predate two measurement fixes** made on 2026-10-09: the k
+> budget now counts distinct *molecules* rather than distinct strings, and
+> evaluation is seeded. Re-scored under the corrected protocol, this run's
+> `recovery@20` on `fp_unseen` is **0.5508** rather than the 0.5367 quoted
+> here. The learning curve and every conclusion below are unaffected in shape.
+> See [`overnight-2026-10-09.md`](overnight-2026-10-09.md) for what changed and
+> why.
+
 First real training run. The question Phase 1 exists to answer is narrow: **can
 a fingerprint-conditioned decoder reconstruct molecules it has never seen, or
 does it only retrieve ones it has?** Everything else is downstream of that.

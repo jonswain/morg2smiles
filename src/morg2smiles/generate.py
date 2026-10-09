@@ -321,7 +321,11 @@ class Morg2Smiles:
         else:
             raise ValueError(f"unknown strategy {strategy!r}; expected 'sample' or 'beam'")
 
-        results = check_many(candidates, fp, self.fp_config)
+        # check_many marks same-molecule candidates rather than dropping them,
+        # so that validity keeps an honest denominator. A caller asking for k
+        # candidates wants k *molecules*, so drop them here -- without this the
+        # public API happily returns twenty spellings of aspirin.
+        results = [r for r in check_many(candidates, fp, self.fp_config) if not r.duplicate]
         results.sort(key=lambda r: (r.fp_match, r.tanimoto), reverse=True)
         return results[:k]
 
