@@ -1,0 +1,39 @@
+# Run B of the overnight pair: the *capacity* variable, held against small_1m.yaml.
+#
+# ~25M parameters on the same 1M shard, for two epochs (~14,000 steps, ~8.6 h
+# on an M2). Against Run A this isolates model size on identical data; it is
+# also the "first real datapoint" the Phase 1 plan asked for, and the best
+# single effort the hardware can produce overnight.
+#
+# Learning rate is a little lower than small_1m and warmup a little longer,
+# which is the usual concession to depth; neither is tuned, and saying so is
+# more useful than implying they were.
+shard_dir: data/shards/1m
+out_dir: checkpoints/base_1m
+
+fingerprint:
+  radius: 2
+  n_bits: 2048
+  counts: false
+  folded: true
+
+model:
+  d_model: 384
+  n_heads: 8
+  d_ff: 1536
+  n_encoder_layers: 6
+  n_decoder_layers: 6
+  dropout: 0.1
+  max_tokens: 128
+
+train:
+  epochs: 2
+  batch_size: 128
+  lr: 0.0004
+  warmup_steps: 500
+  randomize_smiles: true
+  eval_every_steps: 2000
+  eval_n: 500
+  eval_k: 20
+  valid_loss_n: 2000
+  patience: 4

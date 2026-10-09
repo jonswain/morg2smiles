@@ -1,0 +1,50 @@
+# Run 1 of the overnight pair: the *data* variable.
+#
+# Same 8M architecture as configs/small.yaml, on 900,917 training molecules
+# instead of 90,682. The question is whether, for generalising to fingerprints
+# never seen in training, it is better to see many molecules once or few
+# molecules many times. SMILES randomisation already supplies string variety,
+# so extra epochs on a small shard buy a kind of diversity we are not short of.
+#
+# Because evaluation is step-based, a single long run answers both questions at
+# once: read the curve at step ~8,500 to compare against small.yaml at matched
+# compute, and read the tail for the effect of longer training. Separate runs
+# per step count would be waste.
+#
+# The 3-epoch schedule is deliberately more than fits, bounded by max_hours.
+# Measured step time on this hardware has been wrong by 2x in both directions,
+# so the wall clock is the real control and the epoch count only sets the
+# learning-rate schedule's horizon.
+shard_dir: data/shards/1m
+out_dir: checkpoints/small_1m
+
+fingerprint:
+  radius: 2
+  n_bits: 2048
+  counts: false
+  folded: true
+
+model:
+  d_model: 256
+  n_heads: 8
+  d_ff: 1024
+  n_encoder_layers: 4
+  n_decoder_layers: 4
+  dropout: 0.1
+  max_tokens: 128
+
+train:
+  epochs: 3
+  batch_size: 128
+  lr: 0.0005
+  warmup_steps: 300
+  randomize_smiles: true
+  # ~14 points across the run, each costing about two minutes.
+  eval_every_steps: 1500
+  eval_n: 500
+  eval_k: 20
+  valid_loss_n: 2000
+  # No early stop on patience: the point of this run is the shape of the whole
+  # curve, including any plateau. The wall clock is the only brake.
+  patience: 0
+  max_hours: 8.5

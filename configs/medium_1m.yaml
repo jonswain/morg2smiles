@@ -1,0 +1,42 @@
+# Run 2 of the overnight pair: the *capacity* variable, against small_1m.yaml.
+#
+# Sized by measurement rather than ambition. configs/base_1m.yaml (d_model 384,
+# 6+6 layers, 25.7M params) measured 6.58 s/step on this M2 against 0.90 s/step
+# for the 8M model -- 7.3x the time for 3.2x the parameters. That is a cliff,
+# not a slope: something stops fitting and the device starts thrashing. Two
+# epochs of it would take 20-26 h, so base_1m is not an overnight run on this
+# hardware and is kept only as a record of what was tried.
+#
+# This sits between the two, at d_model 320 and 5+5 layers (~15M), to find out
+# whether the cliff is crossed before or after that point. Compare against
+# run 1 at equal step counts, which the step-based curves make readable.
+shard_dir: data/shards/1m
+out_dir: checkpoints/medium_1m
+
+fingerprint:
+  radius: 2
+  n_bits: 2048
+  counts: false
+  folded: true
+
+model:
+  d_model: 320
+  n_heads: 8
+  d_ff: 1280
+  n_encoder_layers: 5
+  n_decoder_layers: 5
+  dropout: 0.1
+  max_tokens: 128
+
+train:
+  epochs: 2
+  batch_size: 128
+  lr: 0.00045
+  warmup_steps: 400
+  randomize_smiles: true
+  eval_every_steps: 1000
+  eval_n: 500
+  eval_k: 20
+  valid_loss_n: 2000
+  patience: 0
+  max_hours: 3.5

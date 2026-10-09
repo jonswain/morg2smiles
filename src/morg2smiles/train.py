@@ -19,6 +19,7 @@ import math
 import random
 import time
 from dataclasses import asdict, dataclass, replace
+from functools import partial
 from pathlib import Path
 
 import numpy as np
@@ -79,6 +80,12 @@ class TrainConfig:
     valid_loss_n: int = 2000
     #: Stop when validation recovery has not improved for this many evaluations.
     patience: int = 5
+    #: Hard wall-clock budget in hours, checked at each evaluation. Exists for
+    #: unattended runs: step-time estimates on this hardware have been wrong by
+    #: a factor of two in both directions, and a run that overshoots silently
+    #: eats the analysis that was supposed to follow it. Stopping at a budget
+    #: costs the tail of one curve; overrunning costs the whole night.
+    max_hours: float | None = None
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -163,8 +170,12 @@ def train(
         dataset,
         batch_size=train_cfg.batch_size,
         shuffle=True,
+        # partial, not a lambda: with num_workers > 0 macOS spawns worker
+        # processes and a lambda collate_fn cannot be pickled.
+        collate_fn=partial(collate, pad_id=tokenizer.pad_id),
         num_workers=train_cfg.num_workers,
-        collate_fn=lambda b: collate(b, tokenizer.pad_id),
+        persistent_workers=train_cfg.num_workers > 0,
+        prefetch_factor=4 if train_cfg.num_workers > 0 else None,
         drop_last=False,
     )
 
@@ -220,7 +231,7 @@ def train(
         loss_dataset,
         batch_size=train_cfg.batch_size,
         shuffle=False,
-        collate_fn=lambda b: collate(b, tokenizer.pad_id),
+        collate_fn=partial(collate, pad_id=tokenizer.pad_id),
     )
 
     total_steps = max(train_cfg.epochs * len(loader), 1)
@@ -320,6 +331,18 @@ def train(
         )
         (out_dir / "history.json").write_text(json.dumps(history, indent=2))
 
+    def _should_stop() -> bool:
+        if train_cfg.patience and since_improved >= train_cfg.patience:
+            return True
+        if train_cfg.max_hours and (time.perf_counter() - started) / 3600 >= train_cfg.max_hours:
+            return True
+        return False
+
+    def _stop_reason() -> str:
+        if train_cfg.patience and since_improved >= train_cfg.patience:
+            return f"no improvement for {since_improved} evaluations"
+        return f"wall-clock budget of {train_cfg.max_hours} h reached"
+
     for epoch in range(train_cfg.epochs):
         model.train()
         dataset.set_epoch(epoch)
@@ -350,10 +373,10 @@ def train(
 
             if train_cfg.eval_every_steps and step % train_cfg.eval_every_steps == 0:
                 evaluate_now(epoch, running / n_batches, reason="step")
-                if train_cfg.patience and since_improved >= train_cfg.patience:
+                if _should_stop():
                     break
 
-        stop_early = bool(train_cfg.patience) and since_improved >= train_cfg.patience
+        stop_early = _should_stop()
 
         # With step-based evaluation the epoch boundary is not special, so only
         # evaluate here if steps are not already driving it -- or if this is the
@@ -367,10 +390,10 @@ def train(
             or (train_cfg.eval_every_steps and is_last and history and history[-1]["step"] != step)
         ):
             evaluate_now(epoch, running / max(n_batches, 1), reason="epoch")
-            stop_early = bool(train_cfg.patience) and since_improved >= train_cfg.patience
+            stop_early = _should_stop()
 
         if stop_early:
-            print(f"no improvement for {since_improved} evaluations; stopping early")
+            print(f"stopping early: {_stop_reason()}")
             break
 
     record = {
@@ -386,6 +409,7 @@ def train(
         "best_epoch": history[best_index]["epoch"] if best_index >= 0 else -1,
         "best_step": history[best_index]["step"] if best_index >= 0 else -1,
         "best_valid_metric": best_metric,
+        "stopped_because": _stop_reason() if _should_stop() else "completed schedule",
         "total_seconds": time.perf_counter() - started,
         "history": history,
     }
