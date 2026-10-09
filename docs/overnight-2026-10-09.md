@@ -156,8 +156,6 @@ Test splits were not touched. Everything here is validation data.
 
 ## Results
 
-*(appended after the runs completed — see below.)*
-
 ### Operational: two guards that did not hold
 
 Written up before the numbers because it is the more transferable finding.
@@ -201,3 +199,102 @@ lost wall time was suspension rather than contention, so the benchmark is not
 the whole story — but the rule now has evidence behind it: **this machine runs
 one job.** The earlier version of that rule was about getting clean benchmark
 numbers; it cuts both ways.
+
+All four stages exited 0, finishing with 35 minutes of the deadline to spare.
+
+```
+stage 1  small_1m    18:42 -> 06:28   3 epochs, 21,117 steps, completed schedule
+stage 2  medium_1m   06:28 -> 08:27   capped at 2,500 steps by max_hours 1.75
+stage 3  comparison  08:27 -> 08:56
+stage 4  scaffolds   08:56 -> 09:10
+```
+
+### The headline: data was the ceiling
+
+One common protocol, 2,000 held-out molecules (1,967 fingerprint-unseen) drawn
+from neither model's training set, `fp_unseen` computed against the union of all
+909,800 training fingerprints, identical seed, budget and k. **These are the only
+numbers in this document that compare across runs.**
+
+| run | params | trained | rec@1 | rec@5 | **rec@20** | struct@20 | validity | mean hit rank |
+|---|---|---|---|---|---|---|---|---|
+| `small_100k` | 8.0M | 12 epochs | 0.1805 | 0.4179 | **0.5892** | 0.5705 | 0.794 | 4.68 |
+| `small_1m` | 8.0M | 3 epochs | 0.5308 | 0.7997 | **0.8927** | 0.8760 | 0.903 | 1.73 |
+| `medium_1m` | 15.1M | 2,500 steps | 0.0524 | 0.1551 | 0.2745 | 0.2645 | 0.522 | 6.72 |
+
+**`recovery@20` 0.5892 → 0.8927 for 10× the data at the same parameter count.**
+`recovery@1` nearly tripled, 0.18 → 0.53: the 1M model usually gets it right on
+the *first* sample, and its mean hit rank of 1.73 says that when it succeeds it
+succeeds almost immediately. Mean best Tanimoto rose 0.885 → 0.974, so even the
+failures are near misses now.
+
+I had predicted the gap would *narrow* under the common protocol, on the
+reasoning that the per-run subsamples flattered the 1M model. It did not. Both
+models scored higher here than on their own subsamples (0.5508 → 0.5892 and
+0.8742 → 0.8927) and the gap was unchanged. The 500-molecule in-training
+subsamples were pessimistic, not optimistic, and I had the direction backwards.
+
+A second-order finding, visible only because duplicates are marked rather than
+dropped: the 1M model's duplicate rate is **0.565 against 0.246**, and it yields
+12.8 distinct valid molecules per query where the 100k model yields 21.3. It
+explores *less* and succeeds *more* — the extra data bought confidence, not
+diversity. For a k-budget metric that is close to free: the budget stops being
+spent on respellings of a wrong answer.
+
+### Capacity is not the binding constraint — and the cliff moved
+
+`medium_1m` only reached step 2,500, so its recovery number is an early-curve
+point and not capacity evidence. It is in the table for completeness, not as a
+result. What it does settle is where the performance cliff sits:
+
+| params | s/step | ratio to previous |
+|---|---|---|
+| 8.0M | 1.37 | — |
+| 15.1M | 2.66 | 1.89× params → **1.94× time** |
+| 25.7M | 6.58 | 1.70× params → **2.47× time** |
+
+Scaling is **linear to 15M** and superlinear beyond it. The cliff is between 15M
+and 26M, not below 15M — so `medium_1m` was a feasible full-length overnight run
+all along, and the planning decision to replace `base_1m` with it was right for
+the wrong reason. Two measurements were extrapolated into a "cliff" that three
+measurements show to be a knee somewhere further out. Had the third point been
+measured before planning, stage 2 would have been a full 15M run.
+
+At matched *steps* the 15M model is marginally ahead of the 8M one (0.2745 at
+2,500 steps against roughly 0.22 interpolated), which is inside the noise floor.
+At matched *wall clock* it is far behind: 8M reaches step 5,000 and about 0.50 in
+the same time. On this hardware the next doubling is better spent on steps or
+data than on parameters.
+
+### Novel chemotypes: more data generalises, it does not just memorise
+
+Validation molecules sliced by whether their Bemis–Murcko scaffold appears
+anywhere in training, reported over fingerprint-unseen queries only, so the two
+slices differ in scaffold novelty and nothing else.
+
+| run | scaffold_seen rec@20 | scaffold_novel rec@20 | penalty |
+|---|---|---|---|
+| `small_100k` | 0.6740 | 0.5471 | **+0.1270** |
+| `small_1m` | 0.9043 | 0.8421 | **+0.0622** |
+| `medium_1m` | 0.2912 | 0.2065 | +0.0848 |
+
+This is the result I would least have predicted. The novel-scaffold penalty
+**halves** with 10× data, 12.7 points to 6.2, and novel-scaffold recovery rises
+0.5471 → 0.8421. More data did not merely let the model interpolate better
+inside chemistry it knows; it made the model *better at chemistry it has never
+seen*. A memorisation story predicts the opposite — a larger training set covers
+more scaffolds, so the novel slice should get harder and the penalty should grow.
+
+`small_1m` recovers 84% of fingerprints whose scaffold appears nowhere in
+909,800 training molecules. That is the number that speaks to behaviour on
+chemistry a user actually brings.
+
+### What the night did not answer
+
+- **Full-length 15M.** Stage 2 was a 1.75 h stub. The capacity arm is open, and
+  it is now known to be affordable: ~5.2 h per epoch at 2.66 s/step.
+- **Where `small_1m` tops out.** It finished its schedule still improving, if
+  barely — the last three increments were +1.4, +0.4, +0.4 points. Converged for
+  practical purposes, but the asymptote was not reached.
+- **The 10M-molecule question.** 100k → 1M bought 30 points. Nothing here says
+  whether 1M → 10M buys another 10 or another 1.

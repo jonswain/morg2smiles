@@ -6,8 +6,9 @@
 
 Generative recovery of SMILES strings from Morgan (ECFP) fingerprints.
 
-**More than half of held-out Morgan fingerprints can be inverted exactly within
-20 guesses** by an 8M-parameter model trained for four hours on a laptop.
+**89% of held-out Morgan fingerprints can be inverted exactly within 20
+guesses** by an 8M-parameter model trained overnight on a laptop. Over half are
+recovered on the *first* guess.
 
 Morgan fingerprints are normally treated as one-way: hash atom environments
 into bits, and the molecule is gone. This project tests how true that is, by
@@ -49,9 +50,9 @@ python scripts/analyse_recoverability.py --subset 10k
 # 3. Smoke-test the whole pipeline (minutes)
 python scripts/run_experiment.py --config configs/tiny.yaml --eval-n 100
 
-# 4. The run in the results table below (~4h on an M2)
-morg2smiles prepare --subset 100k
-python scripts/run_experiment.py --config configs/small.yaml --eval-n 1000
+# 4. The headline run in the results table below (~8h on an M2)
+morg2smiles prepare --subset 1m
+python scripts/run_experiment.py --config configs/small_1m.yaml --eval-n 2000
 
 # 5. Read the ledger
 python scripts/leaderboard.py
@@ -61,31 +62,35 @@ Round-trip a molecule through its own fingerprint — the model sees only the
 bits, never the string:
 
 ```console
-$ morg2smiles invert "CC(=O)Oc1ccccc1C(=O)O" --checkpoint checkpoints/small/best.pt --k 20
-    =  c1(OC(=O)C)ccccc1C(O)=O
- 0.86  O(C(=O)c1ccccc1OC(C)=O)c1ccccc1C(=O)O
- 0.74  CC(=O)c1ccccc1OC(C)=O
- 0.63  c1ccccc1C(Oc1c(C(=O)O)cccc1)=O
+$ morg2smiles invert "CC(=O)Oc1ccccc1C(=O)O" --checkpoint checkpoints/small_1m/best.pt --k 20
+    =  c1(OC(C)=O)c(C(=O)O)cccc1
+ 0.86  O(C(c1ccccc1OC(C)=O)=O)c1c(C(O)=O)cccc1
+ 0.26  O(C(C)=O)C(C)=O
 ```
 
 A line marked `=` is an exact fingerprint match; anything else shows its
 Tanimoto to the target. Aspirin is recovered first try.
 
-Only four candidates come back from a budget of 20, and that is the honest
-output rather than a bug: candidates are deduplicated **by molecule**, and the
-model is so confident about aspirin that 40 sampled strings collapse to six
-distinct molecules. Diversity turns out to be target-dependent, which is the
-behaviour you want:
+Three candidates come back from a budget of 20, and that is the honest output
+rather than a bug: candidates are deduplicated **by molecule**, and 40 sampled
+strings collapse to three distinct molecules. The better model is the *less*
+diverse one — across the full evaluation its duplicate rate is 0.565 against the
+100k model's 0.246, and it returns 12.8 distinct valid molecules per query where
+the weaker model returns 21.3:
 
 | target | distinct molecules from 40 draws | exact matches |
 |---|---|---|
-| aspirin | 6 | 1 |
-| caffeine | 20 | 1 |
-| an imatinib fragment | 20 | 0 |
+| aspirin | 3 | 1 |
+| caffeine | 8 | 1 |
+| an imatinib fragment | 4 | 1 |
 
-Easy targets get a confident answer and little exploration; hard ones get the
-full breadth of the budget spent searching. Earlier versions deduplicated by
-*string*, which hid this entirely — inverting aspirin returned "18 of 20 exact
+The 100k model spread the same budget over 6, 20 and 20 distinct molecules and
+missed the imatinib fragment entirely. Extra data bought *confidence*, not
+exploration — which for a k-budget metric is close to free, because the budget
+stops being spent on respellings of a wrong answer.
+
+Deduplicating by molecule is what makes any of this visible. Earlier versions
+deduplicated by *string*, and inverting aspirin returned "18 of 20 exact
 matches" that were 18 spellings of one molecule.
 
 Or from Python:
@@ -93,7 +98,7 @@ Or from Python:
 ```python
 from morg2smiles import Morg2Smiles, compute
 
-model = Morg2Smiles.load("checkpoints/small/best.pt")
+model = Morg2Smiles.load("checkpoints/small_1m/best.pt")
 fp = compute("CC(=O)Oc1ccccc1C(=O)O", model.fp_config)
 model.generate(fp, k=20)        # oracle-verified matches first
 ```
@@ -228,20 +233,29 @@ target.
 
 ## Results
 
-An 8M-parameter model, four hours on a laptop, ChEMBL 100k, scored under the
-molecule budget with a fixed evaluation seed:
+One common protocol: 2,000 held-out molecules (1,967 fingerprint-unseen) in
+neither model's training set, `fp_unseen` computed against the union of all
+909,800 training fingerprints, fixed seed, molecule budget.
 
 | | rec@1 | rec@5 | **rec@20** | struct@20 | validity |
 |---|---|---|---|---|---|
-| **decoder** (`fp_unseen`, n=995) | 0.1588 | 0.4000 | **0.5508** | 0.5367 | 0.785 |
-| retrieval baseline (`fp_unseen`) | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 1.000 |
+| **8M, ChEMBL 1M**, 3 epochs | 0.5308 | 0.7997 | **0.8927** | 0.8760 | 0.903 |
+| 8M, ChEMBL 100k, 12 epochs | 0.1805 | 0.4179 | 0.5892 | 0.5705 | 0.794 |
+| retrieval baseline | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 1.000 |
 
-**More than half of held-out Morgan fingerprints can be inverted exactly within
-20 guesses.** The learning curve was still climbing when the epoch budget ran
-out. Full numbers, the per-epoch curve and the caveats are in
-[`docs/phase1-results.md`](docs/phase1-results.md); the scaling experiments that
-followed are in
-[`docs/overnight-2026-10-09.md`](docs/overnight-2026-10-09.md).
+**Nearly nine in ten held-out Morgan fingerprints can be inverted exactly
+within 20 guesses, and more than half on the first guess.** Mean best Tanimoto
+is 0.974, so even the failures are near misses.
+
+The jump from 0.5892 came from *data*, not from training longer or building
+bigger: identical architecture, 10× the molecules, and the 1M model passes the
+100k model's final score inside its first epoch. The novel-scaffold penalty also
+halved (12.7 → 6.2 points), so the extra data improved generalisation to unseen
+chemotypes rather than just coverage of known ones.
+
+Full numbers, curves and caveats: [`docs/phase1-results.md`](docs/phase1-results.md)
+for the first 100k run, [`docs/overnight-2026-10-09.md`](docs/overnight-2026-10-09.md)
+for the scaling experiments and the two guards that failed along the way.
 
 The retrieval baseline scores exactly zero on the primary slice, which is the
 point of that slice: since the fingerprint is near-injective, a held-out
@@ -274,9 +288,10 @@ wrong, and only one of them is about the architecture:
 2. **It generated one candidate, by greedy argmax.** For a task whose natural
    formulation is "generate k, keep what the oracle accepts", that is a
    self-imposed `recovery@1`, the hardest version of the metric. Here
-   `recovery@1` is 0.154 and `recovery@20` is 0.537 — the same model, a 3.5×
-   difference. "Generate multiple SMILES from each ECFP" was sitting in the
-   TODO file, unticked.
+   `recovery@1` is 0.531 and `recovery@20` is 0.893 — the same model, a 1.7×
+   difference, and it was 3.5× before the model got good enough to usually
+   succeed on the first try. "Generate multiple SMILES from each ECFP" was
+   sitting in the TODO file, unticked.
 3. **The fingerprint reached the decoder only as the GRU's initial hidden
    state** — one 256-d vector, squeezed through a *stochastic* 128-d latent,
    expected to survive up to 242 decoding steps. A VAE's job is to compress; a
@@ -297,22 +312,40 @@ the memorisation baseline *before* training anything, so that every subsequent
 number meant something. Everything else followed from being able to see.
 
 Credit where due, though. jonswain, three hours, no assistant, correct problem
-selection. Claude, with the oracle he didn't build, four hours of M2 time, and
-the benefit of reading his TODO list to find out what he already knew was
+selection. Claude, with the oracle he didn't build, fifteen hours of M2 time,
+and the benefit of reading his TODO list to find out what he already knew was
 missing.
+
+And lest the moral land too comfortably: the overnight run that produced the
+0.893 was supposed to stop after 8.5 hours and ran for 10.8, because the
+wall-clock guard was built on a clock that stops when the laptop sleeps. The
+assistant that lectures the human about measuring the wrong thing spent a night
+measuring the wrong thing. It is in
+[`docs/overnight-2026-10-09.md`](docs/overnight-2026-10-09.md), under the
+heading "two guards that did not hold".
 
 ## Status
 
 Phase 1 complete: harness, oracle, metrics, baseline, recoverability analysis
 and a trained decoder that clears the go/no-go gate (`recovery@20` on
-`fp_unseen` must beat retrieval — 0.5508 vs 0.0000).
+`fp_unseen` must beat retrieval — 0.8927 vs 0.0000).
 
-Next: exhaust the cheap levers before buying parameters. The curve had not
-flattened at 12 epochs, 21.8% of samples are still unparseable, and the
-model is still only exploring a fraction of its budget on hard targets — all of
-which said more training and better data before more parameters. Those
-experiments ran overnight on 2026-10-09; see
-[`docs/overnight-2026-10-09.md`](docs/overnight-2026-10-09.md).
+The 2026-10-09 scaling runs answered the "what was the ceiling?" question: it
+was **data**. 10× the molecules at the same parameter count moved `recovery@20`
+0.5892 → 0.8927, and parameters turned out to be the wrong lever on this
+hardware — scaling is linear in wall clock to 15M params and superlinear beyond,
+so the next doubling is better spent on steps or data.
+
+Open questions, in rough order of expected value:
+
+1. **1M → 10M molecules.** 100k → 1M bought 30 points. Nothing yet says whether
+   the next decade buys 10 or 1.
+2. **A full-length 15M run.** The capacity arm was cut to 1.75 h by the deadline
+   and is unanswered. Now known to be affordable at ~5.2 h per epoch.
+3. **The remaining 10%.** Validity is 0.903 and `recovery@20` is 0.8927, so
+   almost every valid candidate is now a correct one. The failures are no longer
+   syntax errors, which moves the bottleneck from decoding to fingerprint
+   reasoning and makes them worth inspecting directly.
 
 ## Development
 
