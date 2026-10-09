@@ -34,9 +34,13 @@ train:
   lr: 0.00045
   warmup_steps: 400
   randomize_smiles: true
-  eval_every_steps: 1000
+  eval_every_steps: 500
   eval_n: 500
   eval_k: 20
   valid_loss_n: 2000
   patience: 0
-  max_hours: 3.5
+  # Trimmed from 3.5 h once stage 1 overran: the cap is only checked at an
+  # evaluation, so the real stop is max_hours plus up to one eval interval.
+  # 1.75 h with 500-step evals overshoots by at most ~20 min, which keeps
+  # the analysis stages whole. The cap is what ends this run, not epochs.
+  max_hours: 1.75

@@ -268,7 +268,13 @@ def train(
     best_vloss = float("inf")
     best_index = -1
     step = 0
-    started = time.perf_counter()
+    # Wall clock, deliberately, not ``time.perf_counter()``. On macOS
+    # perf_counter does not advance while the process is suspended, and an
+    # unattended overnight run does get suspended: the first 1M run logged
+    # 6.90 h of perf_counter time across 10.78 h of real time, so an 8.5 h
+    # cap never fired and the stage ate the slot reserved for analysis.
+    # A deadline is in wall time, so the budget guarding it must be too.
+    started = time.time()
 
     def evaluate_now(epoch: int, train_loss: float, *, reason: str) -> None:
         """Run both validation passes, log, and keep the best checkpoint.
@@ -293,7 +299,7 @@ def train(
             "trigger": reason,
             "train_loss": train_loss,
             "valid_loss": vloss,
-            "elapsed_seconds": time.perf_counter() - started,
+            "elapsed_seconds": time.time() - started,
             "valid": report,
         }
         history.append(record)
@@ -334,7 +340,7 @@ def train(
     def _should_stop() -> bool:
         if train_cfg.patience and since_improved >= train_cfg.patience:
             return True
-        if train_cfg.max_hours and (time.perf_counter() - started) / 3600 >= train_cfg.max_hours:
+        if train_cfg.max_hours and (time.time() - started) / 3600 >= train_cfg.max_hours:
             return True
         return False
 
@@ -410,7 +416,7 @@ def train(
         "best_step": history[best_index]["step"] if best_index >= 0 else -1,
         "best_valid_metric": best_metric,
         "stopped_because": _stop_reason() if _should_stop() else "completed schedule",
-        "total_seconds": time.perf_counter() - started,
+        "total_seconds": time.time() - started,
         "history": history,
     }
     (out_dir / "record.json").write_text(json.dumps(record, indent=2))
