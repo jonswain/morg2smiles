@@ -1,0 +1,19 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# Data and run artefacts. Leading slashes anchor these to the repo root, so
+# they do not also swallow the src/morg2smiles/data package.
+/data/
+/checkpoints/
+/reports/
+/results/*
+!/results/.gitkeep
+*.pt
+
+.DS_Store
+.venv/

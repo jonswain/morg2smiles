@@ -1,0 +1,16 @@
+name: morg2smiles
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - rdkit>=2024.3
+  - pytorch>=2.4
+  - numpy
+  - pandas
+  - pyyaml
+  - tqdm
+  - click
+  - matplotlib
+  - pytest
+  - ruff
+  - pip

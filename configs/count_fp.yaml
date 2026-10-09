@@ -1,0 +1,32 @@
+# Same as base.yaml but with count fingerprints, which retain substructure
+# multiplicity. Compare directly against base.yaml to see whether the extra
+# information is worth it; scripts/analyse_recoverability.py predicts the
+# ceiling for both.
+shard_dir: data/shards/100k
+out_dir: checkpoints/count_fp
+
+fingerprint:
+  radius: 2
+  n_bits: 2048
+  counts: true
+  folded: true
+
+model:
+  d_model: 384
+  n_heads: 8
+  d_ff: 1536
+  n_encoder_layers: 6
+  n_decoder_layers: 6
+  dropout: 0.1
+  max_tokens: 128
+
+train:
+  epochs: 30
+  batch_size: 128
+  lr: 0.0003
+  warmup_steps: 500
+  randomize_smiles: true
+  eval_every: 2
+  eval_n: 500
+  eval_k: 20
+  patience: 5

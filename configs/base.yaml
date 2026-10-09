@@ -1,0 +1,34 @@
+# Phase 1 reference run: ~20M parameters on the 100k shard.
+# This is the first real datapoint, and the config an iteration loop should
+# vary one field at a time from.
+shard_dir: data/shards/100k
+out_dir: checkpoints/base
+
+fingerprint:
+  radius: 2
+  n_bits: 2048
+  counts: false      # the hardest and most realistic target
+  folded: true
+
+model:
+  d_model: 384
+  n_heads: 8
+  d_ff: 1536
+  n_encoder_layers: 6
+  n_decoder_layers: 6
+  dropout: 0.1
+  max_tokens: 128
+
+train:
+  epochs: 30
+  batch_size: 128
+  lr: 0.0003
+  weight_decay: 0.01
+  warmup_steps: 500
+  grad_clip: 1.0
+  randomize_smiles: true   # expected to be a large win; ablate it early
+  precision: fp32          # bf16 on MPS is unproven; measure before trusting
+  eval_every: 2
+  eval_n: 500
+  eval_k: 20
+  patience: 5

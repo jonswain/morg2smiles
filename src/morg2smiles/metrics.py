@@ -1,0 +1,195 @@
+"""Metrics, and the slicing that stops them from flattering the model.
+
+The headline number is **recovery@k**: the fraction of held-out fingerprints for
+which at least one of k distinct guesses reproduces the fingerprint exactly.
+
+Every metric is reported on two slices:
+
+``all``
+    Every query in the split.
+``fp_unseen``
+    Only queries whose fingerprint never appears in the training set.
+
+The gap between them is the point. A model can score well on ``all`` by
+memorising the training set, and a nearest-neighbour lookup does exactly that.
+Only ``fp_unseen`` measures reconstruction, so that is the number to optimise
+and the number any claim should quote.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Sequence
+from dataclasses import dataclass, field
+from statistics import mean
+
+from .oracle import OracleResult
+
+__all__ = ["QueryOutcome", "recovery_at_k", "structure_accuracy_at_k", "evaluate", "SLICES"]
+
+SLICES = ("all", "fp_unseen")
+
+
+@dataclass
+class QueryOutcome:
+    """Everything observed for one held-out fingerprint.
+
+    Attributes:
+        results: Oracle verdicts on the distinct candidates, **in the order
+            generated**. Order matters: recovery@k reads the first k, so a model
+            that puts its best guess first scores better at low k.
+        fp_unseen: Whether this fingerprint is absent from the training set.
+            Supplied by the dataset, not inferred here.
+        reference_smiles: The source molecule, for failure analysis.
+    """
+
+    results: list[OracleResult] = field(default_factory=list)
+    fp_unseen: bool = False
+    reference_smiles: str | None = None
+
+    @property
+    def n_candidates(self) -> int:
+        return len(self.results)
+
+    def hit_rank(self) -> int | None:
+        """Index of the first fingerprint match, or None if there is none."""
+        for i, r in enumerate(self.results):
+            if r.fp_match:
+                return i
+        return None
+
+
+def _slice(outcomes: Sequence[QueryOutcome], name: str) -> list[QueryOutcome]:
+    if name == "all":
+        return list(outcomes)
+    if name == "fp_unseen":
+        return [o for o in outcomes if o.fp_unseen]
+    raise ValueError(f"unknown slice {name!r}; expected one of {SLICES}")
+
+
+def recovery_at_k(outcomes: Sequence[QueryOutcome], k: int) -> float:
+    """Fraction of queries with a fingerprint match in the first k candidates.
+
+    Queries that produced fewer than k candidates still count in the
+    denominator -- failing to generate is a failure, not an exclusion.
+    """
+    if not outcomes:
+        return 0.0
+    hits = sum(any(r.fp_match for r in o.results[:k]) for o in outcomes)
+    return hits / len(outcomes)
+
+
+def structure_accuracy_at_k(outcomes: Sequence[QueryOutcome], k: int) -> float:
+    """Fraction of queries whose *original* molecule appears in the first k.
+
+    Strictly below recovery@k, and capped by fingerprint collisions: where
+    several molecules share a fingerprint, no model can reliably pick the one
+    the test set happened to draw from.
+    """
+    if not outcomes:
+        return 0.0
+    hits = sum(any(r.exact_structure for r in o.results[:k]) for o in outcomes)
+    return hits / len(outcomes)
+
+
+def _slice_metrics(outcomes: Sequence[QueryOutcome], ks: Sequence[int]) -> dict:
+    if not outcomes:
+        return {"n_queries": 0}
+
+    all_results = [r for o in outcomes for r in o.results]
+    valid = [r for r in all_results if r.valid]
+    unique_canonical = {r.canonical for r in valid}
+    hit_ranks = [r for r in (o.hit_rank() for o in outcomes) if r is not None]
+
+    return {
+        "n_queries": len(outcomes),
+        "recovery_at_k": {str(k): recovery_at_k(outcomes, k) for k in ks},
+        "structure_accuracy_at_k": {str(k): structure_accuracy_at_k(outcomes, k) for k in ks},
+        # Fraction of generated candidates RDKit accepts. Low validity wastes
+        # the k budget and is usually the first thing to fix.
+        "validity": len(valid) / len(all_results) if all_results else 0.0,
+        # Distinct valid molecules per query: the diversity that recovery@k
+        # depends on. A model that samples one molecule 100 times cannot
+        # improve past recovery@1.
+        "unique_valid_per_query": len(unique_canonical) / len(outcomes),
+        "mean_candidates_per_query": mean(o.n_candidates for o in outcomes),
+        # How close the near-misses were. Distinguishes "almost right" from
+        # "generating noise" when recovery is low.
+        "mean_best_tanimoto": mean(
+            max((r.tanimoto for r in o.results), default=0.0) for o in outcomes
+        ),
+        # Where in the candidate list hits land, over the queries that hit at
+        # all. Near 0 means ranking is good and a bigger k would buy little.
+        "mean_hit_rank": mean(hit_ranks) if hit_ranks else None,
+    }
+
+
+def evaluate(
+    outcomes: Sequence[QueryOutcome],
+    *,
+    ks: Sequence[int] = (1, 5, 20, 100),
+    elapsed_seconds: float | None = None,
+) -> dict:
+    """Compute the full metric report over both slices.
+
+    Args:
+        outcomes: One :class:`QueryOutcome` per held-out fingerprint.
+        ks: The k values to report recovery at. Values above the number of
+            candidates actually generated are reported but will plateau.
+        elapsed_seconds: Wall-clock for the generation pass, to report
+            throughput. Optional.
+
+    Returns:
+        A JSON-serialisable dict with a sub-dict per slice, plus the headline
+        ``primary_metric`` -- recovery@max(ks) on the ``fp_unseen`` slice --
+        hoisted to the top level so the leaderboard and the iteration loop
+        cannot accidentally sort on the memorisable one.
+    """
+    ks = tuple(sorted(set(int(k) for k in ks)))
+    report: dict = {"ks": list(ks), "slices": {s: _slice_metrics(_slice(outcomes, s), ks) for s in SLICES}}
+
+    unseen = report["slices"]["fp_unseen"]
+    report["primary_metric"] = unseen.get("recovery_at_k", {}).get(str(max(ks)), 0.0)
+    report["primary_metric_name"] = f"recovery@{max(ks)} (fp_unseen)"
+    report["fp_unseen_fraction"] = (
+        unseen["n_queries"] / len(outcomes) if outcomes else 0.0
+    )
+
+    if elapsed_seconds:
+        n_candidates = sum(o.n_candidates for o in outcomes)
+        report["elapsed_seconds"] = elapsed_seconds
+        report["queries_per_second"] = len(outcomes) / elapsed_seconds
+        report["candidates_per_second"] = n_candidates / elapsed_seconds
+
+    return report
+
+
+def format_report(report: dict) -> str:
+    """Render a metric report as a short text table for terminal output."""
+    lines = [f"{report['primary_metric_name']}: {report['primary_metric']:.4f}", ""]
+    ks = report["ks"]
+    header = f"{'slice':<12}{'n':>8}" + "".join(f"{'rec@' + str(k):>10}" for k in ks)
+    lines += [header, "-" * len(header)]
+    for name, m in report["slices"].items():
+        if not m.get("n_queries"):
+            lines.append(f"{name:<12}{0:>8}")
+            continue
+        row = f"{name:<12}{m['n_queries']:>8}"
+        row += "".join(f"{m['recovery_at_k'][str(k)]:>10.4f}" for k in ks)
+        lines.append(row)
+    lines.append("")
+    for name, m in report["slices"].items():
+        if not m.get("n_queries"):
+            continue
+        lines.append(
+            f"{name:<12} validity={m['validity']:.3f} "
+            f"unique/query={m['unique_valid_per_query']:.1f} "
+            f"best_tanimoto={m['mean_best_tanimoto']:.3f} "
+            f"struct@{max(ks)}={m['structure_accuracy_at_k'][str(max(ks))]:.4f}"
+        )
+    if "candidates_per_second" in report:
+        lines.append("")
+        lines.append(
+            f"throughput: {report['queries_per_second']:.1f} queries/s, "
+            f"{report['candidates_per_second']:.0f} candidates/s"
+        )
+    return "\n".join(lines)
