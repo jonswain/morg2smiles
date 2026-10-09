@@ -60,11 +60,23 @@ class TrainConfig:
     seed: int = 0
     #: Epochs between oracle-based validation passes.
     eval_every: int = 1
+    #: Optimiser steps between validation passes, if set. Takes precedence over
+    #: ``eval_every``, and exists because epochs are the wrong unit at scale: on
+    #: a 1M shard one epoch is ~7,000 steps and several hours, so epoch-based
+    #: evaluation yields a two-point curve and almost no basis for choosing a
+    #: checkpoint. Steps decouple how often we look from how big the data is.
+    eval_every_steps: int | None = None
     #: Validation molecules to sample. Generation is far slower than training,
     #: so a subsample keeps the epoch loop responsive; the full split is used
     #: for the final report.
     eval_n: int = 500
     eval_k: int = 20
+    #: Molecules for the (cheap) teacher-forced validation loss. Unlike the
+    #: oracle pass this is one forward pass, so it can afford more molecules and
+    #: run at every evaluation. It is a diagnostic, never the selection
+    #: criterion: loss and recovery are only loosely coupled on this task, which
+    #: is the specific mistake the first attempt at this project made.
+    valid_loss_n: int = 2000
     #: Stop when validation recovery has not improved for this many evaluations.
     patience: int = 5
 
@@ -191,13 +203,122 @@ def train(
         f"{sum(eval_mask)} with unseen fingerprints"
     )
 
+    # A second, larger subsample for the teacher-forced validation loss. Cheap
+    # enough to take more molecules than the oracle pass can afford.
+    loss_idx = sorted(
+        rng.sample(range(len(valid_smiles)), min(train_cfg.valid_loss_n, len(valid_smiles)))
+    )
+    loss_dataset = FingerprintDataset(
+        [valid_smiles[i] for i in loss_idx],
+        fp_cfg,
+        tokenizer,
+        max_tokens=model.cfg.max_tokens,
+        randomize=False,  # a moving target would make the curve unreadable
+        seed=train_cfg.seed,
+    )
+    loss_loader = DataLoader(
+        loss_dataset,
+        batch_size=train_cfg.batch_size,
+        shuffle=False,
+        collate_fn=lambda b: collate(b, tokenizer.pad_id),
+    )
+
     total_steps = max(train_cfg.epochs * len(loader), 1)
     autocast_dtype = torch.bfloat16 if train_cfg.precision == "bf16" else None
 
+    def forward_loss(batch: dict) -> torch.Tensor:
+        tokens = batch["tokens"].to(device)
+        logits = model(
+            batch["fp_indices"].to(device),
+            batch["fp_counts"].to(device),
+            batch["fp_mask"].to(device),
+            tokens,
+        )
+        return criterion(logits.reshape(-1, logits.size(-1)), tokens[:, 1:].reshape(-1))
+
+    @torch.no_grad()
+    def validation_loss() -> float:
+        was_training = model.training
+        model.eval()
+        total, n = 0.0, 0
+        for batch in loss_loader:
+            if autocast_dtype is not None:
+                with torch.autocast(device_type=device.type, dtype=autocast_dtype):
+                    total += forward_loss(batch).item()
+            else:
+                total += forward_loss(batch).item()
+            n += 1
+        if was_training:
+            model.train()
+        return total / max(n, 1)
+
     history: list[dict] = []
-    best_metric, best_epoch, since_improved = -1.0, -1, 0
+    best_metric, best_label, since_improved = -1.0, "", 0
+    best_vloss = float("inf")
+    best_index = -1
     step = 0
     started = time.perf_counter()
+
+    def evaluate_now(epoch: int, train_loss: float, *, reason: str) -> None:
+        """Run both validation passes, log, and keep the best checkpoint.
+
+        Shared by the step-based and epoch-based triggers so the two cannot
+        drift apart in what they measure or what they save.
+        """
+        nonlocal best_metric, best_label, best_index, best_vloss, since_improved
+
+        report = evaluate_model(
+            model,
+            eval_smiles,
+            k=train_cfg.eval_k,
+            fp_unseen=eval_mask,
+            show_progress=show_progress,
+        )
+        vloss = validation_loss()
+        label = f"epoch {epoch + 1} step {step}"
+        record = {
+            "epoch": epoch + 1,
+            "step": step,
+            "trigger": reason,
+            "train_loss": train_loss,
+            "valid_loss": vloss,
+            "elapsed_seconds": time.perf_counter() - started,
+            "valid": report,
+        }
+        history.append(record)
+
+        metric = report["primary_metric"]
+        print(
+            f"{label}: train {train_loss:.4f}  valid {vloss:.4f}  "
+            f"{report['primary_metric_name']} {metric:.4f}  "
+            f"recovery@1(all) {report['slices']['all']['recovery_at_k']['1']:.4f}"
+        )
+
+        # Recovery decides; validation loss only breaks ties. Early in a run
+        # every evaluation recovers nothing, and without a tiebreak the first
+        # one wins and ``best.pt`` holds the worst model in the run. Loss must
+        # never outrank recovery, though -- selecting on loss is exactly the
+        # mistake this project exists to avoid.
+        improved = metric > best_metric or (metric == best_metric and vloss < best_vloss)
+        if improved:
+            best_metric, best_label, since_improved = metric, label, 0
+            best_vloss = vloss
+            best_index = len(history) - 1
+            model.save(
+                out_dir / "best.pt",
+                epoch=epoch + 1,
+                step=step,
+                valid_report=report,
+                valid_loss=vloss,
+                train_config=train_cfg.to_dict(),
+            )
+        else:
+            since_improved += 1
+
+        model.save(
+            out_dir / "last.pt", epoch=epoch + 1, step=step, train_config=train_cfg.to_dict()
+        )
+        (out_dir / "history.json").write_text(json.dumps(history, indent=2))
 
     for epoch in range(train_cfg.epochs):
         model.train()
@@ -208,18 +329,11 @@ def train(
             for group in optimizer.param_groups:
                 group["lr"] = train_cfg.lr * _lr_at(step, total_steps, train_cfg)
 
-            tokens = batch["tokens"].to(device)
-            fp_indices = batch["fp_indices"].to(device)
-            fp_counts = batch["fp_counts"].to(device)
-            fp_mask = batch["fp_mask"].to(device)
-
             if autocast_dtype is not None:
                 with torch.autocast(device_type=device.type, dtype=autocast_dtype):
-                    logits = model(fp_indices, fp_counts, fp_mask, tokens)
-                    loss = criterion(logits.reshape(-1, logits.size(-1)), tokens[:, 1:].reshape(-1))
+                    loss = forward_loss(batch)
             else:
-                logits = model(fp_indices, fp_counts, fp_mask, tokens)
-                loss = criterion(logits.reshape(-1, logits.size(-1)), tokens[:, 1:].reshape(-1))
+                loss = forward_loss(batch)
 
             optimizer.zero_grad(set_to_none=True)
             loss.backward()
@@ -234,46 +348,28 @@ def train(
                 loss=f"{running / n_batches:.4f}", lr=f"{optimizer.param_groups[0]['lr']:.2e}"
             )
 
-        record = {
-            "epoch": epoch + 1,
-            "train_loss": running / max(n_batches, 1),
-            "elapsed_seconds": time.perf_counter() - started,
-        }
+            if train_cfg.eval_every_steps and step % train_cfg.eval_every_steps == 0:
+                evaluate_now(epoch, running / n_batches, reason="step")
+                if train_cfg.patience and since_improved >= train_cfg.patience:
+                    break
 
+        stop_early = bool(train_cfg.patience) and since_improved >= train_cfg.patience
+
+        # With step-based evaluation the epoch boundary is not special, so only
+        # evaluate here if steps are not already driving it -- or if this is the
+        # very last batch of training, which must not go unmeasured.
         is_last = epoch == train_cfg.epochs - 1
-        if (epoch + 1) % train_cfg.eval_every == 0 or is_last:
-            report = evaluate_model(
-                model,
-                eval_smiles,
-                k=train_cfg.eval_k,
-                fp_unseen=eval_mask,
-                show_progress=show_progress,
+        if not stop_early and (
+            (
+                not train_cfg.eval_every_steps
+                and ((epoch + 1) % train_cfg.eval_every == 0 or is_last)
             )
-            record["valid"] = report
-            metric = report["primary_metric"]
-            print(
-                f"epoch {epoch + 1}: loss {record['train_loss']:.4f}  "
-                f"{report['primary_metric_name']} {metric:.4f}  "
-                f"recovery@1(all) "
-                f"{report['slices']['all']['recovery_at_k']['1']:.4f}"
-            )
+            or (train_cfg.eval_every_steps and is_last and history and history[-1]["step"] != step)
+        ):
+            evaluate_now(epoch, running / max(n_batches, 1), reason="epoch")
+            stop_early = bool(train_cfg.patience) and since_improved >= train_cfg.patience
 
-            if metric > best_metric:
-                best_metric, best_epoch, since_improved = metric, epoch + 1, 0
-                model.save(
-                    out_dir / "best.pt",
-                    epoch=epoch + 1,
-                    valid_report=report,
-                    train_config=train_cfg.to_dict(),
-                )
-            else:
-                since_improved += 1
-
-        history.append(record)
-        model.save(out_dir / "last.pt", epoch=epoch + 1, train_config=train_cfg.to_dict())
-        (out_dir / "history.json").write_text(json.dumps(history, indent=2))
-
-        if train_cfg.patience and since_improved >= train_cfg.patience:
+        if stop_early:
             print(f"no improvement for {since_improved} evaluations; stopping early")
             break
 
@@ -286,18 +382,20 @@ def train(
         "train_config": train_cfg.to_dict(),
         "n_parameters": model.n_parameters,
         "n_train": len(train_smiles),
-        "best_epoch": best_epoch,
+        "best_checkpoint": best_label,
+        "best_epoch": history[best_index]["epoch"] if best_index >= 0 else -1,
+        "best_step": history[best_index]["step"] if best_index >= 0 else -1,
         "best_valid_metric": best_metric,
         "total_seconds": time.perf_counter() - started,
         "history": history,
     }
     (out_dir / "record.json").write_text(json.dumps(record, indent=2))
 
-    if best_epoch > 0:
-        best_report = history[best_epoch - 1].get("valid") or {}
+    if best_index >= 0:
+        best_report = history[best_index].get("valid") or {}
         if best_report:
             print()
-            print(f"best epoch {best_epoch}:")
+            print(f"best checkpoint: {best_label}")
             print(format_report(best_report))
     return record
 

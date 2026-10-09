@@ -40,19 +40,54 @@ class QueryOutcome:
         fp_unseen: Whether this fingerprint is absent from the training set.
             Supplied by the dataset, not inferred here.
         reference_smiles: The source molecule, for failure analysis.
+        budget: What one of the k slots is spent on. ``"molecules"`` (the
+            default) spends it on a distinct parseable molecule; ``"strings"``
+            spends it on any distinct string the model emitted, including
+            unparseable ones. See :meth:`scored`.
+        n_samples: Raw strings drawn from the model, before any deduplication.
+            Kept because every other diagnostic divides by it: with
+            oversampling, ``len(results)`` no longer says how much sampling
+            the number cost.
     """
 
     results: list[OracleResult] = field(default_factory=list)
     fp_unseen: bool = False
     reference_smiles: str | None = None
+    budget: str = "molecules"
+    n_samples: int = 0
+
+    def scored(self, k: int | None = None) -> list[OracleResult]:
+        """The candidates that consume the k budget, in generation order.
+
+        Under the ``"molecules"`` budget, unparseable candidates do not consume
+        a slot. The oracle is a fingerprint comparison on a parsed molecule, so
+        an unparseable string is not a guess it can be asked about -- RDKit
+        rejects it locally, for free, without consulting the oracle at all. No
+        sane caller would spend one of k oracle queries on a string it already
+        knows does not parse, so scoring as if it had understates the model.
+
+        Validity is not thereby excused: it is reported separately, and it
+        still sets how much sampling a k-molecule budget costs.
+        """
+        if self.budget == "molecules":
+            candidates = [r for r in self.results if r.valid and not r.duplicate]
+        else:
+            candidates = [r for r in self.results if not r.duplicate]
+        return candidates if k is None else candidates[:k]
 
     @property
     def n_candidates(self) -> int:
+        """Distinct candidates judged by the oracle -- the oracle's workload."""
         return len(self.results)
+
+    @property
+    def n_scored(self) -> int:
+        """Candidates that consume a slot of the k budget."""
+        return len(self.scored())
 
     def hit_rank(self) -> int | None:
         """Index of the first fingerprint match, or None if there is none."""
-        for i, r in enumerate(self.results):
+        for i, r in enumerate(self.scored()):
             if r.fp_match:
                 return i
         return None
@@ -74,7 +109,7 @@ def recovery_at_k(outcomes: Sequence[QueryOutcome], k: int) -> float:
     """
     if not outcomes:
         return 0.0
-    hits = sum(any(r.fp_match for r in o.results[:k]) for o in outcomes)
+    hits = sum(any(r.fp_match for r in o.scored(k)) for o in outcomes)
     return hits / len(outcomes)
 
 
@@ -87,7 +122,7 @@ def structure_accuracy_at_k(outcomes: Sequence[QueryOutcome], k: int) -> float:
     """
     if not outcomes:
         return 0.0
-    hits = sum(any(r.exact_structure for r in o.results[:k]) for o in outcomes)
+    hits = sum(any(r.exact_structure for r in o.scored(k)) for o in outcomes)
     return hits / len(outcomes)
 
 
@@ -97,21 +132,41 @@ def _slice_metrics(outcomes: Sequence[QueryOutcome], ks: Sequence[int]) -> dict:
 
     all_results = [r for o in outcomes for r in o.results]
     valid = [r for r in all_results if r.valid]
-    unique_canonical = {r.canonical for r in valid}
     hit_ranks = [r for r in (o.hit_rank() for o in outcomes) if r is not None]
+    n_samples = sum(o.n_samples for o in outcomes)
 
     return {
         "n_queries": len(outcomes),
         "recovery_at_k": {str(k): recovery_at_k(outcomes, k) for k in ks},
         "structure_accuracy_at_k": {str(k): structure_accuracy_at_k(outcomes, k) for k in ks},
-        # Fraction of generated candidates RDKit accepts. Low validity wastes
-        # the k budget and is usually the first thing to fix.
+        # Fraction of what the model emitted that RDKit accepts, counted over
+        # every candidate including same-molecule respellings. Those are marked
+        # rather than dropped precisely so this denominator stays a property of
+        # the model: excluding them would remove mostly valid candidates and
+        # make a model look less valid the more it repeats itself.
+        #
+        # Low validity does not cost recovery under the molecules budget, but it
+        # sets how much sampling that budget costs, so it is still worth fixing.
         "validity": len(valid) / len(all_results) if all_results else 0.0,
-        # Distinct valid molecules per query: the diversity that recovery@k
-        # depends on. A model that samples one molecule 100 times cannot
-        # improve past recovery@1.
-        "unique_valid_per_query": len(unique_canonical) / len(outcomes),
+        # How much of the sampling went on molecules already proposed.
+        "duplicate_rate": (
+            sum(1 for r in all_results if r.duplicate) / len(all_results) if all_results else 0.0
+        ),
+        # Distinct valid molecules per query: the diversity recovery@k depends
+        # on. A model that samples one molecule 100 times cannot improve past
+        # recovery@1. Counted per query and then averaged -- taking one set
+        # over every query conflates "this query was diverse" with "different
+        # queries got different answers", which is not the same thing and is
+        # only coincidentally close when targets rarely repeat.
+        "unique_valid_per_query": mean(
+            len({r.canonical for r in o.results if r.valid}) for o in outcomes
+        ),
+        # Three different counts, because under oversampling they diverge and
+        # each answers a different question: how much sampling the number cost,
+        # how much oracle work it cost, and how much of the k budget it used.
+        "mean_samples_per_query": n_samples / len(outcomes) if n_samples else None,
         "mean_candidates_per_query": mean(o.n_candidates for o in outcomes),
+        "mean_scored_per_query": mean(o.n_scored for o in outcomes),
         # How close the near-misses were. Distinguishes "almost right" from
         # "generating noise" when recovery is low.
         "mean_best_tanimoto": mean(
@@ -145,8 +200,13 @@ def evaluate(
         cannot accidentally sort on the memorisable one.
     """
     ks = tuple(sorted(set(int(k) for k in ks)))
+    budgets = {o.budget for o in outcomes}
     report: dict = {
         "ks": list(ks),
+        # What a slot in the k budget buys. Recorded on every report because it
+        # changes what recovery@k *means*, so rows computed under different
+        # budgets are not comparable and must not be silently ranked together.
+        "budget": budgets.pop() if len(budgets) == 1 else "mixed",
         "slices": {s: _slice_metrics(_slice(outcomes, s), ks) for s in SLICES},
     }
 

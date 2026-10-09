@@ -10,6 +10,7 @@ from __future__ import annotations
 import pytest
 
 from morg2smiles.fingerprints import FPConfig, compute
+from morg2smiles.metrics import QueryOutcome
 from morg2smiles.oracle import best_result, canonicalize, check, check_many
 
 MOLECULES = [
@@ -175,3 +176,64 @@ def test_canonicalize_is_idempotent():
 def test_canonicalize_returns_none_on_garbage():
     assert canonicalize("not a molecule") is None
     assert canonicalize("") == ""  # empty SMILES is a valid empty molecule
+
+
+# -- deduplication: molecules, not strings -------------------------------------
+def test_canonical_dedupe_collapses_respellings():
+    """A model trained on randomised SMILES emits one molecule many ways.
+
+    Those are not distinct guesses, and under raw deduplication they each
+    occupy a slot in the k budget. Inverting aspirin's fingerprint really does
+    return ~18 spellings of aspirin, so this is the common case, not an edge.
+    """
+    cfg = FPConfig()
+    aspirin = "CC(=O)Oc1ccccc1C(=O)O"
+    fp = compute(aspirin, cfg)
+    spellings = [
+        "CC(=O)Oc1ccccc1C(=O)O",
+        "OC(=O)c1ccccc1OC(C)=O",
+        "O=C(O)c1c(OC(=O)C)cccc1",
+        "c1(C(=O)O)c(OC(=O)C)cccc1",
+    ]
+
+    raw = check_many(spellings, fp, cfg, dedupe="raw")
+    assert [r.duplicate for r in raw] == [False] * 4, "raw dedupe does not look at molecules"
+
+    canonical = check_many(spellings, fp, cfg, dedupe="canonical")
+    # Marked, not dropped, so validity keeps an honest denominator.
+    assert len(canonical) == 4
+    assert [r.duplicate for r in canonical] == [False, True, True, True]
+    assert all(r.fp_match for r in canonical), "every spelling is still aspirin"
+
+    # One molecule means one guess, so one slot of the budget.
+    outcome = QueryOutcome(results=canonical)
+    assert outcome.n_scored == 1
+
+
+def test_canonical_dedupe_keeps_genuinely_different_molecules():
+    cfg = FPConfig()
+    fp = compute("CCO", cfg)
+    results = check_many(["CCO", "OCC", "CCC", "CCN"], fp, cfg, dedupe="canonical")
+    assert [r.duplicate for r in results] == [False, True, False, False]
+    assert [r.canonical for r in QueryOutcome(results=results).scored()] == ["CCO", "CCC", "CCN"]
+
+
+def test_invalid_candidates_dedupe_on_the_raw_string():
+    """Unparseable strings have no canonical form to compare, so they fall back."""
+    cfg = FPConfig()
+    fp = compute("CCO", cfg)
+    results = check_many(["C((", "C((", "C((("], fp, cfg, dedupe="canonical")
+    assert len(results) == 2
+    assert not any(r.valid for r in results)
+
+
+def test_dedupe_none_keeps_everything():
+    cfg = FPConfig()
+    fp = compute("CCO", cfg)
+    assert len(check_many(["CCO", "CCO", "OCC"], fp, cfg, dedupe="none")) == 3
+
+
+def test_unknown_dedupe_mode_is_rejected():
+    cfg = FPConfig()
+    with pytest.raises(ValueError, match="dedupe"):
+        check_many(["CCO"], compute("CCO", cfg), cfg, dedupe="molecules")

@@ -83,7 +83,7 @@ def main(path, split, limit, sort_by_time, show):
         return
 
     header = (
-        f"{'row':>4} {'when':<17} {'split':<6} {'params':>8} "
+        f"{'row':>4} {'when':<17} {'split':<6} {'bdgt':<4} {'params':>8} "
         f"{'rec@1':>9} {'rec@20':>9} {'UNSEEN@20':>10} {'base@20':>9} {'delta':>9}  note"
     )
     click.echo(header)
@@ -106,6 +106,7 @@ def main(path, split, limit, sort_by_time, show):
             f"{record['_row']:>4} "
             f"{record.get('timestamp', '')[:17]:<17} "
             f"{record.get('split', ''):<6} "
+            f"{(record.get('generation', {}).get('budget', 'str') or 'str')[:3]:<4} "
             f"{record.get('n_parameters', 0) / 1e6:>7.1f}M"
             f"{_fmt(_recovery(record, 'all', '1'))}"
             f"{_fmt(_recovery(record, 'all', '20'))}"

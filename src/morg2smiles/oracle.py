@@ -13,7 +13,7 @@ mid-evaluation would be indistinguishable from a bad model.
 from __future__ import annotations
 
 from collections.abc import Iterable, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from rdkit import Chem, RDLogger
 
@@ -45,6 +45,12 @@ class OracleResult:
             criterion -- it is the graceful-degradation signal that shows whether
             a near-miss was close or nonsense.
         canonical: Canonical SMILES of the candidate, or None if invalid.
+        duplicate: Whether an earlier candidate was the same molecule. Marked
+            rather than dropped so that rates like validity keep an honest
+            denominator: dropping respellings removes mostly *valid* candidates,
+            which silently depresses the apparent validity of the model that
+            produced them. Consumers of the k budget skip duplicates; consumers
+            counting what the model emitted do not.
     """
 
     smiles: str
@@ -53,6 +59,7 @@ class OracleResult:
     exact_structure: bool
     tanimoto: float
     canonical: str | None = None
+    duplicate: bool = False
 
     def __bool__(self) -> bool:
         """An oracle result is truthy when the fingerprint matches."""
@@ -131,7 +138,7 @@ def check_many(
     cfg: FPConfig,
     *,
     reference_smiles: str | None = None,
-    dedupe: bool = True,
+    dedupe: str | bool = "canonical",
 ) -> list[OracleResult]:
     """Judge a list of candidates against one target.
 
@@ -140,23 +147,58 @@ def check_many(
         target_fp: The target fingerprint.
         cfg: Fingerprint config.
         reference_smiles: The source molecule, if known.
-        dedupe: Drop repeated candidates. Sampling returns duplicates
-            constantly, and counting the same string twice would inflate
-            recovery@k by letting one distinct guess occupy several of the k
-            slots. Deduplication is on raw strings, before parsing, so the
-            budget k counts distinct *guesses*.
+        dedupe: ``"canonical"`` (the default) drops candidates that are the
+            same *molecule* as an earlier one, comparing canonical SMILES.
+            ``"raw"`` drops only byte-identical repeats. ``False`` keeps
+            everything.
+
+            Canonical is the right default because the oracle judges
+            molecules, not strings: a model trained on randomised SMILES
+            emits the same molecule many ways, and under ``"raw"`` those
+            respellings each occupy a slot in the k budget. Inverting
+            aspirin's fingerprint, for instance, returned 18 matches that
+            were all aspirin. Measured over an evaluation run, ``"raw"``
+            leaves 19.7 distinct strings standing where only 11.5 distinct
+            molecules exist.
+
+            Invalid candidates have no canonical form, so they fall back to
+            raw comparison among themselves.
+
+            Either way, dedupe exists because sampling returns duplicates
+            constantly, and counting the same guess twice would inflate
+            recovery@k by letting it occupy several of the k slots.
 
     Returns:
-        Results in input order, duplicates removed when ``dedupe``.
+        Results in input order, duplicates removed per ``dedupe``.
     """
-    seen: set[str] = set()
+    if dedupe is True:
+        dedupe = "canonical"
+    elif dedupe is False:
+        dedupe = "none"
+    if dedupe not in ("canonical", "raw", "none"):
+        raise ValueError(f"dedupe must be 'canonical', 'raw' or 'none', got {dedupe!r}")
+
+    seen_raw: set[str] = set()
+    seen_canonical: set[str] = set()
     results = []
     for smiles in candidates:
-        if dedupe:
-            if smiles in seen:
+        # Byte-identical repeats are dropped outright: they are not distinct in
+        # any sense, and skipping them before parsing is where dedupe saves
+        # real work. Same-molecule-different-string is marked, not dropped.
+        if dedupe != "none":
+            if smiles in seen_raw:
                 continue
-            seen.add(smiles)
-        results.append(check(smiles, target_fp, cfg, reference_smiles=reference_smiles))
+            seen_raw.add(smiles)
+
+        result = check(smiles, target_fp, cfg, reference_smiles=reference_smiles)
+
+        if dedupe == "canonical" and result.canonical is not None:
+            if result.canonical in seen_canonical:
+                result = replace(result, duplicate=True)
+            else:
+                seen_canonical.add(result.canonical)
+
+        results.append(result)
     return results
 
 

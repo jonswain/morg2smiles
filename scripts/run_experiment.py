@@ -76,6 +76,19 @@ def append_record(record: dict, path: Path = LEADERBOARD) -> None:
 @click.option("--temperature", default=1.0, show_default=True)
 @click.option("--top-p", default=1.0, show_default=True)
 @click.option(
+    "--budget",
+    default="molecules",
+    type=click.Choice(["molecules", "strings"]),
+    show_default=True,
+    help="What one of the k slots is spent on. Rows under different budgets are not comparable.",
+)
+@click.option(
+    "--oversample",
+    default=2.0,
+    show_default=True,
+    help="Draw k*oversample strings so k distinct molecules are available.",
+)
+@click.option(
     "--baseline/--no-baseline", default=True, show_default=True, help="Also score retrieval."
 )
 @click.option("--skip-train", is_flag=True, help="Evaluate an existing checkpoint instead.")
@@ -92,6 +105,8 @@ def main(
     strategy,
     temperature,
     top_p,
+    budget,
+    oversample,
     baseline,
     skip_train,
     checkpoint,
@@ -152,6 +167,8 @@ def main(
         strategy=strategy,
         temperature=temperature,
         top_p=top_p,
+        budget=budget,
+        oversample=oversample,
     )
     click.echo("")
     click.secho("model", bold=True)
@@ -203,6 +220,8 @@ def main(
             "strategy": strategy,
             "temperature": temperature,
             "top_p": top_p,
+            "budget": budget,
+            "oversample": oversample,
         },
         "primary_metric_name": model_report["primary_metric_name"],
         "primary_metric": model_report["primary_metric"],

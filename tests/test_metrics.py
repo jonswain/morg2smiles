@@ -177,3 +177,64 @@ def test_format_report_mentions_both_slices():
     ]
     text = format_report(evaluate(outcomes, ks=[1]))
     assert "all" in text and "fp_unseen" in text
+
+
+# -- the k budget: molecules, not strings --------------------------------------
+# These pin down what one of the k slots is spent on. The distinction moves the
+# headline number, so it needs tests rather than a docstring.
+def test_invalid_candidates_do_not_consume_the_molecule_budget():
+    """An unparseable string is rejected locally and for free, so it is not a guess.
+
+    Under the molecules budget a hit at position 2 behind two invalid strings
+    is still a recovery@1, because a caller spending oracle queries would never
+    have spent one on either invalid string.
+    """
+    outcome = QueryOutcome(results=[INVALID, INVALID, result(True)], budget="molecules")
+    assert recovery_at_k([outcome], 1) == 1.0
+
+    strings = QueryOutcome(results=[INVALID, INVALID, result(True)], budget="strings")
+    assert recovery_at_k([strings], 1) == 0.0
+    assert recovery_at_k([strings], 3) == 1.0
+
+
+def test_invalid_candidates_still_count_against_validity():
+    """Not consuming budget must not mean disappearing from the diagnostics."""
+    outcome = QueryOutcome(
+        results=[INVALID, result(True)], fp_unseen=True, budget="molecules", n_samples=2
+    )
+    metrics = evaluate([outcome], ks=[1])["slices"]["fp_unseen"]
+    assert metrics["validity"] == pytest.approx(0.5)
+    assert metrics["mean_candidates_per_query"] == 2
+    assert metrics["mean_scored_per_query"] == 1
+
+
+def test_hit_rank_is_measured_in_budget_slots():
+    outcome = QueryOutcome(results=[INVALID, result(False), result(True)], budget="molecules")
+    assert outcome.hit_rank() == 1
+
+
+def test_the_budget_is_recorded_on_every_report():
+    """Rows computed under different budgets are not comparable, so say which."""
+    assert evaluate([QueryOutcome(results=[result(True)])], ks=[1])["budget"] == "molecules"
+    outcome = QueryOutcome(results=[result(True)], budget="strings")
+    assert evaluate([outcome], ks=[1])["budget"] == "strings"
+    mixed = [QueryOutcome(results=[result(True)], budget=b) for b in ("molecules", "strings")]
+    assert evaluate(mixed, ks=[1])["budget"] == "mixed"
+
+
+def test_unique_valid_is_per_query_not_global():
+    """Two queries that both answer 'CCO' are not evidence of low diversity.
+
+    Taking one set over all queries conflates per-query diversity with
+    cross-query agreement. Each query here proposes two distinct molecules.
+    """
+    outcomes = [
+        QueryOutcome(
+            results=[result(False, smiles="CCO"), result(False, smiles="CC")], fp_unseen=True
+        ),
+        QueryOutcome(
+            results=[result(False, smiles="CCO"), result(False, smiles="CC")], fp_unseen=True
+        ),
+    ]
+    metrics = evaluate(outcomes, ks=[1])["slices"]["fp_unseen"]
+    assert metrics["unique_valid_per_query"] == pytest.approx(2.0)

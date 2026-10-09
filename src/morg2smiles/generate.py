@@ -273,6 +273,7 @@ class Morg2Smiles:
         k: int = 20,
         strategy: str = "sample",
         verified_only: bool = False,
+        oversample: float = 2.0,
         **kwargs,
     ) -> list[str]:
         """Generate candidate SMILES for one fingerprint, best first.
@@ -280,8 +281,13 @@ class Morg2Smiles:
         Args:
             fp: The target fingerprint, sparse or dense, computed under
                 :attr:`fp_config`.
-            k: Number of distinct candidates to aim for.
+            k: Number of distinct *molecules* to aim for. Candidates are
+                deduplicated by canonical SMILES, so asking for 20 gets you up
+                to 20 different molecules rather than 20 spellings of three.
             strategy: ``"sample"`` or ``"beam"``.
+            oversample: Multiplier on how many raw strings to draw to fill k
+                distinct molecules. Ignored by beam search, which returns
+                distinct sequences already.
             verified_only: Return only candidates the oracle accepts. The
                 default returns everything, ordered so verified matches come
                 first, so a caller that wants a best-effort answer still gets
@@ -293,14 +299,23 @@ class Morg2Smiles:
             descending similarity to the target.
         """
         sparse = _as_sparse(fp, self.fp_config)
-        results = self._judge(sparse, k=k, strategy=strategy, **kwargs)
+        results = self._judge(sparse, k=k, strategy=strategy, oversample=oversample, **kwargs)
         if verified_only:
             return [r.smiles for r in results if r.fp_match]
         return [r.smiles for r in results]
 
-    def _judge(self, fp: Sparse, *, k: int, strategy: str, **kwargs) -> list[OracleResult]:
+    def _judge(
+        self,
+        fp: Sparse,
+        *,
+        k: int,
+        strategy: str,
+        oversample: float = 2.0,
+        **kwargs,
+    ) -> list[OracleResult]:
         if strategy == "sample":
-            candidates = sample(self.model, [fp], k=k, device=self.device, **kwargs)[0]
+            n_draw = max(k, int(round(k * oversample)))
+            candidates = sample(self.model, [fp], k=n_draw, device=self.device, **kwargs)[0]
         elif strategy == "beam":
             candidates = beam_search(self.model, fp, k=k, device=self.device, **kwargs)
         else:
@@ -308,7 +323,7 @@ class Morg2Smiles:
 
         results = check_many(candidates, fp, self.fp_config)
         results.sort(key=lambda r: (r.fp_match, r.tanimoto), reverse=True)
-        return results
+        return results[:k]
 
     def generate_batch(
         self,

@@ -18,6 +18,7 @@ distinction decides whether a result means anything.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import random
 from pathlib import Path
@@ -200,9 +201,26 @@ def collate(batch: list[dict], pad_id: int = 0) -> dict:
     }
 
 
-def _fp_key(fp: Sparse) -> tuple:
-    """Hashable canonical form of a sparse fingerprint, for set membership."""
-    return tuple(sorted(fp.items()))
+def _fp_key(fp: Sparse) -> bytes:
+    """Compact hashable form of a sparse fingerprint, for set membership.
+
+    A 16-byte digest rather than the obvious ``tuple(sorted(fp.items()))``,
+    because this is used to index the *whole training set*. The tuple form
+    keeps ~50 live Python tuples per molecule, which measured around 5 KB per
+    molecule -- fine for a 100k shard, about 4.5 GB for a 1M one, which is
+    where the index stops fitting comfortably and starts thrashing.
+
+    blake2b rather than ``hash()`` so the digest is stable across processes and
+    runs, which matters because the resulting mask is cached on disk. At 16
+    bytes the collision probability over a million fingerprints is ~1e-27; a
+    collision would mark one unseen fingerprint as seen, costing a query from
+    the primary slice rather than corrupting a metric.
+    """
+    payload = b"".join(
+        index.to_bytes(4, "little") + count.to_bytes(2, "little")
+        for index, count in sorted(fp.items())
+    )
+    return hashlib.blake2b(payload, digest_size=16).digest()
 
 
 def fp_unseen_mask(
