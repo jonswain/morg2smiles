@@ -157,3 +157,47 @@ Test splits were not touched. Everything here is validation data.
 ## Results
 
 *(appended after the runs completed — see below.)*
+
+### Operational: two guards that did not hold
+
+Written up before the numbers because it is the more transferable finding.
+
+**`max_hours` measured the wrong clock.** The cap was built on
+`time.perf_counter()`, which on macOS does not advance while the process is
+suspended — and an unattended overnight run is suspended repeatedly. Stage 1
+recorded **6.90 h of `perf_counter` time across 10.78 h of real time**, a 36%
+shortfall, so an 8.5 h cap never fired and the stage ran 2.3 h past its slot.
+
+```
+step 18,000   perf_counter 6.90 h   wall clock 10.78 h
+```
+
+`perf_counter` is the right clock for per-step rates and the wrong one for a
+deadline. The budget now uses `time.time()`. `caffeinate -dimsu -w <driver pid>`
+holds the machine awake for the rest of the night, which stops the time loss
+rather than merely measuring it correctly.
+
+The irony is worth recording: this is the guard that existed *specifically* so
+an unattended stage could not eat the analysis window, and it was measuring the
+wrong quantity from the moment it was written. A cap that is never exercised in
+testing is an assertion, not a guard.
+
+**The driver's own guard is too weak.** `have_time_for_training` checks only
+that 105 minutes remain; it never compares that against the stage's actual cap,
+so it would launch a 3.5 h stage with 2 h left. It could not be fixed in place:
+`overnight.sh` was executing, and bash reads a script incrementally by byte
+offset, so editing a running script can make the shell execute garbage. The
+protection was applied through `configs/medium_1m.yaml` instead — which stage
+2's fresh interpreter reads — by trimming `max_hours` to 1.75 and halving the
+evaluation interval to 500 steps. The cap is only tested at an evaluation, so
+the true stop is the cap plus up to one interval; halving the interval halves
+the overshoot.
+
+**And one self-inflicted wound.** Three stalls of 905 s, 1008 s and 1037 s
+appeared at steps 382–821, the progress bar frozen on a single step. That window
+is exactly when a worker-count benchmark of mine was running against the live
+job, having loaded the 1M shard and built two models before dying. Some of that
+lost wall time was suspension rather than contention, so the benchmark is not
+the whole story — but the rule now has evidence behind it: **this machine runs
+one job.** The earlier version of that rule was about getting clean benchmark
+numbers; it cuts both ways.
