@@ -140,6 +140,140 @@ blog posts, less well as a repo banner.
   tactile and handmade, warm off-white paper ground.
 
 
+Round 2: concepts 3 and 4, with the boredom taken out
+------------------------------------------------------
+
+Concepts 3 and 4 were judged the best ideas and the dullest outputs. The
+fault is in the prompts above: "flat vector illustration style", "elegant,
+restrained" and "quiet and precise rather than dramatic" are instructions to
+be boring, and the shared suffix bans gradients and glow, which removes the
+main source of drama. These replacements keep the two ideas and change the
+register.
+
+Use this style suffix instead of the shared one:
+
+  Dramatic cinematic lighting with a clear light direction, strong rim light
+  and deep shadow. High contrast, rich tonal range, volumetric haze. Dynamic
+  asymmetric composition with a low or raking camera angle and a strong sense
+  of scale. Shallow depth of field. Palette anchored in deep slate blue-grey
+  and teal, with hot amber as the only light source in the frame.
+
+And this negative prompt, which no longer bans the drama:
+
+  text, letters, words, labels, typography, watermark, signature, flat
+  illustration, vector art, clip art, infographic, diagram, symmetrical,
+  centred, static, evenly lit, pastel, DNA double helix, periodic table,
+  person, hands, circuit board
+
+
+3a. The wall, monumental
+------------------------
+
+Scale is the cheapest route to excitement and the original had none.
+
+  A colossal wall of dark slate and teal stone tiles, each tile etched with a
+  simple binary mark, towering hundreds of metres and receding into fog. The
+  wall is violently breaking apart at its right edge: enormous tiles tear
+  free and hang suspended in mid-air, tumbling and rotating, trailing dust.
+  As they fly outward they transform into vast glowing amber molecular
+  lattices, hexagonal rings and bonds the size of buildings, burning hot
+  against the cold grey stone. Dramatic low camera angle looking up along the
+  face of the wall, raking side light, god rays through the dust, epic scale,
+  cinematic.
+
+
+3b. The wall, kinetic macro
+---------------------------
+
+Opposite strategy: get close and fast rather than big and slow.
+
+  Extreme close-up of a disintegrating surface. In the foreground, sharply
+  focused slate and teal tiles in a dense grid, their edges beginning to
+  crack and lift. Mid-frame, tiles are already airborne, caught in motion
+  blur as they spin toward the camera, some streaking past out of frame.
+  Behind them, out of focus, the tiles have resolved into a glowing amber
+  molecular structure, its bonds burning like filament, throwing warm light
+  forward onto the tumbling debris. Shallow depth of field, strong motion,
+  sparks and embers, high shutter-speed energy, dark background.
+
+
+3c. The wall, shockwave
+-----------------------
+
+The wilder option: treat the transformation as a detonation front.
+
+  A shockwave rushing outward across a vast dark plane tiled with teal and
+  slate squares. At the leading edge of the wave the tiles are thrown upward
+  in a curling crest, a breaking wave made of geometry, and beyond that crest
+  the tiles have reorganised into an expanding web of incandescent amber
+  molecular bonds racing outward like cracks of light. Seen from a dramatic
+  three-quarter aerial angle. Enormous scale, glowing core, dust and debris
+  lit from within, deep atmospheric perspective, cinematic science-fiction
+  energy.
+
+
+4a. The fingerprint as terrain
+------------------------------
+
+The strongest reframe of the two: stop drawing a thumbprint and make the
+ridges landscape. Earns the drama honestly and the pun survives.
+
+  An aerial view of a vast alien landscape whose ridges and valleys form the
+  concentric whorl of an enormous fingerprint, carved into dark slate rock,
+  each ridge hundreds of metres high and casting long hard shadows in low
+  raking sunlight. At the centre of the whorl, where the ridges tighten, the
+  rock gives way to an immense structure of glowing amber crystal beams
+  meeting at precise hexagonal angles, a molecular lattice the size of a
+  city, radiating warm light up the surrounding canyon walls. Dramatic low
+  sun, long shadows, atmospheric haze, immense scale, cinematic aerial
+  photography.
+
+
+4b. The fingerprint, volumetric macro
+-------------------------------------
+
+  Extreme macro photograph of a fingerprint pressed against dark glass, its
+  ridges rendered as towering walls of teal-lit texture receding into shallow
+  focus, like canyon walls seen from the floor. From deep within the centre
+  of the whorl, intense amber light pours upward and outward between the
+  ridges in visible volumetric shafts, and silhouetted inside that light are
+  the sharp straight bonds and hexagonal rings of a molecular structure,
+  backlit so they read as hard black geometry against the glow. Dramatic
+  chiaroscuro, heavy atmosphere, dust motes, very shallow depth of field.
+
+
+4c. The fingerprint, shatter
+----------------------------
+
+  A fingerprint etched into a thick pane of dark glass, lit from behind in
+  cold teal. The glass is shattering outward from the centre of the whorl:
+  radial cracks, suspended shards hanging in space, each shard catching the
+  light on its edge. Through the broken centre, blazing amber light reveals a
+  complex molecular skeleton structure behind the glass, its bonds sharp and
+  incandescent, as if the structure was always behind the print and has just
+  been exposed. Dramatic backlight, lens flare across the shards, frozen
+  mid-shatter, high contrast, cinematic.
+
+
+Three dials, in the order worth turning
+---------------------------------------
+
+1. Scale. "hundreds of metres", "the size of a city", "towering". The round-1
+   prompts specified no scale at all, which is why they came back as
+   diagrams.
+2. Light direction. "raking", "backlit", "lit from within", "low sun". Evenly
+   lit images always read as flat.
+3. Motion. "tumbling", "mid-shatter", "caught in motion blur". A static
+   transformation is a diagram; a transformation in progress is an image.
+
+If the results come back overcooked, dial down the lens-flare-and-embers
+register first -- strip "sparks and embers" and "lens flare", keep the scale
+and the light.
+
+Expectation: 4a gives the best single image, 3a the best banner, since a 3:1
+crop suits a wall far better than it suits a thumbprint.
+
+
 Iterating
 ---------
 
