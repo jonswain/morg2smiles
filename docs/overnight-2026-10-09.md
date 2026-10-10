@@ -211,6 +211,15 @@ stage 4  scaffolds   08:56 -> 09:10
 
 ### The headline: data was the ceiling
 
+> **Correction, 2026-10-11.** The heading and the bolded claim below are wrong.
+> The table is right, but the two runs it compares differ in compute as well as
+> data — 8,508 optimiser steps against 21,117 — so the 30-point gap cannot be
+> attributed to data. Running the missing control (the same 100k shard for the
+> same 21,117 steps) puts **10× data at 4.9 points, not 30**; the rest was
+> compute. See [night 2](overnight-2026-10-10.md). The paragraph beginning "I had
+> predicted the gap would narrow" is also comparing across two different
+> evaluation protocols without knowing it, and is corrected there.
+
 One common protocol, 2,000 held-out molecules (1,967 fingerprint-unseen) drawn
 from neither model's training set, `fp_unseen` computed against the union of all
 909,800 training fingerprints, identical seed, budget and k. **These are the only
@@ -223,6 +232,8 @@ numbers in this document that compare across runs.**
 | `medium_1m` | 15.1M | 2,500 steps | 0.0524 | 0.1551 | 0.2745 | 0.2645 | 0.522 | 6.72 |
 
 **`recovery@20` 0.5892 → 0.8927 for 10× the data at the same parameter count.**
+<sup>Wrong — the second run also had 2.5× the compute. ~4.9 of those 30 points
+are data. See [night 2](overnight-2026-10-10.md).</sup>
 `recovery@1` nearly tripled, 0.18 → 0.53: the 1M model usually gets it right on
 the *first* sample, and its mean hit rank of 1.73 says that when it succeeds it
 succeeds almost immediately. Mean best Tanimoto rose 0.885 → 0.974, so even the
@@ -298,3 +309,6 @@ chemistry a user actually brings.
   practical purposes, but the asymptote was not reached.
 - **The 10M-molecule question.** 100k → 1M bought 30 points. Nothing here says
   whether 1M → 10M buys another 10 or another 1.
+  <sup>Corrected: it bought ~4.9 points at matched compute, which makes
+  1M → 10M a much smaller prize than this bullet assumed. See
+  [night 2](overnight-2026-10-10.md).</sup>

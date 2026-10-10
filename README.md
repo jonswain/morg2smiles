@@ -85,9 +85,9 @@ the weaker model returns 21.3:
 | an imatinib fragment | 4 | 1 |
 
 The 100k model spread the same budget over 6, 20 and 20 distinct molecules and
-missed the imatinib fragment entirely. Extra data bought *confidence*, not
-exploration — which for a k-budget metric is close to free, because the budget
-stops being spent on respellings of a wrong answer.
+missed the imatinib fragment entirely. The stronger model bought *confidence*,
+not exploration — which for a k-budget metric is close to free, because the
+budget stops being spent on respellings of a wrong answer.
 
 Deduplicating by molecule is what makes any of this visible. Earlier versions
 deduplicated by *string*, and inverting aspirin returned "18 of 20 exact
@@ -247,11 +247,17 @@ neither model's training set, `fp_unseen` computed against the union of all
 within 20 guesses, and more than half on the first guess.** Mean best Tanimoto
 is 0.974, so even the failures are near misses.
 
-The jump from 0.5892 came from *data*, not from training longer or building
-bigger: identical architecture, 10× the molecules, and the 1M model passes the
-100k model's final score inside its first epoch. The novel-scaffold penalty also
-halved (12.7 → 6.2 points), so the extra data improved generalisation to unseen
-chemotypes rather than just coverage of known ones.
+The two rows above differ in **compute as well as data** — 8,508 optimiser steps
+against 21,117 — so the gap between them is not a data-scaling result. Training
+the 100k shard for the same 21,117 steps closes most of it: `rec@20` 0.8257
+against the 1M run's 0.8742 on matched compute. **10× the data is worth about 5
+points here, and the rest of the 30 was training longer.** The novel-scaffold
+penalty halving (12.7 → 6.2 points) is likewise a property of the better model,
+not demonstrably of its data.
+
+An earlier version of this section attributed the whole 30-point gap to data.
+That was wrong; the correction and the control run are in
+[`docs/overnight-2026-10-10.md`](docs/overnight-2026-10-10.md).
 
 Full numbers, curves and caveats: [`docs/phase1-results.md`](docs/phase1-results.md)
 for the first 100k run, [`docs/overnight-2026-10-09.md`](docs/overnight-2026-10-09.md)
@@ -324,25 +330,40 @@ measuring the wrong thing. It is in
 [`docs/overnight-2026-10-09.md`](docs/overnight-2026-10-09.md), under the
 heading "two guards that did not hold".
 
+Worse, the morning after: the headline of that write-up — "10× the data moved
+recovery 0.5892 → 0.8927" — came from two runs that differed in compute as well
+as data, and the control run the next night cut data's share of it from 30
+points to 5. The criticism above is that the human reported a number that could
+not support his conclusion. The assistant then did the same thing, in bold, on
+the front page, having been handed a config file that said in advance how to
+avoid it. That correction is
+[`docs/overnight-2026-10-10.md`](docs/overnight-2026-10-10.md).
+
 ## Status
 
 Phase 1 complete: harness, oracle, metrics, baseline, recoverability analysis
 and a trained decoder that clears the go/no-go gate (`recovery@20` on
 `fp_unseen` must beat retrieval — 0.8927 vs 0.0000).
 
-The 2026-10-09 scaling runs answered the "what was the ceiling?" question: it
-was **data**. 10× the molecules at the same parameter count moved `recovery@20`
-0.5892 → 0.8927, and parameters turned out to be the wrong lever on this
-hardware — scaling is linear in wall clock to 15M params and superlinear beyond,
-so the next doubling is better spent on steps or data.
+The 2026-10-09 scaling runs looked like they had answered the "what was the
+ceiling?" question — **data** — but they had varied data and compute together.
+The 2026-10-10 control run separated them: at matched compute, 10× the molecules
+is worth ~5 points of `recovery@20`, and **optimiser steps were the dominant
+lever**. Parameters remain the wrong lever on this hardware: scaling is linear in
+wall clock to 15M params and superlinear beyond.
 
 Open questions, in rough order of expected value:
 
-1. **1M → 10M molecules.** 100k → 1M bought 30 points. Nothing yet says whether
-   the next decade buys 10 or 1.
-2. **A full-length 15M run.** The capacity arm was cut to 1.75 h by the deadline
+1. **How far do steps go?** Both 21,117-step runs were still improving when
+   they stopped, and 30 epochs of 90k molecules showed no overfitting at all —
+   probably because SMILES randomisation makes every epoch a fresh target. The
+   cheapest untested lever is simply a longer run.
+2. **1M → 10M molecules.** Worth ~5 points per decade at matched compute, not
+   30, which makes the full-corpus and PubChem ambitions much less attractive
+   than they looked yesterday.
+3. **A full-length 15M run.** The capacity arm was cut to 1.75 h by the deadline
    and is unanswered. Now known to be affordable at ~5.2 h per epoch.
-3. **The remaining 10%.** Validity is 0.903 and `recovery@20` is 0.8927, so
+4. **The remaining 10%.** Validity is 0.903 and `recovery@20` is 0.8927, so
    almost every valid candidate is now a correct one. The failures are no longer
    syntax errors, which moves the bottleneck from decoding to fingerprint
    reasoning and makes them worth inspecting directly.
