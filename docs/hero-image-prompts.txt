@@ -1,0 +1,153 @@
+Image-generation prompts for a Morg2SMILES hero image
+=====================================================
+
+For a wide illustration to sit at the top of the README or inside a blog
+post. Not an icon -- the small-size legibility constraint that rejected half
+the concepts in docs/logos/ does not apply here, so these can carry detail,
+depth and atmosphere.
+
+Written for Gemini / Imagen / similar. They are paste-ready: append the
+shared style suffix, and set the negative prompt once.
+
+Palette is inherited from docs/logos/_theme.txt so a hero image and an icon
+can sit on the same page:
+
+  slate   #334155    structure, backgrounds
+  teal    #0d9488    the fingerprint side
+  amber   #f59e0b    the molecule side, and exact matches
+
+Practical notes
+---------------
+
+Aspect ratio
+  3:1   banner above the README title
+  2:1   image inside a blog post
+  16:9  social preview / og:image
+
+GitHub theme
+  READMEs render on both light and dark backgrounds. Either commit to one
+  and supply both variants via a <picture> block, or specify a mid-tone
+  background that survives both.
+
+Judging
+  Generate four variants per prompt. Unlike the icon set, do not judge these
+  shrunk down -- judge them at the width they will actually appear, which on
+  GitHub is about 850 px.
+
+Known failure modes
+  Models ignore "no text" roughly a third of the time; regenerate rather
+  than fighting it. They also treat hex codes as hue families, not exact
+  values. Fingerprint-plus-molecule prompts pull hard toward DNA helices and
+  glowing blue "AI" imagery -- the negative prompt below suppresses both.
+
+
+Shared style suffix
+-------------------
+
+Append to any prompt below:
+
+  Wide 3:1 composition, full-bleed background, rich detail, no text, no
+  letters, no numbers, no labels, no watermark. Colour palette built from
+  deep slate #334155, teal #0d9488 and warm amber #f59e0b, with amber
+  reserved for the molecular structures so the eye reads them as the answer.
+
+
+Negative prompt
+---------------
+
+  text, letters, words, labels, typography, watermark, signature, logo,
+  icon, UI mockup, screenshot, chart axes, periodic table, laboratory
+  glassware, scientist, person, hands, DNA double helix, brain, circuit
+  board, glowing blue technology, artificial intelligence imagery
+
+
+1. The many-to-one truth
+------------------------
+
+The project's most distinctive idea, and the one nobody illustrates. Folding
+and bit collisions mean many molecules share a fingerprint, which is why the
+task is generative rather than deterministic.
+
+  An editorial science illustration. On the left, a single vertical strip of
+  densely packed teal and slate rectangles, like one folded binary
+  fingerprint, rendered crisply and solidly. From it, delicate amber lines
+  fan out to the right into five or six different molecular skeleton
+  diagrams, each a distinct arrangement of hexagonal rings and bond lines,
+  all drawn in the same amber line weight. The composition makes clear that
+  one pattern on the left corresponds to many different structures on the
+  right. Clean technical drafting aesthetic, flat colour, fine linework,
+  generous dark slate background.
+
+
+2. Verified among candidates
+----------------------------
+
+The actual mechanism. recovery@20 means sampling k candidates and letting the
+oracle pick, so this is what the model does, drawn literally. My pick of the
+five: the only one that depicts the method rather than the inputs and outputs.
+
+  An atmospheric illustration of a search resolving. A field of twenty faint,
+  ghostly molecular skeleton diagrams floats in a deep slate space, drawn in
+  thin translucent teal lines, overlapping and slightly out of focus. One
+  single molecule among them is rendered crisply and fully opaque in bright
+  warm amber, sharply in focus, as if selected and confirmed. A subtle amber
+  glow separates it from the others. Depth of field, layered transparency,
+  quiet and precise rather than dramatic.
+
+
+3. The wall dissolving
+----------------------
+
+Large-scale and striking. The most conventional of the five, and the most
+likely to produce something immediately usable.
+
+  A wide cinematic illustration. The left two-thirds is a vast wall of small
+  teal and slate squares in a dense binary grid, extending beyond the frame,
+  flat and regular. Towards the right the grid begins to break apart: squares
+  detach, drift, and reorganise into the bonds and rings of amber molecular
+  skeleton structures, which become fully formed at the right edge. A clear
+  transition from rigid uniform data to organic chemical structure across the
+  width of the image. Flat vector illustration style, strong silhouette, deep
+  slate background.
+
+
+4. The fingerprint pun, rendered properly
+-----------------------------------------
+
+This failed as an icon because at 32 px it read as a wifi symbol. At banner
+size the whorl has room to work.
+
+  A large detailed illustration of a human thumbprint, its concentric ridge
+  lines drawn in fine teal strokes against deep slate, filling most of the
+  frame. Towards the centre of the whorl the ridges stop behaving like skin
+  and become chemical bonds: straight amber line segments meeting at precise
+  angles, forming hexagonal and pentagonal molecular rings nested inside the
+  whorl. The handover from organic ridge curves to geometric molecular bonds
+  is the focal point. Elegant, restrained, scientific-poster quality.
+
+
+5. Risograph poster
+-------------------
+
+A different register entirely -- texture rather than diagram. Works well in
+blog posts, less well as a repo banner.
+
+  A two-colour risograph screenprint poster. Overlapping teal and amber ink
+  layers with visible paper grain, slight misregistration at the edges, and
+  mottled uneven ink coverage. The subject is a bold simplified molecular
+  skeleton structure overlaid on a repeating pattern of filled and empty
+  squares. Retro mid-century scientific printing aesthetic, limited palette,
+  tactile and handmade, warm off-white paper ground.
+
+
+Iterating
+---------
+
+The axis most worth varying first is register, not concept: the same idea
+reads completely differently as technical drafting (1), atmospheric depth
+(2), flat vector (3) or print texture (5). Run 2 and 1 first, since they
+depict what the project does rather than what it takes in and puts out.
+
+Prompts for a small square icon, as opposed to a hero image, are a separate
+problem with different constraints -- see docs/logos/README.md for six
+hand-drawn concepts and which of them survive at favicon size.
