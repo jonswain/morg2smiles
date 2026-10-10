@@ -46,6 +46,34 @@ For a wide image there is no longer any need to press one of these into
 service: `docs/images/banner.jpg` is concept 01's idea — bits on the left
 coming apart into structures on the right — realised at 3:1.
 
+## Derived assets
+
+**04 reversal** is the chosen mark, and these are built from it. Rebuild them
+if the mark changes.
+
+| file | what it is | where it goes |
+|---|---|---|
+| `lockup.svg` | Mark plus wordmark at a fixed gap | Slides, blog posts, talks, anywhere the mark alone would not identify the project |
+| `social-card.svg` | The lockup on a slate field, 1280x640 | Source for the card below |
+| `../images/social-card.png` | The same, rasterised, 48 KB | **Settings → General → Social preview** on GitHub |
+| `favicon/favicon.ico` | 16, 32 and 48 px | A docs site, when there is one |
+| `favicon/icon-*.png` | 16 / 32 / 48 / 180 / 512 | `apple-touch-icon` is the 180 |
+
+Two notes on how these were built, because both are easy to get wrong:
+
+The wordmark in `lockup.svg` and `social-card.svg` is **outlined, not live
+text**. An SVG that names a font renders differently on every machine that
+lacks it, which is not a property a logo should have. The face is Avenir Next
+Demi Bold, converted to paths with `fontTools`. The consequence is that the
+wordmark cannot be edited by changing a string — it has to be regenerated.
+
+The favicons bake in the **light-mode palette**. A raster cannot respond to
+`prefers-color-scheme`, and teal and amber both hold up against light and dark
+browser chrome, where slate would disappear into one of them.
+
+The card's background is `#111822`, sampled from the banner's dark field
+rather than chosen, so the two sit together as one family.
+
 ## Rendering
 
 ```bash
