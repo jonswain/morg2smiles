@@ -274,6 +274,179 @@ Expectation: 4a gives the best single image, 3a the best banner, since a 3:1
 crop suits a wall far better than it suits a thumbprint.
 
 
+How to assemble and paste a prompt
+----------------------------------
+
+Three pieces, in this order: concept, then style suffix, then negatives. Only
+the handling of the third differs by tool.
+
+  Gemini chat app       no negative field. Fold it in as a closing sentence.
+  Imagen / Vertex API   may expose a negativePrompt parameter depending on
+                        model version. If it does, put the list there and
+                        leave it out of the text.
+  Midjourney            append --no text, people, hands
+  Stable Diffusion      a real separate negative field. Paste it verbatim.
+
+Aspect ratio: most models offer only a fixed set -- typically 1:1, 4:3, 3:4,
+16:9, 9:16 -- and 3:1 is not among them. Generate at 16:9 and crop to 3:1
+afterwards. Asking for 3:1 in prose only nudges the composition.
+
+One caveat for chat models: naming a thing can summon it, and "no text"
+occasionally produces text. So in prose keep the avoid-list short and put the
+positive description first.
+
+Where a concept already fixes something the suffix also mentions -- a camera
+angle, say -- trim the suffix rather than leaving the model a choice it does
+not need.
+
+Full worked example, everything that goes in the box, for 4a in Gemini chat:
+
+  Generate a 16:9 landscape image.
+
+  An aerial view of a vast alien landscape whose ridges and valleys form the
+  concentric whorl of an enormous fingerprint, carved into dark slate rock,
+  each ridge hundreds of metres high and casting long hard shadows in low
+  raking sunlight. At the centre of the whorl, where the ridges tighten, the
+  rock gives way to an immense structure of glowing amber crystal beams
+  meeting at precise hexagonal angles, a molecular lattice the size of a
+  city, radiating warm light up the surrounding canyon walls. Dramatic low
+  sun, long shadows, atmospheric haze, immense scale, cinematic aerial
+  photography.
+
+  Dramatic cinematic lighting with a clear light direction, strong rim light
+  and deep shadow. High contrast, rich tonal range, volumetric haze. Dynamic
+  asymmetric composition with a raking camera angle and a strong sense of
+  scale. Shallow depth of field. Palette anchored in deep slate blue-grey and
+  teal, with hot amber as the only light source in the frame.
+
+  Keep the frame free of any lettering, labels or watermarks. Avoid flat
+  vector or infographic styling, avoid a symmetrical centred composition, and
+  avoid even lighting.
+
+Iterating inside a chat model is usually faster than re-pasting, since it
+keeps context:
+
+  Same image, but push the amber lattice further into the distance and make
+  the foreground ridges much larger.
+  Keep the composition, drop the haze by half, harden the shadows.
+
+Re-paste from scratch only when a run goes somewhere you do not want -- chat
+models anchor hard on their own previous output.
+
+
+Round 3: the middle register
+----------------------------
+
+Round 1 was boring and round 2 was too cinematic. The target is editorial
+science illustration with real colour and dimension -- a notch above the
+NISPO logo, which is coloured and descriptive but a little dull, and well
+below the drama of round 2. Two concepts survive: the literal fingerprint,
+and a wall of fingerprints breaking apart.
+
+Style suffix for this register:
+
+  Modern editorial science illustration. Limited palette of deep slate
+  blue-grey, teal and warm amber, used with real saturation rather than
+  pastels. Gentle directional light producing soft shadows and quiet tonal
+  shading, enough to give the forms volume but never dramatic. Crisp linework
+  combined with flat and softly graded fills, a matte finish and a fine paper
+  grain. Calm, considered composition with one clear focal point. Richly
+  detailed but legible.
+
+Negative prompt:
+
+  text, letters, words, labels, watermark, signature, cinematic lighting,
+  lens flare, god rays, volumetric light beams, heavy chiaroscuro,
+  photorealism, 3D render, neon, glowing technology, clip art, infographic,
+  chart axes, DNA double helix, person, hands
+
+Note what is not banned: "vector art" and "diagram". A refined vector
+illustration is close to the target. It was "flat", "restrained" and "quiet"
+in the round-1 prompts that caused the problem, not the diagrammatic register
+itself.
+
+
+A1. The whorl resolving into chemistry
+--------------------------------------
+
+  A single large fingerprint seen straight on, filling most of the frame. Its
+  concentric ridges are drawn as clean teal lines of varying weight on a deep
+  slate ground, with soft shading in the valleys between them so the ridges
+  read as gently raised. Towards the centre of the whorl the ridges resolve
+  into chemistry: the curved lines straighten into warm amber bonds meeting
+  at precise angles, forming two or three hexagonal and pentagonal rings with
+  small dots at the vertices. The handover is gradual over several ridges,
+  with some lines half-curve and half-bond. Slight breathing room around the
+  print.
+
+
+A2. The whorl as a contour map
+------------------------------
+
+Same idea, different descriptive register. Topographic maps are inherently
+colourful and detailed without being dramatic, which is the middle exactly.
+
+  A fingerprint rendered as a topographic contour map. Concentric ridge lines
+  become elevation contours in fine teal linework, with soft bands of tonal
+  fill between them shifting from deep slate in the low valleys to pale sand
+  at the ridge crests. At the centre of the whorl the contours give way to a
+  precise amber molecular skeleton, hexagonal rings and straight bonds with
+  small circular nodes, drawn as if surveyed on the same map. Subtle paper
+  grain, quiet cartographic elegance, no lettering.
+
+
+B1. The wall loosening
+----------------------
+
+Tiles each bearing a fingerprint rather than a bit grid -- the better image,
+and it says something truer, because the wall is the corpus.
+
+  A wall of small square tiles in a regular grid, each tile bearing a simple
+  fingerprint pattern in fine teal linework on slate, softly shaded so the
+  tiles read as thin ceramic plates. Towards the right side the grid loosens:
+  gaps open between tiles, several tilt slightly out of alignment, and a
+  handful drift free of the surface, each floating tile at a gentle angle with
+  a soft shadow cast back onto the wall. The lines on the drifting tiles
+  unfold into small warm amber molecular skeletons, hexagonal rings and bonds.
+  A calm, deliberate progression from order to release across the width.
+
+
+B2. The wall as an exploded diagram
+-----------------------------------
+
+Best candidate for a README banner: the exploded-diagram device gives it
+interest and structure without drama, it reads well in a wide crop, and
+"ordered disassembly" is a fair description of what the model does to a
+fingerprint.
+
+  A wall of fingerprint tiles seen at a shallow three-quarter angle, in gentle
+  isometric perspective. Each tile is a thin slate plate carrying a
+  fingerprint in teal linework. In the middle of the wall a section has come
+  apart like an exploded technical diagram: tiles separated along clean axes,
+  suspended in ordered layers at measured intervals, with thin guide lines
+  showing how they move. As the tiles separate their fingerprint lines
+  straighten and reassemble into warm amber molecular structures held in the
+  gaps between layers. Precise, analytical, patiently detailed, soft even
+  shading with a single light source from the upper left.
+
+
+The three dials, turned down
+----------------------------
+
+1. Scale. Drop it entirely. No "hundreds of metres", no "the size of a city".
+   Scale is what made round 2 grandiose; the subject should read as roughly
+   hand-sized or diagrammatic.
+2. Light. "gentle directional", "soft shadows", "single light source from the
+   upper left". Keep a direction so forms have volume; remove raking,
+   backlit, god rays.
+3. Motion. "drift", "tilt", "loosen", "separate along clean axes". Movement
+   observed rather than violent. No tumbling, no mid-shatter, no motion blur.
+
+If these come back flat, the first thing to add is material -- "thin ceramic
+plates", "matte card stock", "brushed slate" -- which buys texture and tonal
+interest without moving toward cinema.
+
+
 Iterating
 ---------
 
