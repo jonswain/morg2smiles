@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Morg2SMILES: bits to a structure, on the diagonal">
+  <style>
+    .s { stroke: #334155 }  .fs { fill: #334155 }
+    .t { stroke: #0d9488 }  .ft { fill: #0d9488 }
+    .a { stroke: #f59e0b }  .fa { fill: #f59e0b }
+    .off { fill: none; stroke: #94a3b8 }
+    @media (prefers-color-scheme: dark) {
+      .s { stroke: #cbd5e1 } .fs { fill: #cbd5e1 }
+      .t { stroke: #2dd4bf } .ft { fill: #2dd4bf }
+      .a { stroke: #fbbf24 } .fa { fill: #fbbf24 }
+      .off { stroke: #475569 }
+    }
+  </style>
+  <!-- Bits, an arrow, a molecule: the same three elements as the
+       left-to-right original, hung on the square's diagonal instead, which
+       is its longest axis. The original wasted the two empty corners and
+       shrank every element to fit the width. -->
+  <g>
+      <rect class="off" x="54" y="54" width="36" height="36" rx="6" stroke-width="3"/>
+      <rect class="ft" x="100" y="54" width="36" height="36" rx="6"/>
+      <rect class="off" x="146" y="54" width="36" height="36" rx="6" stroke-width="3"/>
+      <rect class="off" x="192" y="54" width="36" height="36" rx="6" stroke-width="3"/>
+      <rect class="ft" x="54" y="100" width="36" height="36" rx="6"/>
+      <rect class="off" x="100" y="100" width="36" height="36" rx="6" stroke-width="3"/>
+      <rect class="off" x="146" y="100" width="36" height="36" rx="6" stroke-width="3"/>
+      <rect class="ft" x="192" y="100" width="36" height="36" rx="6"/>
+      <rect class="off" x="54" y="146" width="36" height="36" rx="6" stroke-width="3"/>
+      <rect class="off" x="100" y="146" width="36" height="36" rx="6" stroke-width="3"/>
+      <rect class="ft" x="146" y="146" width="36" height="36" rx="6"/>
+      <rect class="off" x="192" y="146" width="36" height="36" rx="6" stroke-width="3"/>
+      <rect class="off" x="54" y="192" width="36" height="36" rx="6" stroke-width="3"/>
+      <rect class="ft" x="100" y="192" width="36" height="36" rx="6"/>
+      <rect class="off" x="146" y="192" width="36" height="36" rx="6" stroke-width="3"/>
+      <rect class="off" x="192" y="192" width="36" height="36" rx="6" stroke-width="3"/>
+  </g>
+  <g class="s" stroke-width="17" stroke-linecap="round" fill="none">
+    <path d="M248 248 L302 302"/>
+  </g>
+  <path class="fs" d="M334.5 334.5 L284.3 319.7 L319.7 284.3 Z"/>
+  <g fill="none" stroke-width="15" stroke-linejoin="round" stroke-linecap="round">
+    <polygon class="a" points="372.0,288.0 444.7,330.0 444.7,414.0 372.0,456.0 299.3,414.0 299.3,330.0"/>
+    <circle class="a" cx="372" cy="372" r="34" stroke-width="11" opacity="0.5"/>
+  </g>
+</svg>

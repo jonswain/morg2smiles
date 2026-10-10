@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Morg2SMILES: a ring of bits around the structure it encodes">
+  <style>
+    .s { stroke: #334155 }  .fs { fill: #334155 }
+    .t { stroke: #0d9488 }  .ft { fill: #0d9488 }
+    .a { stroke: #f59e0b }  .fa { fill: #f59e0b }
+    .off { fill: none; stroke: #94a3b8 }
+    @media (prefers-color-scheme: dark) {
+      .s { stroke: #cbd5e1 } .fs { fill: #cbd5e1 }
+      .t { stroke: #2dd4bf } .ft { fill: #2dd4bf }
+      .a { stroke: #fbbf24 } .fa { fill: #fbbf24 }
+      .off { stroke: #475569 }
+    }
+  </style>
+  <!-- The same idea with no left and no right: the folded bit vector
+       is the ring, the structure is what sits inside it. Radially symmetric,
+       so nothing is wasted in the corners and the mark reads the same at any
+       size. -->
+  <g>
+      <rect class="ft" x="238.0" y="42.0" width="36" height="36" rx="6" transform="rotate(-45.0 256.0 60.0)"/>
+      <rect class="ft" x="323.0" y="61.4" width="36" height="36" rx="6" transform="rotate(-19.3 341.0 79.4)"/>
+      <rect class="off" x="391.2" y="115.8" width="36" height="36" rx="6" transform="rotate(6.4 409.2 133.8)" stroke-width="4"/>
+      <rect class="off" x="429.1" y="194.4" width="36" height="36" rx="6" transform="rotate(32.1 447.1 212.4)" stroke-width="4"/>
+      <rect class="ft" x="429.1" y="281.6" width="36" height="36" rx="6" transform="rotate(57.9 447.1 299.6)"/>
+      <rect class="off" x="391.2" y="360.2" width="36" height="36" rx="6" transform="rotate(83.6 409.2 378.2)" stroke-width="4"/>
+      <rect class="ft" x="323.0" y="414.6" width="36" height="36" rx="6" transform="rotate(109.3 341.0 432.6)"/>
+      <rect class="off" x="238.0" y="434.0" width="36" height="36" rx="6" transform="rotate(135.0 256.0 452.0)" stroke-width="4"/>
+      <rect class="off" x="153.0" y="414.6" width="36" height="36" rx="6" transform="rotate(160.7 171.0 432.6)" stroke-width="4"/>
+      <rect class="ft" x="84.8" y="360.2" width="36" height="36" rx="6" transform="rotate(186.4 102.8 378.2)"/>
+      <rect class="off" x="46.9" y="281.6" width="36" height="36" rx="6" transform="rotate(212.1 64.9 299.6)" stroke-width="4"/>
+      <rect class="off" x="46.9" y="194.4" width="36" height="36" rx="6" transform="rotate(237.9 64.9 212.4)" stroke-width="4"/>
+      <rect class="ft" x="84.8" y="115.8" width="36" height="36" rx="6" transform="rotate(263.6 102.8 133.8)"/>
+      <rect class="off" x="153.0" y="61.4" width="36" height="36" rx="6" transform="rotate(289.3 171.0 79.4)" stroke-width="4"/>
+  </g>
+  <g fill="none" stroke-width="16" stroke-linejoin="round" stroke-linecap="round">
+    <polygon class="a" points="256.0,152.0 346.1,204.0 346.1,308.0 256.0,360.0 165.9,308.0 165.9,204.0"/>
+    <circle class="a" cx="256" cy="256" r="40" stroke-width="12" opacity="0.5"/>
+  </g>
+</svg>
