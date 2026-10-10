@@ -7,7 +7,7 @@ The night-1 write-up led with this:
 > **`recovery@20` 0.5892 → 0.8927 for 10× the data at the same parameter count.**
 
 The table behind that sentence is correct. The sentence is not. The two runs it
-compares differed in **two** things, not one:
+compares differed in **two** things:
 
 | run | train molecules | optimiser steps |
 |---|---|---|
@@ -15,114 +15,195 @@ compares differed in **two** things, not one:
 | `small_1m` | 909,800 | **21,117** |
 
 Ten times the data *and* two and a half times the compute. Attributing the whole
-30-point gap to data was a claim the experiment could not support, and I made it
-anyway. `configs/small_1m.yaml` had even written down, before the run, that its
-curve should be read at step ~8,500 for exactly this reason; the write-up quoted
-the endpoint instead.
+30-point gap to data was a claim the experiment could not support.
+`configs/small_1m.yaml` had written down, before the run, that its curve should
+be read at step ~8,500 for exactly this reason; the write-up quoted the endpoint
+instead.
 
-So this night ran the control that was missing: **the same 100k shard, the same
-8M-parameter model, the same learning rate and the same cosine horizon, for the
-same 21,117 steps.** `configs/small_100k_long.yaml` committed in advance to how
-the result would be read:
+This night ran the missing control — the same 100k shard, the same 8M-parameter
+model, the same learning rate, the same cosine horizon, for the same 21,117
+steps — plus a full-ChEMBL run at 8,508 steps. `configs/small_100k_long.yaml`
+committed in advance to how the result would be read:
 
 > If it plateaus near 0.60 then data is what makes extra compute pay, and the
 > conclusion survives restatement. If it climbs to 0.80 then compute was the
 > lever and the claim was wrong.
 
-## The answer: compute was the lever
+It climbed to 0.8384.
 
-It climbed to **0.8257**.
+## The runs
 
-| step | 100k (90,682 molecules) | 1M (909,800 molecules) |
+```
+stage 1  build full shard   16:41 -> 16:52   2,091,106 mols, 109,152 excluded
+stage 2  small_100k_long    16:52 -> 01:01   21,117 steps, 30 epochs, completed
+stage 3  small_full         01:01 -> 03:51   8,508 steps, 1st epoch, completed
+stage 4  comparison         03:51 -> 04:46
+stage 5  scaffolds          04:46 -> 05:14
+stage 6  small_1m_matched   SKIPPED -- 209 min left, needed 294
+```
+
+The full ChEMBL shard is 2,200,258 unique standardised molecules minus the
+109,152 held out by `prepare --exclude`, split 1,881,996 / 104,555 / 104,555.
+Every holdout was verified absent from all three splits.
+
+## The headline
+
+One common protocol: 2,000 held-out molecules (1,956 fingerprint-unseen) in
+**no** model's training set, `fp_unseen` computed against the union of all
+1,989,502 training fingerprints, fixed seed, molecule budget, identical k.
+**These are the only numbers here that compare across runs.**
+
+| run | params | steps | data | rec@1 | rec@5 | **rec@20** | struct@20 | validity | uniq/q | tanimoto | hit rank |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| `small_1m` | 7.96M | 21,117 | 909,800 | 0.5302 | 0.7996 | **0.8926** | 0.8834 | 0.903 | 12.6 | 0.974 | 1.72 |
+| `small_100k_long` | 7.95M | 21,117 | 90,682 | 0.4519 | 0.7214 | **0.8384** | 0.8252 | 0.887 | 14.2 | 0.961 | 2.23 |
+| `small_full` | 7.96M | 8,508 | 1,881,996 | 0.3113 | 0.5808 | **0.7347** | 0.7224 | 0.820 | 18.7 | 0.929 | 3.34 |
+| `small_100k` | 7.95M | 8,508 | 90,682 | 0.1800 | 0.4182 | **0.5890** | 0.5787 | 0.794 | 21.3 | 0.884 | 4.69 |
+| `medium_1m` | 15.12M | 2,500 | 909,800 | 0.0527 | 0.1554 | **0.2735** | 0.2669 | 0.520 | 18.7 | 0.722 | 6.75 |
+
+This table contains **two** clean matched-compute data comparisons, because
+`small_100k` and `small_full` both ran exactly 8,508 steps with their cosine
+horizons set to 8,508, and `small_100k_long` and `small_1m` both ran exactly
+21,117 with horizons of 21,117. All four completed their schedules.
+
+### Data is worth ~1.45× error reduction per decade
+
+| at fixed compute | data | rec@20 | absolute | error ratio | per decade |
+|---|---|---|---|---|---|
+| 8,508 steps | 90,682 → 1,881,996 (20.8×) | 0.5890 → 0.7347 | +14.6 pts | 1.549× | **1.39×** |
+| 21,117 steps | 90,682 → 909,800 (10.0×) | 0.8384 → 0.8926 | +5.4 pts | 1.505× | **1.50×** |
+
+Two independent measurements, two different shard pairs, two different compute
+budgets, and they agree to within 0.11× per decade. In *absolute* points they
+look nothing alike — +14.6 against +5.4 — and that difference is an artifact of
+how close 0.84 is to the ceiling, not a change in how much data is worth. Error
+reduction is the right scale for this metric and the absolute-points framing is
+what made night 1's number look so large.
+
+### Compute is worth ~10.6× per decade in this regime
+
+| at fixed data | steps | rec@20 | absolute | error ratio | per decade |
+|---|---|---|---|---|---|
+| 90,682 molecules | 8,508 → 21,117 (2.48×) | 0.5890 → 0.8384 | +24.9 pts | 2.543× | **10.6×** |
+
+An order of magnitude steeper than the data axis. **Of the 30.4-point gap night
+1 attributed to data, 5.4 points are data and 24.9 are compute.**
+
+And the confounded pair reproduces night 1's "scaling law" exactly: 100k@8,508
+against 1M@21,117 is an error ratio of 3.83× across one decade of data, which is
+the 3.81×/decade that document fitted and extrapolated from. That fit was
+compute's contribution wearing data's label. Corrected to 1.45×/decade, the
+extrapolation changes a great deal:
+
+| train molecules | night 1 predicted | corrected |
 |---|---|---|
-| 1,500 | 0.0361 | 0.0325 |
-| 3,000 | 0.2425 | 0.3387 |
-| 4,500 | 0.4489 | 0.4787 |
-| 6,000 | 0.5471 | 0.5700 |
-| 7,500 | 0.6152 | 0.6045 |
-| 9,000 | 0.6713 | 0.7181 |
-| 10,500 | 0.7014 | 0.7606 |
-| 12,000 | 0.7295 | 0.7870 |
-| 13,500 | 0.7475 | 0.8012 |
-| 15,000 | 0.7856 | 0.7667 |
-| 16,500 | 0.8096 | 0.8438 |
-| 18,000 | 0.8096 | 0.8519 |
-| 19,500 | 0.8216 | 0.8661 |
-| 21,000 | 0.8236 | 0.8702 |
-| **21,117** | **0.8257** | **0.8742** |
+| 9.1M | 0.936 | 0.926 |
+| 91M (PubChem scale) | **0.993** | **0.949** |
 
-`rec@20`, `fp_unseen`, each run against its own shard's validation subsample, one
-protocol, 30 epochs against 3. (The 1M column's dip at 15,000 is its
-epoch-3 boundary, visible in night 1's curve too.)
+The PubChem ambition survives but stops being a near-solve. Getting the last few
+points will be a compute and architecture problem, not a corpus problem.
 
-**Ten times the data is worth 4.9 points, not 30.** The 100k shard — 90,682
-molecules, seen thirty times over — gets within five points of a corpus ten
-times its size, given the same number of optimiser steps. Of the ~30-point gap
-reported yesterday, roughly five points are data and the rest was compute.
+### Novel scaffolds: that was compute too
 
-The claim as published was wrong, and wrong in the direction that made the
-result sound more interesting than it is. "More data is the ceiling" is a
-finding; "train it for longer" is not.
+| run | seen rec@20 | novel rec@20 | penalty |
+|---|---|---|---|
+| `small_1m` | 0.9043 | 0.8421 | 6.2 pts |
+| `small_100k_long` | 0.8652 | 0.8236 | **4.2 pts** |
+| `small_full` | 0.7382 | 0.6811 | 5.7 pts |
+| `small_100k` | 0.6740 | 0.5471 | 12.7 pts |
+| `medium_1m` | 0.2912 | 0.2065 | 8.5 pts |
 
-### What this does not say
+Night 1 said:
 
-- **Data still helps, monotonically.** 4.9 points at `rec@20` is not noise, and
-  the 1M run is ahead at every step after 3,000. The ordering was never in
-  question; only the size of the effect.
-- **It does not say data is irrelevant at scale.** Both runs are nowhere near
-  convergence and the 100k curve is still rising at step 21,117 (0.8236 →
-  0.8257 over its last 117 steps, having gained 4 points over the last 6,000).
-  Thirty epochs of 90k molecules has not yet started to overfit, which is
-  itself surprising and is probably the SMILES randomisation doing its job: the
-  model sees a different string for the same molecule every epoch, so "thirty
-  epochs" is thirty *distinct* targets per molecule, not thirty repeats.
-- **It is not a statement about the test set.** Everything above is validation.
+> The novel-scaffold penalty **halves** with 10× data, 12.7 points to 6.2 […]
+> More data did not merely let the model interpolate better.
 
-## A measurement bug found on the way
+Also wrong, and this one is worse, because the correction inverts the ranking:
+the **lowest** penalty of any run belongs to `small_100k_long`, which has the
+*least* data of the three strong runs. On an identical 90,682 molecules the
+penalty fell 12.7 → 4.2 points with nothing changed but training length. Novel
+chemotypes are not a data-coverage problem in this range; they get better as the
+model gets better, by whatever means.
 
-Checking whether `configs/small.yaml`'s 100k run was a clean first point for a
-fixed-compute curve turned up something worse than a confound. That run scored
-**0.5752** at 8,508 steps. The new long 100k run scores **0.6713** at step
-9,000 — same shard, identical model config, and *mid*-schedule where the old run
-had finished its cosine decay. A mid-schedule run beating a completed one is
-backwards.
+The conclusion night 1 drew from this — that the model is not merely memorising
+— still stands, and is in fact strengthened: a model that has seen 90,682
+molecules thirty times over recovers 82% of fingerprints whose Bemis–Murcko
+scaffold it has never encountered.
 
-The cause is not compute. The old run predates the molecule budget: it drew 20
-**strings** per query, where every run since draws until it has 20 distinct
-**molecules** (40 samples). Same weights, larger budget, several points apart.
+### Diversity tracks skill, monotonically
 
-That number, `0.575`, is quoted in `configs/small_100k_long.yaml`'s own header as
-the thing to beat, and in my earlier estimate that "data is worth about a third"
-of the gap. Both were comparing across evaluation protocols without knowing it.
-The estimate above (4.9 points) does not use it: it compares two runs that were
-scored identically.
+Across all five runs, distinct valid molecules per query falls as recovery
+rises: 21.3 → 18.7 → 14.2 → 12.6 for 0.589 → 0.735 → 0.838 → 0.893. Night 1 saw
+this as two points and read it as "extra data bought confidence, not diversity".
+With five points it is clearly a property of model quality, not of data. Better
+models spend less of the budget on respellings of a wrong answer.
 
-`scripts/matched_steps.py` now refuses to put two runs in adjacent columns
-unless their evaluation protocol signature matches, and refuses runs whose
-history has no step field at all. The project already hashes `FPConfig` into
-every artefact for precisely this reason; the evaluation protocol deserved the
-same treatment and did not have it.
+## What this night does not answer
+
+- **Full ChEMBL at 21,117 steps.** The data axis has two points at 8,508 steps
+  and two at 21,117, but no run combines the largest corpus with the longest
+  schedule. That run is ~8.3 h and did not fit tonight.
+- **`small_1m` at 8,508 steps with a matched horizon.** Stage 6 was correctly
+  skipped: 209 minutes left against a measured 294-minute need. Its purpose was
+  to de-confound the middle of the 8,508-step curve, which `small_full` now
+  partly covers.
+- **Where the step axis saturates.** 10.6×/decade cannot continue; every run
+  that finished its schedule was still improving, and 30 epochs of 90k molecules
+  showed no overfitting at all. That is probably SMILES randomisation doing its
+  job — every epoch is a fresh target string — and it means the cheapest
+  untested lever is simply a longer run.
+- **Capacity.** Still unanswered; `medium_1m` has never run to completion.
+- **Anything about the test split.** All validation.
+
+## Two measurement bugs found on the way
+
+**The molecule budget moved and the old number did not.** Checking whether
+`configs/small.yaml`'s run was a clean curve point turned up that it scored
+0.5752 at 8,508 steps where the new long run scores 0.6713 at step 9,000 —
+same shard, identical model, and *mid*-schedule where the old run had finished
+decaying. A mid-schedule run beating a completed one is backwards. The cause is
+not compute: that run predates the molecule budget, drawing 20 **strings** per
+query where every run since draws until it has 20 distinct **molecules**. Same
+weights, larger budget, several points apart. `0.575` is quoted as the thing to
+beat in `configs/small_100k_long.yaml`'s own header and in my earlier estimate
+that data was "worth about a third" of the gap; both were comparing across
+protocols without knowing it. None of the numbers above use it — the common
+protocol re-scores every checkpoint itself, which is exactly why it exists.
+
+**Matched steps are not matched learning rates.** `scripts/matched_steps.py`
+initially printed `small_full` in a column beside the other two. Its horizon is
+8,508 and theirs is 21,117, so at step 7,500 it has finished decaying and they
+are mid-decay: it led at every shared step, by an amount that was pure schedule.
+The script now derives each run's horizon from its record and suppresses the
+per-step table entirely when they differ, printing only the endpoints, which
+remain comparable for runs that completed their schedules.
+
+Both guards are the same shape as the `FPConfig` hash the project has had since
+day one: refuse to put two numbers side by side until something has checked they
+mean the same thing. The fingerprint had that guard. The evaluation protocol and
+the learning-rate schedule did not.
 
 ## Operational
 
 Three faults in the follow-on driver, all caught before they cost a stage:
 
 1. **`pgrep -f "overnight2.sh"` matched my own watcher shells**, whose command
-   lines contain that string. The driver would have waited on a watcher instead
-   of on the driver, and stage 6 would never have started. Verified live:
-   `pgrep` returned two pids, one of them a watcher. Now waits on a pid with
-   `kill -0`. This is the third time this pattern has cost something here, so it
-   is gone rather than re-checked.
+   lines contain that string. The driver would have waited on a watcher rather
+   than on the driver, and stage 6 would never have started. Verified live:
+   `pgrep` returned two pids, one a watcher. Now waits on a pid with `kill -0`.
+   Third time this pattern has cost something here, so it is gone rather than
+   re-checked.
 2. **The time guard assumed 4 hours** for a stage that paces at ~2.4, and would
    have skipped a run that fitted. It now reads the preceding stage's recorded
-   wall time — same model, same step count, so a direct measurement — with 20%
-   headroom and the old pessimistic figure as fallback.
+   wall time — same model, same step count, a direct measurement — with 20%
+   headroom. In the event it skipped stage 6 anyway, on a measured budget, which
+   is the guard working rather than guessing.
 3. **No `caffeinate` of its own.** `overnight2.sh`'s is bound to its own pid and
    dies exactly when the follow-on starts working, so stage 6 would have been
-   the first run of the night free to be suspended mid-flight — the failure that
-   cost night 1 its analysis slot.
+   the first run of the night free to be suspended — the failure that cost night
+   1 its analysis slot.
 
 Vocabulary size differs by shard (73 tokens for 100k, 119 for the full corpus),
 so parameter counts differ by 0.15% between otherwise identical configs
-(7,951,945 against 7,963,767). Noted rather than corrected; it is three orders of
-magnitude smaller than the effects being measured.
+(7,951,945 against 7,963,767). Three orders of magnitude smaller than the effects
+measured; noted rather than corrected.

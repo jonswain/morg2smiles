@@ -32,6 +32,7 @@ Usage::
 from __future__ import annotations
 
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -84,6 +85,32 @@ def load(name: str) -> dict[int, dict]:
     return {rec["step"]: rec for rec in records}
 
 
+def lr_horizon(name: str) -> int | None:
+    """The step the cosine schedule was set to decay to, or None if unknown.
+
+    Matching the step is not the same as matching the learning rate. A run with
+    an 8,508-step horizon has finished decaying by step 7,500; a run with a
+    21,117-step horizon is still near its peak there. Line those two up by step
+    and the shorter-horizon run looks better in the middle of the table for a
+    reason that has nothing to do with its data or its compute -- which is how
+    this script first printed the full-shard run alongside the other two.
+
+    Endpoints of runs that each completed their own schedule stay comparable;
+    it is only the intermediate rows that this invalidates.
+    """
+    path = Path("checkpoints") / name / "record.json"
+    if not path.exists():
+        return None
+    rec = json.loads(path.read_text())
+    cfg = rec.get("train_config", {})
+    n_train, batch = rec.get("n_train"), cfg.get("batch_size")
+    epochs, max_steps = cfg.get("epochs"), cfg.get("max_steps")
+    if not (n_train and batch and epochs):
+        return None
+    horizon = epochs * math.ceil(n_train / batch)
+    return min(horizon, max_steps) if max_steps else horizon
+
+
 def metric(rec: dict) -> float | None:
     slice_, family, k = METRIC
     try:
@@ -113,6 +140,9 @@ def main(names: list[str]) -> None:
             "checkpoint under one protocol."
         )
 
+    horizons = {name: lr_horizon(name) for name in names}
+    same_schedule = len({h for h in horizons.values() if h}) <= 1
+
     shared = set.intersection(*(set(r) for r in runs.values()))
     if not shared:
         cadences = {n: sorted(r)[:4] for n, r in runs.items()}
@@ -121,15 +151,26 @@ def main(names: list[str]) -> None:
             + "\n".join(f"  {n}: {steps}..." for n, steps in cadences.items())
         )
 
-    print("### rec@20 fp_unseen at matched steps\n")
-    print("| step | " + " | ".join(names) + " |")
-    print("|---" * (len(names) + 1) + "|")
-    for step in sorted(shared):
-        cells = []
+    if same_schedule:
+        print("### rec@20 fp_unseen at matched steps\n")
+        print("| step | " + " | ".join(names) + " |")
+        print("|---" * (len(names) + 1) + "|")
+        for step in sorted(shared):
+            cells = []
+            for name in names:
+                value = metric(runs[name][step])
+                cells.append("--" if value is None else f"{value:.4f}")
+            print(f"| {step} | " + " | ".join(cells) + " |")
+    else:
+        print("### per-step rows suppressed: cosine horizons differ\n")
         for name in names:
-            value = metric(runs[name][step])
-            cells.append("--" if value is None else f"{value:.4f}")
-        print(f"| {step} | " + " | ".join(cells) + " |")
+            print(f"- `{name}`: horizon {horizons[name]}")
+        print(
+            "\nAt a given step these runs are at different points of their own\n"
+            "learning-rate schedules, so a row would compare decayed weights\n"
+            "against mid-decay ones and read it as data or compute. Endpoints\n"
+            "below are still comparable where each run finished its schedule."
+        )
 
     # Each run's own endpoint, which is what a leaderboard reports and what the
     # matched rows above exist to qualify.

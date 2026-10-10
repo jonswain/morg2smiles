@@ -233,31 +233,42 @@ target.
 
 ## Results
 
-One common protocol: 2,000 held-out molecules (1,967 fingerprint-unseen) in
-neither model's training set, `fp_unseen` computed against the union of all
-909,800 training fingerprints, fixed seed, molecule budget.
+One common protocol: 2,000 held-out molecules (1,956 fingerprint-unseen) in
+**no** model's training set, `fp_unseen` computed against the union of all
+1,989,502 training fingerprints, fixed seed, molecule budget.
 
-| | rec@1 | rec@5 | **rec@20** | struct@20 | validity |
-|---|---|---|---|---|---|
-| **8M, ChEMBL 1M**, 3 epochs | 0.5308 | 0.7997 | **0.8927** | 0.8760 | 0.903 |
-| 8M, ChEMBL 100k, 12 epochs | 0.1805 | 0.4179 | 0.5892 | 0.5705 | 0.794 |
-| retrieval baseline | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 1.000 |
+| | data | steps | rec@1 | rec@5 | **rec@20** | struct@20 | validity |
+|---|---|---|---|---|---|---|---|
+| **8M, ChEMBL 1M** | 909,800 | 21,117 | 0.5302 | 0.7996 | **0.8926** | 0.8834 | 0.903 |
+| 8M, ChEMBL 100k, long | 90,682 | 21,117 | 0.4519 | 0.7214 | 0.8384 | 0.8252 | 0.887 |
+| 8M, ChEMBL full | 1,881,996 | 8,508 | 0.3113 | 0.5808 | 0.7347 | 0.7224 | 0.820 |
+| 8M, ChEMBL 100k | 90,682 | 8,508 | 0.1800 | 0.4182 | 0.5890 | 0.5787 | 0.794 |
+| retrieval baseline | — | — | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 1.000 |
 
 **Nearly nine in ten held-out Morgan fingerprints can be inverted exactly
 within 20 guesses, and more than half on the first guess.** Mean best Tanimoto
 is 0.974, so even the failures are near misses.
 
-The two rows above differ in **compute as well as data** — 8,508 optimiser steps
-against 21,117 — so the gap between them is not a data-scaling result. Training
-the 100k shard for the same 21,117 steps closes most of it: `rec@20` 0.8257
-against the 1M run's 0.8742 on matched compute. **10× the data is worth about 5
-points here, and the rest of the 30 was training longer.** The novel-scaffold
-penalty halving (12.7 → 6.2 points) is likewise a property of the better model,
-not demonstrably of its data.
+Because two pairs of rows are matched on compute — 100k against full at 8,508
+steps, 100k-long against 1M at 21,117, all four with completed cosine schedules
+— the two axes separate cleanly:
 
-An earlier version of this section attributed the whole 30-point gap to data.
-That was wrong; the correction and the control run are in
-[`docs/overnight-2026-10-10.md`](docs/overnight-2026-10-10.md).
+| axis | change | error reduction | per decade |
+|---|---|---|---|
+| **data**, at 8,508 steps | 90,682 → 1,881,996 | 1.549× | 1.39× |
+| **data**, at 21,117 steps | 90,682 → 909,800 | 1.505× | 1.50× |
+| **compute**, at 90,682 molecules | 8,508 → 21,117 steps | 2.543× | **10.6×** |
+
+Data is worth a consistent ~1.45× error reduction per decade; compute, in this
+regime, is worth an order of magnitude more. Of the 30.4-point gap between the
+best and worst rows, **5.4 points are data and 24.9 are compute.**
+
+An earlier version of this section attributed all 30 of them to data, from two
+runs that differed in both. That was wrong; the correction and the control runs
+are in [`docs/overnight-2026-10-10.md`](docs/overnight-2026-10-10.md). The same
+correction applies to the novel-scaffold penalty: it falls 12.7 → 4.2 points on
+*identical* data trained longer, which is a lower penalty than the 1M model's
+6.2, so that was compute as well.
 
 Full numbers, curves and caveats: [`docs/phase1-results.md`](docs/phase1-results.md)
 for the first 100k run, [`docs/overnight-2026-10-09.md`](docs/overnight-2026-10-09.md)
@@ -332,38 +343,41 @@ heading "two guards that did not hold".
 
 Worse, the morning after: the headline of that write-up — "10× the data moved
 recovery 0.5892 → 0.8927" — came from two runs that differed in compute as well
-as data, and the control run the next night cut data's share of it from 30
-points to 5. The criticism above is that the human reported a number that could
-not support his conclusion. The assistant then did the same thing, in bold, on
-the front page, having been handed a config file that said in advance how to
-avoid it. That correction is
+as data, and the controls the next night cut data's share of it from 30.4 points
+to 5.4. Two further claims in that document went the same way, including one
+whose ranking inverted. The criticism above is that the human reported a number
+that could not support his conclusion. The assistant then did the same thing, in
+bold, on the front page, having been handed a config file that said in advance
+how to avoid it. That correction is
 [`docs/overnight-2026-10-10.md`](docs/overnight-2026-10-10.md).
 
 ## Status
 
 Phase 1 complete: harness, oracle, metrics, baseline, recoverability analysis
 and a trained decoder that clears the go/no-go gate (`recovery@20` on
-`fp_unseen` must beat retrieval — 0.8927 vs 0.0000).
+`fp_unseen` must beat retrieval — 0.8926 vs 0.0000).
 
 The 2026-10-09 scaling runs looked like they had answered the "what was the
 ceiling?" question — **data** — but they had varied data and compute together.
-The 2026-10-10 control run separated them: at matched compute, 10× the molecules
-is worth ~5 points of `recovery@20`, and **optimiser steps were the dominant
-lever**. Parameters remain the wrong lever on this hardware: scaling is linear in
-wall clock to 15M params and superlinear beyond.
+The 2026-10-10 controls separated the two axes: data is worth ~1.45× error
+reduction per decade, **compute ~10.6×**. Parameters remain the wrong lever on
+this hardware: scaling is linear in wall clock to 15M params and superlinear
+beyond.
 
 Open questions, in rough order of expected value:
 
-1. **How far do steps go?** Both 21,117-step runs were still improving when
-   they stopped, and 30 epochs of 90k molecules showed no overfitting at all —
-   probably because SMILES randomisation makes every epoch a fresh target. The
-   cheapest untested lever is simply a longer run.
-2. **1M → 10M molecules.** Worth ~5 points per decade at matched compute, not
-   30, which makes the full-corpus and PubChem ambitions much less attractive
-   than they looked yesterday.
+1. **How far do steps go?** Every run that completed its schedule was still
+   improving, and 30 epochs of 90k molecules showed no overfitting at all —
+   probably because SMILES randomisation makes every epoch a fresh target
+   string. 10.6×/decade cannot continue, but nothing here has found where it
+   stops, and it is the cheapest untested lever.
+2. **1M → 10M molecules.** At 1.45×/decade this extrapolates to `rec@20` ~0.93
+   at 9M and ~0.95 at PubChem scale — worth having, but not the near-solve a
+   confounded fit suggested yesterday (0.993). The last few points look like a
+   compute and architecture problem, not a corpus problem.
 3. **A full-length 15M run.** The capacity arm was cut to 1.75 h by the deadline
    and is unanswered. Now known to be affordable at ~5.2 h per epoch.
-4. **The remaining 10%.** Validity is 0.903 and `recovery@20` is 0.8927, so
+4. **The remaining 10%.** Validity is 0.903 and `recovery@20` is 0.8926, so
    almost every valid candidate is now a correct one. The failures are no longer
    syntax errors, which moves the bottleneck from decoding to fingerprint
    reasoning and makes them worth inspecting directly.

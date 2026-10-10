@@ -215,7 +215,7 @@ stage 4  scaffolds   08:56 -> 09:10
 > The table is right, but the two runs it compares differ in compute as well as
 > data — 8,508 optimiser steps against 21,117 — so the 30-point gap cannot be
 > attributed to data. Running the missing control (the same 100k shard for the
-> same 21,117 steps) puts **10× data at 4.9 points, not 30**; the rest was
+> same 21,117 steps) puts **10× data at 5.4 points, not 30**; the rest was
 > compute. See [night 2](overnight-2026-10-10.md). The paragraph beginning "I had
 > predicted the gap would narrow" is also comparing across two different
 > evaluation protocols without knowing it, and is corrected there.
@@ -232,7 +232,7 @@ numbers in this document that compare across runs.**
 | `medium_1m` | 15.1M | 2,500 steps | 0.0524 | 0.1551 | 0.2745 | 0.2645 | 0.522 | 6.72 |
 
 **`recovery@20` 0.5892 → 0.8927 for 10× the data at the same parameter count.**
-<sup>Wrong — the second run also had 2.5× the compute. ~4.9 of those 30 points
+<sup>Wrong — the second run also had 2.5× the compute. 5.4 of those 30.4 points
 are data. See [night 2](overnight-2026-10-10.md).</sup>
 `recovery@1` nearly tripled, 0.18 → 0.53: the 1M model usually gets it right on
 the *first* sample, and its mean hit rank of 1.73 says that when it succeeds it
@@ -279,6 +279,14 @@ data than on parameters.
 
 ### Novel chemotypes: more data generalises, it does not just memorise
 
+> **Correction, 2026-10-11.** The attribution to data is wrong and the ranking
+> inverts once the control exists. `small_100k_long` — the *same* 90,682
+> molecules trained for 21,117 steps — has the lowest penalty of any run at
+> **4.2 points**, below `small_1m`'s 6.2. On identical data the penalty fell
+> 12.7 → 4.2 with nothing changed but training length. The anti-memorisation
+> conclusion below survives and is strengthened; the claim that *data* caused it
+> does not. See [night 2](overnight-2026-10-10.md).
+
 Validation molecules sliced by whether their Bemis–Murcko scaffold appears
 anywhere in training, reported over fingerprint-unseen queries only, so the two
 slices differ in scaffold novelty and nothing else.
@@ -309,6 +317,6 @@ chemistry a user actually brings.
   practical purposes, but the asymptote was not reached.
 - **The 10M-molecule question.** 100k → 1M bought 30 points. Nothing here says
   whether 1M → 10M buys another 10 or another 1.
-  <sup>Corrected: it bought ~4.9 points at matched compute, which makes
+  <sup>Corrected: it bought 5.4 points at matched compute, which makes
   1M → 10M a much smaller prize than this bullet assumed. See
   [night 2](overnight-2026-10-10.md).</sup>
