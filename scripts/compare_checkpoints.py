@@ -60,6 +60,15 @@ def present_runs() -> list[tuple[str, str, str]]:
 @click.option("--baseline/--no-baseline", default=True, show_default=True)
 @click.option("--pool-shard", default="data/shards/1m", show_default=True)
 @click.option("--out", type=click.Path(path_type=Path), default=Path("results/comparison.json"))
+@click.option(
+    "--only",
+    multiple=True,
+    help=(
+        "Score just these runs. The protocol is still built from every present "
+        "checkpoint, so the numbers stay comparable with a full run and can be "
+        "spliced into its table."
+    ),
+)
 def main(
     eval_n: int,
     seed: int,
@@ -68,14 +77,30 @@ def main(
     baseline: bool,
     pool_shard: str,
     out: Path,
+    only: tuple[str, ...],
 ) -> None:
     runs = present_runs()
     if not runs:
         raise click.ClickException("no checkpoints found; nothing to compare")
-    click.echo(f"comparing {len(runs)} checkpoint(s): {', '.join(n for n, _, _ in runs)}")
 
-    # Every training set in play, by molecule and by fingerprint.
+    # The protocol -- which molecules are held out, and which of them count as
+    # fingerprint-unseen -- is derived from the union of *every* present run's
+    # training shard, deliberately before --only narrows anything. Filtering
+    # first would shrink that union, move the fp_unseen flags, and produce a
+    # number that could not be compared with the full table it is meant to join.
+    # So --only chooses what to score, never what the protocol is.
     shards = sorted({shard for _, _, shard in runs})
+
+    if only:
+        known = {n for n, _, _ in runs}
+        unknown = set(only) - known
+        if unknown:
+            raise click.ClickException(
+                f"unknown or absent run(s): {sorted(unknown)}; present: {sorted(known)}"
+            )
+        runs = [r for r in runs if r[0] in only]
+
+    click.echo(f"comparing {len(runs)} checkpoint(s): {', '.join(n for n, _, _ in runs)}")
     train_molecules: set[str] = set()
     for shard in shards:
         train_molecules |= set(load_split(shard, "train"))

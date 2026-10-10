@@ -39,7 +39,7 @@ stage 2  small_100k_long    16:52 -> 01:01   21,117 steps, 30 epochs, completed
 stage 3  small_full         01:01 -> 03:51   8,508 steps, 1st epoch, completed
 stage 4  comparison         03:51 -> 04:46
 stage 5  scaffolds          04:46 -> 05:14
-stage 6  small_1m_matched   SKIPPED -- 209 min left, needed 294
+stage 6  small_1m_matched   SKIPPED -- 209 min left, needed 294 (rerun 05:23, below)
 ```
 
 The full ChEMBL shard is 2,200,258 unique standardised molecules minus the
@@ -138,15 +138,30 @@ this as two points and read it as "extra data bought confidence, not diversity".
 With five points it is clearly a property of model quality, not of data. Better
 models spend less of the budget on respellings of a wrong answer.
 
+### A prediction, recorded before the measurement
+
+The 8,508-step data axis rests on two points, so "1.39× per decade" is a slope
+through two measurements rather than a fit. A third point at 909,800 molecules —
+the same 8,508 steps, horizon 8,508 — tests it, and is running as this is
+written (`configs/small_1m_matched.yaml`, launched 05:23).
+
+The two-point fit predicts **`rec@20` = 0.705** for that run, under the same
+common protocol. Writing it down first, because quoting an endpoint after seeing
+it is precisely how the night-1 claim went wrong:
+
+| outcome | reading |
+|---|---|
+| 0.695–0.715 | log-linear holds; 1.39×/decade is a fit, not a coincidence |
+| above ~0.725 | data's return is not log-linear; the 100k point is anomalously low and the full-shard comparison understated data |
+| below ~0.685 | returns to data diminish faster than log-linear, and the PubChem extrapolation above is optimistic |
+
+Any of the three is informative. The result is in the final section.
+
 ## What this night does not answer
 
 - **Full ChEMBL at 21,117 steps.** The data axis has two points at 8,508 steps
   and two at 21,117, but no run combines the largest corpus with the longest
   schedule. That run is ~8.3 h and did not fit tonight.
-- **`small_1m` at 8,508 steps with a matched horizon.** Stage 6 was correctly
-  skipped: 209 minutes left against a measured 294-minute need. Its purpose was
-  to de-confound the middle of the 8,508-step curve, which `small_full` now
-  partly covers.
 - **Where the step axis saturates.** 10.6×/decade cannot continue; every run
   that finished its schedule was still improving, and 30 epochs of 90k molecules
   showed no overfitting at all. That is probably SMILES randomisation doing its

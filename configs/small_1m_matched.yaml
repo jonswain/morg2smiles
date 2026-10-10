@@ -32,11 +32,11 @@ train:
   lr: 0.0005
   warmup_steps: 300
   randomize_smiles: true
-  eval_every_steps: 1500
+  eval_every_steps: 4254
   eval_n: 500
   eval_k: 20
   valid_loss_n: 2000
   patience: 0
   # Matched to configs/small.yaml's 12 epochs x 709 steps.
   max_steps: 8508
-  max_hours: 4.5
+  max_hours: 2.7
