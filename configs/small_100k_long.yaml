@@ -1,0 +1,49 @@
+# The matched-compute control.
+#
+# The 100k -> 1M comparison reported on 2026-10-09 varied *two* things at once:
+# ten times the data and two and a half times the optimiser steps (8,508 against
+# 21,117). The write-up attributed the whole 30-point gain to data. Reading the
+# 1M run's own curve at step 8,508 gives ~0.68 against the 100k run's 0.575, so
+# at matched compute data is worth about a third of what was claimed and the
+# rest came from training longer.
+#
+# That leaves the real question unanswered: could the 100k shard have reached
+# the same place given the same 21,117 steps? If it plateaus near 0.60 then data
+# is what makes extra compute pay, and the conclusion survives restatement. If
+# it climbs to 0.80 then compute was the lever and the claim was wrong.
+#
+# Identical to configs/small_1m.yaml in every respect except the shard and the
+# epoch count needed to reach the same step budget: 90,682 / 128 = 709 steps per
+# epoch, so 30 epochs is 21,270 steps and max_steps stops it on 21,117 exactly.
+shard_dir: data/shards/100k
+out_dir: checkpoints/small_100k_long
+
+fingerprint:
+  radius: 2
+  n_bits: 2048
+  counts: false
+  folded: true
+
+model:
+  d_model: 256
+  n_heads: 8
+  d_ff: 1024
+  n_encoder_layers: 4
+  n_decoder_layers: 4
+  dropout: 0.1
+  max_tokens: 128
+
+train:
+  epochs: 30
+  batch_size: 128
+  lr: 0.0005
+  warmup_steps: 300
+  randomize_smiles: true
+  eval_every_steps: 1500
+  eval_n: 500
+  eval_k: 20
+  valid_loss_n: 2000
+  patience: 0
+  # Matched to configs/small_1m.yaml. This is the whole point of the run.
+  max_steps: 21117
+  max_hours: 9.0

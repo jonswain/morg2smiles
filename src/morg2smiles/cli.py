@@ -27,11 +27,29 @@ def main() -> None:
 @click.option("--data-dir", default="data", type=click.Path(path_type=Path), show_default=True)
 @click.option("--source", type=click.Path(exists=True, path_type=Path), help="Local chemreps file.")
 @click.option("--overwrite", is_flag=True)
-def prepare(subset: str, data_dir: Path, source: Path | None, overwrite: bool) -> None:
+@click.option(
+    "--exclude",
+    multiple=True,
+    type=click.Path(exists=True, path_type=Path),
+    help="SMILES file whose molecules must not enter this shard. Repeatable.",
+)
+def prepare(
+    subset: str,
+    data_dir: Path,
+    source: Path | None,
+    overwrite: bool,
+    exclude: tuple[Path, ...],
+) -> None:
     """Download and standardise a ChEMBL subset into train/valid/test shards."""
     from .data.prepare import prepare as _prepare
 
-    _prepare(subset=subset, data_dir=data_dir, source=source, overwrite=overwrite)
+    _prepare(
+        subset=subset,
+        data_dir=data_dir,
+        source=source,
+        overwrite=overwrite,
+        exclude=exclude,
+    )
 
 
 @main.command()

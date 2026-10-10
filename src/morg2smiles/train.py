@@ -86,6 +86,12 @@ class TrainConfig:
     #: eats the analysis that was supposed to follow it. Stopping at a budget
     #: costs the tail of one curve; overrunning costs the whole night.
     max_hours: float | None = None
+    #: Stop after this many optimiser steps, whatever the epoch schedule says.
+    #: Data-scaling comparisons need runs matched on *compute*, not on epochs:
+    #: one epoch of the 1M shard is 11 epochs of the 100k shard, so comparing
+    #: "3 epochs" against "12 epochs" varies data and compute together and
+    #: cannot say which one moved the result.
+    max_steps: int | None = None
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -235,6 +241,13 @@ def train(
     )
 
     total_steps = max(train_cfg.epochs * len(loader), 1)
+    if train_cfg.max_steps:
+        # The cosine schedule must finish decaying by the step the run actually
+        # stops on, or a step-capped run ends with its learning rate still high
+        # and is penalised for a reason unrelated to what it is testing. This
+        # matters for matched-compute comparisons, where the same step budget
+        # is a different number of epochs on each shard.
+        total_steps = min(total_steps, train_cfg.max_steps)
     autocast_dtype = torch.bfloat16 if train_cfg.precision == "bf16" else None
 
     def forward_loss(batch: dict) -> torch.Tensor:
@@ -340,6 +353,8 @@ def train(
     def _should_stop() -> bool:
         if train_cfg.patience and since_improved >= train_cfg.patience:
             return True
+        if train_cfg.max_steps and step >= train_cfg.max_steps:
+            return True
         if train_cfg.max_hours and (time.time() - started) / 3600 >= train_cfg.max_hours:
             return True
         return False
@@ -347,6 +362,8 @@ def train(
     def _stop_reason() -> str:
         if train_cfg.patience and since_improved >= train_cfg.patience:
             return f"no improvement for {since_improved} evaluations"
+        if train_cfg.max_steps and step >= train_cfg.max_steps:
+            return f"step budget of {train_cfg.max_steps} reached"
         return f"wall-clock budget of {train_cfg.max_hours} h reached"
 
     for epoch in range(train_cfg.epochs):
@@ -381,6 +398,12 @@ def train(
                 evaluate_now(epoch, running / n_batches, reason="step")
                 if _should_stop():
                     break
+            elif train_cfg.max_steps and step >= train_cfg.max_steps:
+                # A matched-compute run must stop on the exact step, so this
+                # one condition is checked every step rather than only at an
+                # evaluation. The final measurement is taken below.
+                evaluate_now(epoch, running / n_batches, reason="step-budget")
+                break
 
         stop_early = _should_stop()
 

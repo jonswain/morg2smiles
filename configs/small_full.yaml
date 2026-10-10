@@ -1,0 +1,53 @@
+# The third point on a data-scaling curve measured at *fixed* compute.
+#
+# All of standardised ChEMBL 35 (~2.1M training molecules after the smaller
+# shards' held-out molecules are excluded), same 8M architecture, and the same
+# 8,508 step budget the original configs/small.yaml run happened to use
+# (12 epochs x 709 steps). That makes this directly comparable to a run already
+# on disk, with both cosine schedules completing over the same horizon -- so the
+# 100k-vs-full contrast at fixed compute costs one run instead of two.
+#
+# ChEMBL is nearly exhausted at this size -- 2,474,590 raw records, so this is
+# only ~0.34 decades beyond the 1M shard rather than another full decade. The
+# confounded two-point fit predicted recovery@20 0.936 at this size; the
+# matched-compute picture predicts far less. Which is closer is the most
+# informative thing this run can report.
+#
+# The shard is built with --exclude so that the 1M and 100k shards' valid and
+# test molecules stay out of its training set. Without that, shards are nested
+# and the larger one swallows the smaller one's holdouts, leaving no evaluation
+# set that is clean for every model.
+shard_dir: data/shards/full
+out_dir: checkpoints/small_full
+
+fingerprint:
+  radius: 2
+  n_bits: 2048
+  counts: false
+  folded: true
+
+model:
+  d_model: 256
+  n_heads: 8
+  d_ff: 1024
+  n_encoder_layers: 4
+  n_decoder_layers: 4
+  dropout: 0.1
+  max_tokens: 128
+
+train:
+  # ~16,400 steps per epoch, so 8,508 steps is just over half of one epoch:
+  # most of ChEMBL is seen exactly once and the rest not at all. The cosine
+  # horizon follows max_steps, not this number.
+  epochs: 1
+  batch_size: 128
+  lr: 0.0005
+  warmup_steps: 300
+  randomize_smiles: true
+  eval_every_steps: 1500
+  eval_n: 500
+  eval_k: 20
+  valid_loss_n: 2000
+  patience: 0
+  max_steps: 8508
+  max_hours: 4.5

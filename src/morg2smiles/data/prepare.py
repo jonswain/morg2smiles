@@ -258,6 +258,7 @@ def prepare(
     test_frac: float = 0.05,
     processes: int | None = None,
     overwrite: bool = False,
+    exclude: tuple[Path, ...] = (),
 ) -> Path:
     """Download, standardise, deduplicate and split ChEMBL into a shard set.
 
@@ -275,6 +276,15 @@ def prepare(
         test_frac: Test fraction, for occasional, deliberate measurement.
         processes: Worker processes for standardisation. Defaults to all cores.
         overwrite: Rebuild shards that already exist.
+        exclude: SMILES files whose molecules must not enter *any* split of
+            this shard. Shards are nested by construction, so a larger shard
+            normally swallows a smaller one's held-out molecules -- 90% of the
+            100k shard's validation split sits inside the 1M shard's training
+            set. That makes two models trained on different shards impossible
+            to compare honestly on either one's own split. Passing the smaller
+            shards' valid and test files here keeps one evaluation set clean
+            across every model. The removed molecules are written to
+            ``excluded.smi`` for the record.
 
     Returns:
         The shard directory.
@@ -328,6 +338,18 @@ def prepare(
         click.echo(f"warning: only {len(molecules):,} molecules available, wanted {target:,}")
     click.echo(f"{len(molecules):,} unique standardised molecules")
 
+    excluded: list[str] = []
+    if exclude:
+        blocked: set[str] = set()
+        for path in exclude:
+            text = Path(path).read_text().split("\n")
+            blocked.update(line.strip() for line in text if line.strip())
+        click.echo(f"excluding {len(blocked):,} molecules named by --exclude")
+        kept = [m for m in molecules if m not in blocked]
+        excluded = [m for m in molecules if m in blocked]
+        click.echo(f"{len(excluded):,} of them were present; {len(kept):,} molecules remain")
+        molecules = kept
+
     # Random split. Deduplication happened above, so no canonical SMILES can
     # appear in two splits.
     rng = random.Random(seed + 1)
@@ -345,6 +367,9 @@ def prepare(
     for name, members in splits.items():
         (out_dir / f"{name}.smi").write_text("\n".join(members) + "\n")
 
+    if excluded:
+        (out_dir / "excluded.smi").write_text("\n".join(excluded) + "\n")
+
     scaffold_splits = _scaffold_split(molecules, valid_frac, test_frac, seed + 2)
     scaffold_dir = out_dir / "scaffold"
     scaffold_dir.mkdir(exist_ok=True)
@@ -357,6 +382,8 @@ def prepare(
         "seed": seed,
         "standardize": cfg.to_dict(),
         "n_molecules": len(molecules),
+        "n_excluded": len(excluded),
+        "exclude_files": [str(path) for path in exclude],
         "splits": {name: len(members) for name, members in splits.items()},
         "scaffold_splits": {name: len(m) for name, m in scaffold_splits.items()},
         "drop_reasons": dict(reasons.most_common()),
@@ -384,8 +411,23 @@ def prepare(
 @click.option("--max-tokens", default=128, show_default=True)
 @click.option("--processes", default=None, type=int, help="Defaults to all cores.")
 @click.option("--overwrite", is_flag=True)
+@click.option(
+    "--exclude",
+    multiple=True,
+    type=click.Path(exists=True, path_type=Path),
+    help="SMILES file whose molecules must not enter this shard. Repeatable.",
+)
 def main(
-    subset, data_dir, release, source, seed, max_heavy_atoms, max_tokens, processes, overwrite
+    subset,
+    data_dir,
+    release,
+    source,
+    seed,
+    max_heavy_atoms,
+    max_tokens,
+    processes,
+    overwrite,
+    exclude,
 ):
     """Prepare ChEMBL shards for training and evaluation."""
     prepare(
@@ -397,6 +439,7 @@ def main(
         seed=seed,
         processes=processes,
         overwrite=overwrite,
+        exclude=tuple(exclude),
     )
 
 
