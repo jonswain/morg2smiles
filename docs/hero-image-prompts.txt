@@ -447,6 +447,93 @@ plates", "matte card stock", "brushed slate" -- which buys texture and tonal
 interest without moving toward cinema.
 
 
+Round 4: the two keepers, as banners
+------------------------------------
+
+A1 and B1 are the survivors. Two changes: A1 came out portrait, because a
+fingerprint is radially symmetric and will fill a square given the chance;
+and B1 goes back to round 1's bit grid rather than tiles carrying literal
+fingerprints.
+
+Both are fixed the same way -- run the fingerprint-to-molecule handover along
+the horizontal axis, so the composition is inherently wide instead of a
+square subject stuffed into a wide frame. For A1 that means cropping the
+whorl so it bleeds off the top and bottom and sits in the left third.
+
+These two blocks are complete: concept, suffix and negatives, ready to paste.
+
+
+Round 4, prompt 1: A1 as a banner
+---------------------------------
+
+  Generate a 16:9 landscape image, a wide horizontal banner.
+
+  A fingerprint seen close up and cropped, its whorl positioned in the left
+  third of the frame, with the concentric ridges bleeding off the top and
+  bottom edges so the print fills the full height. The ridges are clean teal
+  lines of varying weight on a deep slate ground, with soft shading in the
+  valleys between them so they read as gently raised. Moving rightward across
+  the frame the ridges gradually straighten and open out: the curves become
+  warm amber bonds meeting at precise angles, forming hexagonal and
+  pentagonal rings with small dots at the vertices, until the right third of
+  the image is molecular structure rather than fingerprint. Some lines
+  mid-frame are half-curve and half-bond. Asymmetric composition, strong
+  left-to-right read, the subject spread across the full width with no empty
+  corners.
+
+  Modern editorial science illustration. Limited palette of deep slate
+  blue-grey, teal and warm amber, used with real saturation rather than
+  pastels. Gentle directional light producing soft shadows and quiet tonal
+  shading, enough to give the forms volume but never dramatic. Crisp linework
+  combined with flat and softly graded fills, a matte finish and a fine paper
+  grain. Richly detailed but legible.
+
+  Keep the frame free of any lettering, labels or watermarks. Avoid cinematic
+  lighting, lens flare, glowing technology and photorealism, and avoid a
+  centred or symmetrical composition.
+
+If it still centres the whorl, add: the whorl is deliberately off-centre and
+partially cropped by the left edge. Partial cropping is the instruction that
+reliably breaks radial symmetry.
+
+
+Round 4, prompt 2: B1 with round 1's bit grid
+---------------------------------------------
+
+  Generate a 16:9 landscape image, a wide horizontal banner.
+
+  A wall of small square tiles in a dense regular grid filling the frame,
+  each tile either filled solid teal or left empty dark slate, so the whole
+  surface reads as a sparse binary pattern. The tiles are thin matte plates
+  with soft shading and subtly bevelled edges, catching a gentle light from
+  the upper left. Towards the right the grid loosens: gaps open between tiles,
+  several tilt out of alignment, and a scattering of them drift free of the
+  surface at gentle angles, each casting a soft shadow back onto the wall
+  behind it. The drifting tiles resolve into small warm amber molecular
+  skeletons, hexagonal and pentagonal rings with straight bonds and small
+  dots at the vertices. A calm, deliberate progression from regular data on
+  the left to chemical structure on the right, spread evenly across the
+  width.
+
+  Modern editorial science illustration. Limited palette of deep slate
+  blue-grey, teal and warm amber, used with real saturation rather than
+  pastels. Gentle directional light producing soft shadows and quiet tonal
+  shading, enough to give the forms volume but never dramatic. Crisp linework
+  combined with flat and softly graded fills, a matte finish and a fine paper
+  grain. Richly detailed but legible.
+
+  Keep the frame free of any lettering, labels or watermarks. Avoid cinematic
+  lighting, lens flare, glowing technology and photorealism, and avoid a
+  centred or symmetrical composition.
+
+Two things to expect. The bit grid will come back denser and more uniform
+than a real Morgan fingerprint, which is roughly 50 set bits in 2048 -- for
+accuracy add "most tiles empty, only about one in forty filled", accepting
+that it may then look sparse and thin. And generate at 16:9 before cropping
+to 3:1: the drift-and-resolve composition survives that crop well, because
+the action sits in a horizontal band.
+
+
 Iterating
 ---------
 
