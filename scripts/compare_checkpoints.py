@@ -43,6 +43,7 @@ RUNS = [
     ("small_1m", "checkpoints/small_1m/best.pt", "data/shards/1m"),
     ("medium_1m", "checkpoints/medium_1m/best.pt", "data/shards/1m"),
     ("small_100k_long", "checkpoints/small_100k_long/best.pt", "data/shards/100k"),
+    ("small_1m_matched", "checkpoints/small_1m_matched/best.pt", "data/shards/1m"),
     ("small_full", "checkpoints/small_full/best.pt", "data/shards/full"),
 ]
 
