@@ -1,3 +1,5 @@
+<img src="docs/images/banner.jpg" alt="A grid of dark tiles, a scattering of them filled teal like the set bits of a fingerprint, coming apart at the right edge into drifting tiles that carry amber skeletal structures of drug-like molecules" width="100%">
+
 # Morg2SMILES
 
 [![CI](https://github.com/jonswain/morg2smiles/actions/workflows/ci.yml/badge.svg)](https://github.com/jonswain/morg2smiles/actions/workflows/ci.yml)

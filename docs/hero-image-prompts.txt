@@ -16,6 +16,22 @@ can sit on the same page:
   teal    #0d9488    the fingerprint side
   amber   #f59e0b    the molecule side, and exact matches
 
+Outcome
+-------
+
+The banner in the README (docs/images/banner.jpg) came from round 6: the
+single self-contained prompt below, run in a fresh chat. That last part
+mattered. Rounds 4 and 5 were steered by correcting a previous generation in
+the same conversation, and by round 5 the model was defending its own earlier
+composition rather than reading the prompt -- the set bits had settled into
+vertical columns and the molecules into repeated bare polygons, and neither
+could be corrected in place. Restating everything once, with no history,
+fixed both.
+
+Delivered at 1600x533, cropped 3:1 from a 16:9 generation and compressed to
+184 KB. The generated originals are deliberately not kept in the repo; this
+file is the reproducible record.
+
 Practical notes
 ---------------
 
@@ -532,6 +548,75 @@ accuracy add "most tiles empty, only about one in forty filled", accepting
 that it may then look sparse and thin. And generate at 16:9 before cropping
 to 3:1: the drift-and-resolve composition survives that crop well, because
 the action sits in a horizontal band.
+
+
+Round 6: the final prompt, and the one that was used
+----------------------------------------------------
+
+Round 5 fixed the bit density but the set bits fell into vertical columns and
+the molecules degenerated into repeated bare polygons -- a single hexagon or
+pentagon with one stub, several with impossible valences. Round 6 corrected
+both, and the difference was not the wording so much as running it in a fresh
+chat: by then the model was defending its own earlier composition rather than
+reading the instructions.
+
+This block is deliberately self-contained. It assembles nothing and assumes
+no history, so it can be pasted into an empty conversation. It is what
+produced docs/images/banner.jpg.
+
+  Generate a 16:9 landscape image: a wide horizontal banner for a scientific
+  software project. No text anywhere in the image.
+
+  The subject is a wall of small square tiles dissolving into chemistry, read
+  left to right.
+
+  The left two thirds is a regular grid of small square tiles, seen straight
+  on. The tiles are thin matte plates in dark slate blue-grey with subtly
+  bevelled edges and soft shadows, lit gently and evenly from the upper left.
+  Most tiles are empty. Roughly one tile in eight is filled solid teal. These
+  filled tiles must be scattered organically and irregularly, with some
+  clustered in small groups and others isolated among large empty runs --
+  they must never align into rows, columns, diagonals, stripes or any
+  repeating rhythm, and the pattern must look like randomly hashed data
+  rather than a designed motif.
+
+  Moving rightward, the grid comes apart gradually, with no clean boundary.
+  Tiles first tilt slightly while still seated in the grid, then gaps widen,
+  then tiles lift away from the surface and drift at gentle angles, each
+  casting a soft shadow onto the wall behind. The two states overlap
+  throughout this zone: some tilting and drifting tiles still carry their
+  teal fill, and a few show a teal fill together with a partial amber
+  structure beginning to form, so there is no band of blank tiles between the
+  wall and the molecules.
+
+  The drifting tiles on the right carry warm amber skeletal structural
+  formulae, drawn as clean thin lines. These are varied drug-like fragments,
+  each clearly different from the others -- fused bicyclic systems, rings
+  with short branching chains, a few open-chain fragments, double bonds shown
+  as parallel lines -- using only six-membered and five-membered rings, with
+  correct bond angles. Vary their scale and rotation, some larger and nearer,
+  some smaller and further back. Avoid repeating the same bare ring.
+
+  Style: modern editorial science illustration. Limited palette of deep slate
+  blue-grey, teal and warm amber, at real saturation rather than pastel.
+  Gentle directional light, soft shadows, quiet tonal shading that gives the
+  tiles volume without drama. Matte surfaces, fine grain, crisp edges. Calm,
+  analytical and richly detailed, but legible at a glance.
+
+  Do not include any lettering, numbers, labels, captions or watermarks.
+  Avoid cinematic lighting, lens flare, god rays, neon or glowing technology,
+  photorealistic studio rendering, and any checkerboard or alternating
+  pattern in the tiles.
+
+Two notes. Generate four variants before judging any of them -- the bit
+scatter is what varies most between seeds. And "no lettering" does not and
+should not suppress heteroatom labels: the chosen image carries N, S and HO
+on its structures, which is correct chemistry and reads as deliberate rather
+than as a model failing to follow instructions.
+
+The processing afterwards was: crop 3:1 from the 16:9 original, resize to
+1600 px wide, JPEG quality 80, giving 184 KB. Quality 80 rather than 70
+because thin amber linework is the first thing JPEG artefacts spoil.
 
 
 Iterating
