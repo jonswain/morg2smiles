@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Morg2SMILES: a one-way function run backwards">
+  <style>
+    .s { stroke: #334155 } .fs { fill: #334155 }
+    .t { stroke: #0d9488 } .ft { fill: #0d9488 }
+    .a { stroke: #f59e0b } .fa { fill: #f59e0b }
+    @media (prefers-color-scheme: dark) {
+      .s { stroke: #cbd5e1 } .fs { fill: #cbd5e1 }
+      .t { stroke: #2dd4bf } .ft { fill: #2dd4bf }
+      .a { stroke: #fbbf24 } .fa { fill: #fbbf24 }
+    }
+  </style>
+  <!-- Hashing runs one way. This arc runs the other way, anticlockwise,
+       back from the bits to the structure they came from. -->
+  <g class="t" fill="none" stroke-width="18" stroke-linecap="round">
+    <path d="M401.5 172.0 A168 168 0 1 0 413.9 313.5"/>
+  </g>
+  <path class="ft" d="M366 140 L424 182 L358 208 Z"/>
+  <!-- the structure it arrives at -->
+  <g class="a" fill="none" stroke-width="16" stroke-linejoin="round" stroke-linecap="round">
+    <polygon points="256,176 325,216 325,296 256,336 187,296 187,216"/>
+    <circle cx="256" cy="256" r="38" stroke-width="12" opacity="0.5"/>
+  </g>
+</svg>

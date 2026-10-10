@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Morg2SMILES: oracle-verified exact match">
+  <style>
+    .s { stroke: #334155 } .fs { fill: #334155 }
+    .t { stroke: #0d9488 } .ft { fill: #0d9488 }
+    .a { stroke: #f59e0b } .fa { fill: #f59e0b }
+    .g { stroke: #059669 } .fg { fill: #059669 }
+    .off { fill: none; stroke: #94a3b8; stroke-width: 2 }
+    @media (prefers-color-scheme: dark) {
+      .s { stroke: #cbd5e1 } .fs { fill: #cbd5e1 }
+      .t { stroke: #2dd4bf } .ft { fill: #2dd4bf }
+      .a { stroke: #fbbf24 } .fa { fill: #fbbf24 }
+      .g { stroke: #34d399 } .fg { fill: #34d399 }
+      .off { stroke: #475569 }
+    }
+  </style>
+  <!-- The thing that makes this project work: the answer is checkable. Two
+       identical bit columns, target and recomputed, and a tick between them. -->
+  <g>
+    <g class="ft">
+      <rect x="64" y="112" width="52" height="22" rx="11"/>
+      <rect class="off" x="64" y="148" width="52" height="22" rx="11"/>
+      <rect x="64" y="184" width="52" height="22" rx="11"/>
+      <rect class="off" x="64" y="220" width="52" height="22" rx="11"/>
+      <rect class="off" x="64" y="256" width="52" height="22" rx="11"/>
+      <rect x="64" y="292" width="52" height="22" rx="11"/>
+      <rect class="off" x="64" y="328" width="52" height="22" rx="11"/>
+      <rect x="64" y="364" width="52" height="22" rx="11"/>
+    </g>
+    <g class="fa">
+      <rect x="396" y="112" width="52" height="22" rx="11"/>
+      <rect class="off" x="396" y="148" width="52" height="22" rx="11"/>
+      <rect x="396" y="184" width="52" height="22" rx="11"/>
+      <rect class="off" x="396" y="220" width="52" height="22" rx="11"/>
+      <rect class="off" x="396" y="256" width="52" height="22" rx="11"/>
+      <rect x="396" y="292" width="52" height="22" rx="11"/>
+      <rect class="off" x="396" y="328" width="52" height="22" rx="11"/>
+      <rect x="396" y="364" width="52" height="22" rx="11"/>
+    </g>
+    <!-- the molecule the model proposed -->
+    <g class="a" fill="none" stroke-width="10" stroke-linejoin="round" stroke-linecap="round">
+      <polygon points="256,176 302,203 302,257 256,284 210,257 210,203"/>
+      <path d="M302 203 L344 179"/>
+      <path d="M210 257 L168 281"/>
+    </g>
+    <!-- the oracle's verdict -->
+    <path class="g" d="M212 352 L244 386 L306 318" fill="none" stroke-width="22"
+          stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

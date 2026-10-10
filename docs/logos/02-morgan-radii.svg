@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Morg2SMILES: Morgan radii">
+  <style>
+    .s { stroke: #334155 } .fs { fill: #334155 }
+    .t { stroke: #0d9488 } .ft { fill: #0d9488 }
+    .a { stroke: #f59e0b } .fa { fill: #f59e0b }
+    @media (prefers-color-scheme: dark) {
+      .s { stroke: #cbd5e1 } .fs { fill: #cbd5e1 }
+      .t { stroke: #2dd4bf } .ft { fill: #2dd4bf }
+      .a { stroke: #fbbf24 } .fa { fill: #fbbf24 }
+    }
+  </style>
+  <!-- what "Morgan radius 2" actually means: nested atom environments -->
+  <g fill="none">
+    <circle class="t" cx="256" cy="256" r="186" stroke-width="5" stroke-dasharray="14 12" opacity="0.5"/>
+    <circle class="t" cx="256" cy="256" r="108" stroke-width="6" stroke-dasharray="14 12" opacity="0.8"/>
+  </g>
+  <!-- bonds out to radius 1 and radius 2 -->
+  <g class="a" stroke-width="11" stroke-linecap="round" fill="none">
+    <path d="M256 256 L256 148"/>
+    <path d="M256 256 L350 310"/>
+    <path d="M256 256 L162 310"/>
+    <path d="M256 148 L350 94"/>
+    <path d="M350 310 L444 256"/>
+    <path d="M162 310 L162 418"/>
+  </g>
+  <g class="fa">
+    <circle cx="256" cy="148" r="19"/>
+    <circle cx="350" cy="310" r="19"/>
+    <circle cx="162" cy="310" r="19"/>
+  </g>
+  <g class="ft">
+    <circle cx="350" cy="94"  r="15"/>
+    <circle cx="444" cy="256" r="15"/>
+    <circle cx="162" cy="418" r="15"/>
+  </g>
+  <!-- the centre atom, the thing being hashed -->
+  <circle class="fs" cx="256" cy="256" r="27"/>
+</svg>

@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Morg2SMILES: scattered bits condensing into a molecular graph">
+  <style>
+    .s { stroke: #334155 } .fs { fill: #334155 }
+    .t { stroke: #0d9488 } .ft { fill: #0d9488 }
+    .a { stroke: #f59e0b } .fa { fill: #f59e0b }
+    @media (prefers-color-scheme: dark) {
+      .s { stroke: #cbd5e1 } .fs { fill: #cbd5e1 }
+      .t { stroke: #2dd4bf } .ft { fill: #2dd4bf }
+      .a { stroke: #fbbf24 } .fa { fill: #fbbf24 }
+    }
+  </style>
+  <!-- Left: set bits, unordered and meaningless on their own. Right: the same
+       count of points, now a connected graph. The gradient of connection is
+       the whole idea: structure condensing out of a bag of bits. -->
+  <g class="ft">
+    <circle cx="58"  cy="132" r="11"/>
+    <circle cx="112" cy="206" r="11"/>
+    <circle cx="66"  cy="286" r="11"/>
+    <circle cx="128" cy="360" r="11"/>
+    <circle cx="54"  cy="408" r="11"/>
+    <circle cx="146" cy="110" r="11"/>
+    <circle cx="178" cy="282" r="11"/>
+    <circle cx="160" cy="430" r="11"/>
+  </g>
+  <!-- mid: bonds beginning to form, faint -->
+  <g class="t" fill="none" stroke-width="7" stroke-linecap="round" opacity="0.45">
+    <path d="M178 282 L242 236"/>
+    <path d="M160 430 L228 376"/>
+  </g>
+  <!-- right: a resolved skeleton -->
+  <g class="a" fill="none" stroke-width="12" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M242 236 L310 196 L378 236 L378 316 L310 356 L242 316 Z"/>
+    <path d="M310 196 L310 116"/>
+    <path d="M378 236 L446 196"/>
+    <path d="M242 316 L228 376"/>
+    <path d="M256 252 L302 226" stroke-width="8" opacity="0.6"/>
+    <path d="M364 252 L364 302" stroke-width="8" opacity="0.6"/>
+    <path d="M256 302 L300 330" stroke-width="8" opacity="0.6"/>
+  </g>
+  <g class="fa">
+    <circle cx="310" cy="116" r="16"/>
+    <circle cx="446" cy="196" r="16"/>
+    <circle cx="228" cy="376" r="16"/>
+  </g>
+</svg>

@@ -1,0 +1,8 @@
+Shared palette, so the six concepts can be compared on shape rather than colour.
+
+  slate   #334155 light / #cbd5e1 dark   structure, outlines, text
+  teal    #0d9488 light / #2dd4bf dark   the fingerprint side
+  amber   #f59e0b light / #fbbf24 dark   the molecule side, and exact matches
+
+Every file carries a prefers-color-scheme block so it reads on both GitHub
+themes, and uses no pure black or white.

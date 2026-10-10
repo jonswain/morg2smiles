@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Morg2SMILES: bits to ring">
+  <style>
+    .s { stroke: #334155 }  .fs { fill: #334155 }
+    .t { stroke: #0d9488 }  .ft { fill: #0d9488 }
+    .a { stroke: #f59e0b }  .fa { fill: #f59e0b }
+    .off { fill: none; stroke: #94a3b8; stroke-width: 2 }
+    @media (prefers-color-scheme: dark) {
+      .s { stroke: #cbd5e1 } .fs { fill: #cbd5e1 }
+      .t { stroke: #2dd4bf } .ft { fill: #2dd4bf }
+      .a { stroke: #fbbf24 } .fa { fill: #fbbf24 }
+      .off { stroke: #475569 }
+    }
+  </style>
+  <g>
+    <!-- the folded bit vector, sparse as a real ECFP is -->
+    <g>
+      <rect class="off" x="56"  y="188" width="26" height="26" rx="5"/>
+      <rect class="ft" x="90"  y="188" width="26" height="26" rx="5"/>
+      <rect class="off" x="124" y="188" width="26" height="26" rx="5"/>
+      <rect class="off" x="158" y="188" width="26" height="26" rx="5"/>
+
+      <rect class="ft" x="56"  y="222" width="26" height="26" rx="5"/>
+      <rect class="off" x="90"  y="222" width="26" height="26" rx="5"/>
+      <rect class="off" x="124" y="222" width="26" height="26" rx="5"/>
+      <rect class="ft" x="158" y="222" width="26" height="26" rx="5"/>
+
+      <rect class="off" x="56"  y="256" width="26" height="26" rx="5"/>
+      <rect class="off" x="90"  y="256" width="26" height="26" rx="5"/>
+      <rect class="ft" x="124" y="256" width="26" height="26" rx="5"/>
+      <rect class="off" x="158" y="256" width="26" height="26" rx="5"/>
+
+      <rect class="off" x="56"  y="290" width="26" height="26" rx="5"/>
+      <rect class="ft" x="90"  y="290" width="26" height="26" rx="5"/>
+      <rect class="off" x="124" y="290" width="26" height="26" rx="5"/>
+      <rect class="off" x="158" y="290" width="26" height="26" rx="5"/>
+    </g>
+    <!-- the inversion arrow, pointing the way nobody thought it went -->
+    <g class="s" stroke-width="9" stroke-linecap="round" fill="none">
+      <path d="M204 252 H250"/>
+      <path d="M236 236 L252 252 L236 268"/>
+    </g>
+    <!-- the molecule -->
+    <g fill="none" stroke-width="11" stroke-linejoin="round" stroke-linecap="round">
+      <polygon class="a" points="358,182 422,219 422,293 358,330 294,293 294,219"/>
+      <circle class="a" cx="358" cy="256" r="36" stroke-width="8" opacity="0.55"/>
+      <path class="a" d="M422 219 L462 196"/>
+      <path class="a" d="M294 293 L254 316"/>
+    </g>
+  </g>
+</svg>
