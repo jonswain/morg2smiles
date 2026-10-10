@@ -242,6 +242,7 @@ One common protocol: 2,000 held-out molecules (1,956 fingerprint-unseen) in
 | **8M, ChEMBL 1M** | 909,800 | 21,117 | 0.5302 | 0.7996 | **0.8926** | 0.8834 | 0.903 |
 | 8M, ChEMBL 100k, long | 90,682 | 21,117 | 0.4519 | 0.7214 | 0.8384 | 0.8252 | 0.887 |
 | 8M, ChEMBL full | 1,881,996 | 8,508 | 0.3113 | 0.5808 | 0.7347 | 0.7224 | 0.820 |
+| 8M, ChEMBL 1M, short | 909,800 | 8,508 | 0.2091 | 0.4755 | 0.6299 | 0.6161 | 0.794 |
 | 8M, ChEMBL 100k | 90,682 | 8,508 | 0.1800 | 0.4182 | 0.5890 | 0.5787 | 0.794 |
 | retrieval baseline | — | — | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 1.000 |
 
@@ -249,26 +250,31 @@ One common protocol: 2,000 held-out molecules (1,956 fingerprint-unseen) in
 within 20 guesses, and more than half on the first guess.** Mean best Tanimoto
 is 0.974, so even the failures are near misses.
 
-Because two pairs of rows are matched on compute — 100k against full at 8,508
-steps, 100k-long against 1M at 21,117, all four with completed cosine schedules
-— the two axes separate cleanly:
+The one axis these rows isolate cleanly is **compute**: the first and last rows
+share an identical 90,682-molecule corpus and differ only in step budget.
 
-| axis | change | error reduction | per decade |
-|---|---|---|---|
-| **data**, at 8,508 steps | 90,682 → 1,881,996 | 1.549× | 1.39× |
-| **data**, at 21,117 steps | 90,682 → 909,800 | 1.505× | 1.50× |
-| **compute**, at 90,682 molecules | 8,508 → 21,117 steps | 2.543× | **10.6×** |
+| at fixed data | steps | rec@20 | absolute | error ratio |
+|---|---|---|---|---|
+| 90,682 molecules | 8,508 → 21,117 | 0.5890 → 0.8384 | **+24.9 pts** | 2.543× |
 
-Data is worth a consistent ~1.45× error reduction per decade; compute, in this
-regime, is worth an order of magnitude more. Of the 30.4-point gap between the
-best and worst rows, **5.4 points are data and 24.9 are compute.**
+Night 1 compared the 100k row at 8,508 steps against the 1M row at 21,117 and
+credited the whole 30.4-point gap to 10× the data. At least 24.9 of those points
+are available from compute on the small corpus alone, so that attribution was
+wrong. The correction is in
+[`docs/overnight-2026-10-10.md`](docs/overnight-2026-10-10.md), along with the
+same correction to the novel-scaffold penalty — it falls 12.7 → 4.2 points on
+*identical* data trained longer, a lower penalty than the 1M model's 6.2.
 
-An earlier version of this section attributed all 30 of them to data, from two
-runs that differed in both. That was wrong; the correction and the control runs
-are in [`docs/overnight-2026-10-10.md`](docs/overnight-2026-10-10.md). The same
-correction applies to the novel-scaffold penalty: it falls 12.7 → 4.2 points on
-*identical* data trained longer, which is a lower penalty than the 1M model's
-6.2, so that was compute as well.
+**What corpus size is worth, this repo cannot currently say.** At a fixed step
+budget `steps × batch = corpus × passes` is an identity, so a larger shard
+always comes with proportionally fewer passes over each molecule, and the two
+cannot be separated. Measured at 8,508 steps the corpus direction is convex —
+0.5890, 0.6299, 0.7347 for 90,682, 909,800 and 1,881,996 molecules — which is
+not a shape any data-scaling law produces, and is the trace of those two effects
+moving oppositely. An earlier version of this section reported 1.45× error
+reduction per decade from a two-point fit; a third point, predicted in advance
+at 0.705 and measured at 0.6299, falsified it. Settling it needs a corpus sweep
+at constant **epochs**, not constant steps.
 
 Full numbers, curves and caveats: [`docs/phase1-results.md`](docs/phase1-results.md)
 for the first 100k run, [`docs/overnight-2026-10-09.md`](docs/overnight-2026-10-09.md)
@@ -343,9 +349,11 @@ heading "two guards that did not hold".
 
 Worse, the morning after: the headline of that write-up — "10× the data moved
 recovery 0.5892 → 0.8927" — came from two runs that differed in compute as well
-as data, and the controls the next night cut data's share of it from 30.4 points
-to 5.4. Two further claims in that document went the same way, including one
-whose ranking inverted. The criticism above is that the human reported a number
+as data, and the controls the next night showed +24.9 of those points come from
+compute on a fixed corpus. Two further claims in that document went the same way,
+including one whose ranking inverted. Then the replacement claim fell too: a
+1.45×/decade data-scaling fit, published here for about four hours, was
+falsified by a third point it had predicted at 0.705 and which measured 0.6299. The criticism above is that the human reported a number
 that could not support his conclusion. The assistant then did the same thing, in
 bold, on the front page, having been handed a config file that said in advance
 how to avoid it. That correction is
@@ -359,10 +367,11 @@ and a trained decoder that clears the go/no-go gate (`recovery@20` on
 
 The 2026-10-09 scaling runs looked like they had answered the "what was the
 ceiling?" question — **data** — but they had varied data and compute together.
-The 2026-10-10 controls separated the two axes: data is worth ~1.45× error
-reduction per decade, **compute ~10.6×**. Parameters remain the wrong lever on
-this hardware: scaling is linear in wall clock to 15M params and superlinear
-beyond.
+The 2026-10-10 controls show **compute** is worth at least +24.9 points on a
+fixed corpus, which is most of the gap that was attributed to data. They also
+show that corpus size cannot be isolated at a fixed step budget at all, so how
+much data is worth here remains open. Parameters remain the wrong lever on this
+hardware: scaling is linear in wall clock to 15M params and superlinear beyond.
 
 Open questions, in rough order of expected value:
 
@@ -371,10 +380,11 @@ Open questions, in rough order of expected value:
    probably because SMILES randomisation makes every epoch a fresh target
    string. 10.6×/decade cannot continue, but nothing here has found where it
    stops, and it is the cheapest untested lever.
-2. **1M → 10M molecules.** At 1.45×/decade this extrapolates to `rec@20` ~0.93
-   at 9M and ~0.95 at PubChem scale — worth having, but not the near-solve a
-   confounded fit suggested yesterday (0.993). The last few points look like a
-   compute and architecture problem, not a corpus problem.
+2. **What a bigger corpus is actually worth.** Needs a sweep at constant
+   **epochs**, since at constant steps corpus size and repetition rate are
+   locked together by `steps × batch = corpus × passes`. Until that runs, every
+   extrapolation to PubChem scale from this repo is withdrawn — both night 1's
+   0.993 and the 0.949 that briefly replaced it.
 3. **A full-length 15M run.** The capacity arm was cut to 1.75 h by the deadline
    and is unanswered. Now known to be affordable at ~5.2 h per epoch.
 4. **The remaining 10%.** Validity is 0.903 and `recovery@20` is 0.8926, so

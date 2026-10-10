@@ -39,7 +39,9 @@ stage 2  small_100k_long    16:52 -> 01:01   21,117 steps, 30 epochs, completed
 stage 3  small_full         01:01 -> 03:51   8,508 steps, 1st epoch, completed
 stage 4  comparison         03:51 -> 04:46
 stage 5  scaffolds          04:46 -> 05:14
-stage 6  small_1m_matched   SKIPPED -- 209 min left, needed 294 (rerun 05:23, below)
+stage 6  small_1m_matched   SKIPPED -- 209 min left, needed 294
+stage 6' small_1m_matched   05:23 -> 08:28   8,508 steps, 1.2 epochs, completed
+stage 9' scoring (--only)   08:24 -> 09:19   stage-4 protocol, one checkpoint
 ```
 
 The full ChEMBL shard is 2,200,258 unique standardised molecules minus the
@@ -58,6 +60,7 @@ One common protocol: 2,000 held-out molecules (1,956 fingerprint-unseen) in
 | `small_1m` | 7.96M | 21,117 | 909,800 | 0.5302 | 0.7996 | **0.8926** | 0.8834 | 0.903 | 12.6 | 0.974 | 1.72 |
 | `small_100k_long` | 7.95M | 21,117 | 90,682 | 0.4519 | 0.7214 | **0.8384** | 0.8252 | 0.887 | 14.2 | 0.961 | 2.23 |
 | `small_full` | 7.96M | 8,508 | 1,881,996 | 0.3113 | 0.5808 | **0.7347** | 0.7224 | 0.820 | 18.7 | 0.929 | 3.34 |
+| `small_1m_matched` | 7.96M | 8,508 | 909,800 | 0.2091 | 0.4755 | **0.6299** | 0.6161 | 0.794 | 20.4 | 0.898 | 4.08 |
 | `small_100k` | 7.95M | 8,508 | 90,682 | 0.1800 | 0.4182 | **0.5890** | 0.5787 | 0.794 | 21.3 | 0.884 | 4.69 |
 | `medium_1m` | 15.12M | 2,500 | 909,800 | 0.0527 | 0.1554 | **0.2735** | 0.2669 | 0.520 | 18.7 | 0.722 | 6.75 |
 
@@ -66,42 +69,72 @@ This table contains **two** clean matched-compute data comparisons, because
 horizons set to 8,508, and `small_100k_long` and `small_1m` both ran exactly
 21,117 with horizons of 21,117. All four completed their schedules.
 
-### Data is worth ~1.45× error reduction per decade
+### Corpus size, at fixed compute: not a single variable
 
-| at fixed compute | data | rec@20 | absolute | error ratio | per decade |
-|---|---|---|---|---|---|
-| 8,508 steps | 90,682 → 1,881,996 (20.8×) | 0.5890 → 0.7347 | +14.6 pts | 1.549× | **1.39×** |
-| 21,117 steps | 90,682 → 909,800 (10.0×) | 0.8384 → 0.8926 | +5.4 pts | 1.505× | **1.50×** |
+> **This section originally reported "data is worth ~1.45× error reduction per
+> decade", fitted through two points. A third point, predicted in advance and
+> measured afterwards, falsified it. The retraction and what replaces it are
+> below; the original fit was 1.39×/decade at 8,508 steps and 1.50× at 21,117.**
 
-Two independent measurements, two different shard pairs, two different compute
-budgets, and they agree to within 0.11× per decade. In *absolute* points they
-look nothing alike — +14.6 against +5.4 — and that difference is an artifact of
-how close 0.84 is to the ceiling, not a change in how much data is worth. Error
-reduction is the right scale for this metric and the absolute-points framing is
-what made night 1's number look so large.
+Three runs at 8,508 steps, all with cosine horizons of 8,508, all scored under
+the common protocol:
 
-### Compute is worth ~10.6× per decade in this regime
+| corpus | passes over each molecule | rec@20 | error ratio to previous | per decade |
+|---|---|---|---|---|
+| 90,682 | 12.01 | 0.5890 | — | — |
+| 909,800 | 1.20 | **0.6299** | 1.111× | 1.11× |
+| 1,881,996 | 0.58 | 0.7347 | 1.395× | **2.87×** |
+
+The curve is **convex**: returns to corpus size *accelerate*. No plausible
+data-scaling law does that, and the obvious candidate explanation fails — the
+full-shard run sees only 1,089,024 distinct molecules against the 1M run's
+909,800, a factor of 1.20, for +10.5 points.
+
+The uncontrolled variable is in the third column, and it is not possible to
+control it:
+
+    steps × batch_size = corpus_size × passes
+
+That is an identity. At a fixed step budget, corpus size and repetition rate are
+perfectly anti-correlated, so every one of these comparisons varies both:
+
+| 8,508 steps | 90,682 → 909,800 → 1,881,996 molecules | 12.0 → 1.2 → 0.58 passes |
+| 21,117 steps | 90,682 → 909,800 molecules | 29.8 → 3.0 passes |
+
+**"Data's contribution at fixed compute" is therefore not a well-posed quantity
+in this design, and the 1.45×/decade figure should not be used.** In both pairs
+the larger corpus also received about ten times fewer passes over each molecule,
+and nothing here can say which of the two did the work. The convexity is most
+likely the signature of those two effects pulling in opposite directions at
+different rates, not a property of data.
+
+Separating them requires varying corpus size while holding *passes* fixed, which
+necessarily varies compute — so the clean experiment is a corpus sweep at
+constant epochs, not at constant steps, and it costs proportionally more for
+each larger shard.
+
+### Compute, at genuinely fixed data
 
 | at fixed data | steps | rec@20 | absolute | error ratio | per decade |
 |---|---|---|---|---|---|
 | 90,682 molecules | 8,508 → 21,117 (2.48×) | 0.5890 → 0.8384 | +24.9 pts | 2.543× | **10.6×** |
 
-An order of magnitude steeper than the data axis. **Of the 30.4-point gap night
-1 attributed to data, 5.4 points are data and 24.9 are compute.**
+This one is clean: the corpus is identical and only the step budget moves (the
+pass count rises with it, which is what "more compute on the same data" means).
+**+24.9 points from compute alone on 90,682 molecules.**
 
-And the confounded pair reproduces night 1's "scaling law" exactly: 100k@8,508
-against 1M@21,117 is an error ratio of 3.83× across one decade of data, which is
-the 3.81×/decade that document fitted and extrapolated from. That fit was
-compute's contribution wearing data's label. Corrected to 1.45×/decade, the
-extrapolation changes a great deal:
+That is enough to settle the night-1 question even without a usable data axis.
+Night 1 compared 100k@8,508 against 1M@21,117 and credited the whole 30.4-point
+gap to 10× data; 24.9 of those points are available from compute on the small
+corpus alone, so the attribution was wrong regardless of how the remainder
+divides.
 
-| train molecules | night 1 predicted | corrected |
-|---|---|---|
-| 9.1M | 0.936 | 0.926 |
-| 91M (PubChem scale) | **0.993** | **0.949** |
-
-The PubChem ambition survives but stops being a near-solve. Getting the last few
-points will be a compute and architecture problem, not a corpus problem.
+It also explains night 1's "3.81× per decade of data": that pair is an error
+ratio of 3.83× over one decade, which is the figure that document fitted and
+extrapolated to 0.993 at PubChem scale. **Both that extrapolation and the 0.949
+I replaced it with are withdrawn** — the first was compute wearing data's label,
+the second rested on a two-point fit that a third point has now broken. There is
+currently no defensible scaling law here in the corpus direction.
 
 ### Novel scaffolds: that was compute too
 
@@ -132,11 +165,18 @@ scaffold it has never encountered.
 
 ### Diversity tracks skill, monotonically
 
-Across all five runs, distinct valid molecules per query falls as recovery
-rises: 21.3 → 18.7 → 14.2 → 12.6 for 0.589 → 0.735 → 0.838 → 0.893. Night 1 saw
-this as two points and read it as "extra data bought confidence, not diversity".
-With five points it is clearly a property of model quality, not of data. Better
-models spend less of the budget on respellings of a wrong answer.
+Across all five trained runs, distinct valid molecules per query falls
+monotonically as recovery rises:
+
+| rec@20 | 0.589 | 0.630 | 0.735 | 0.838 | 0.893 |
+|---|---|---|---|---|---|
+| distinct valid / query | 21.3 | 20.4 | 18.7 | 14.2 | 12.6 |
+
+Night 1 saw two of these points and read it as "extra data bought confidence,
+not diversity". With five it is clearly a property of model quality by whatever
+route — the 0.630 run and the 0.589 run have corpora differing by 10×, and sit
+adjacent here. Better models spend less of the budget on respellings of a wrong
+answer.
 
 ### A prediction, recorded before the measurement
 
@@ -155,13 +195,27 @@ it is precisely how the night-1 claim went wrong:
 | above ~0.725 | data's return is not log-linear; the 100k point is anomalously low and the full-shard comparison understated data |
 | below ~0.685 | returns to data diminish faster than log-linear, and the PubChem extrapolation above is optimistic |
 
-Any of the three is informative. The result is in the final section.
+Any of the three is informative.
+
+**Result: 0.6299.** Low by 7.5 points, outside the band, so the third reading
+applies — returns in the corpus direction are not log-linear here. Working out
+why is what produced the retraction above: the prediction assumed corpus size
+was an axis that could be isolated at fixed compute, and it cannot be.
+
+The prediction failing is the only reason that was found. A two-point slope
+reported as a law is the same shape of error as night 1's, and it was about to
+go out with a PubChem extrapolation attached. Writing the number down first is
+what turned a repeat of yesterday's mistake into a result.
 
 ## What this night does not answer
 
-- **Full ChEMBL at 21,117 steps.** The data axis has two points at 8,508 steps
-  and two at 21,117, but no run combines the largest corpus with the longest
-  schedule. That run is ~8.3 h and did not fit tonight.
+- **What corpus size is actually worth.** The design cannot say, for the reason
+  above. The experiment that can is a corpus sweep at **constant epochs** rather
+  than constant steps — 100k, 1M and full each trained for the same number of
+  passes — which costs proportionally more for each larger shard and so needs a
+  deliberate compute budget rather than a spare night.
+- **Full ChEMBL at 21,117 steps.** No run combines the largest corpus with the
+  longest schedule; ~8.3 h, did not fit.
 - **Where the step axis saturates.** 10.6×/decade cannot continue; every run
   that finished its schedule was still improving, and 30 epochs of 90k molecules
   showed no overfitting at all. That is probably SMILES randomisation doing its
