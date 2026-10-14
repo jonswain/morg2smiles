@@ -2,10 +2,12 @@
   "run": "small_1m",
   "n_fp_unseen": 1956,
   "recovery": 0.8946830265848671,
+  "recovery_any_drawn": 0.9038854805725971,
   "n_fail": 206,
   "taxonomy": {
-    "near": 53,
+    "near": 35,
     "analogue": 91,
+    "beyond_budget": 18,
     "far": 60,
     "collision": 2
   },

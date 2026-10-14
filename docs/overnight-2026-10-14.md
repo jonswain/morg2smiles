@@ -9,9 +9,12 @@ corpus point) and item 3's cheap signal (count fingerprints).
 stage 1  re-score every checkpoint, adaptive top-up   20:13 -> 21:29
 stage 2  failure taxonomy + likelihood ranking        21:29 -> 21:35
 stage 3  bit-flip probe                               21:35 -> 21:47
-stage 4  small_100k_3ep, 2,127 steps + scoring        21:47 -> __:__
-stage 5  count_fp_100k, 8,508 steps + scoring         __:__ -> __:__
+stage 4  small_100k_3ep, 2,127 steps + scoring        21:47 -> 23:12
+stage 5  count_fp_100k, 8,508 steps + scoring         23:12 -> 02:22
 ```
+
+Every stage completed; the driver finished with 257 minutes of its window
+unused.
 
 The headline is not the gate. It is that **ranking candidates by how often the
 model proposes them lifts `rec@1` from 0.5302 to 0.7520**, and that the
@@ -315,12 +318,137 @@ of the corpus axis.** The full-ChEMBL run will supply a third constant-epoch
 point at 44,112 steps, and it will carry the same confound; it is worth running
 as a deliverable, as the plan already says, not as an experiment.
 
-## Stage 5 — count fingerprints, the cheap signal
+## Stage 5 — count fingerprints do not help
 
-_pending_
+Item 3, named as item 6 in the Phase 1 results and never run until now. Counts
+retain substructure multiplicity, so they carry strictly more information than
+bits. The plan framed this as item 2's question from the opposite side: if
+recovery jumps, the bottleneck is the input representation; if not, it is model
+capability.
+
+`count_fp_100k`, 23:12 → 02:11: 8,508 steps in 2.98 h, 1.26 s/step. Identical to
+`small_100k` in every respect — same 7,951,945 parameters, same 100k shard, same
+12 epochs, same learning rate and horizon — except `counts: true`.
+
+| run | fingerprint | rec@1 | rec@5 | **rec@20** | struct@20 | validity |
+|---|---|---|---|---|---|---|
+| `small_100k` | binary | 0.1800 | 0.4182 | **0.5982** | 0.5879 | 0.790 |
+| `count_fp_100k` | count | 0.1687 | 0.3962 | **0.5890** | 0.5818 | 0.733 |
+| `count_fp_100k` re-judged under binary | — | 0.1708 | 0.4003 | **0.5920** | — | — |
+
+**Counts buy nothing.** The count model is 0.9 points *below* the binary model
+on its own oracle and 0.6 points below when its candidates are re-judged against
+the binary fingerprint — so the stricter target is not the explanation. Strictly
+more input information produced no gain at all.
+
+Two notes on making this comparison fair:
+
+- **The oracle.** A count model's own oracle demands an exact *count* match,
+  which is a harder question than bit equality. Scoring only that would penalise
+  the richer input for being asked more. `scripts/rejudge_binary.py` re-scores
+  the same candidates, in the same order, against the binary fingerprint; the
+  conclusion is unchanged.
+- **The `fp_unseen` slice** is defined under the binary fingerprint, taken from
+  the first present run before `--only` narrows the list. That is valid for the
+  count model and slightly conservative: two molecules sharing a count
+  fingerprint necessarily share a binary one, so binary-unseen is a subset of
+  count-unseen. The count model is never credited with a query its own
+  fingerprint had seen.
+
+What should *not* be claimed: that counts are worse. This is a cross-run
+comparison, the pattern behind all three of this project's retracted claims, and
+single-run training variance at this scale has never been measured. A 0.6–0.9
+point gap is small enough to be variance. The defensible reading is **no large
+gain, in a setup designed to show one** — and that is enough for the decision it
+was run to inform.
+
+**Cancel the comparable-scale count run.** The plan allocated night 1 to counts
+at 1M / 21,117 steps, ~8 h, "only if the cheap signal justifies it". It does not.
+
+### Both sides of the question now agree
+
+Item 2 and item 3 were designed to attack the same question from opposite
+directions, and they answer it the same way:
+
+| evidence | reading |
+|---|---|
+| 2 of 206 misses are fingerprint collisions | the input is not ambiguous where the model fails |
+| recovery 0.98 → 0.37 across the size range | failures track molecular size and complexity |
+| strictly richer input buys 0.0 points | more input information is not the limiting factor |
+
+**The bottleneck is model capability, not the fingerprint.** Information-theoretic
+headroom exists — ~98% of ChEMBL fingerprints are unique — and the model is not
+using the information it already has.
 
 ---
 
 ## What this changes about the plan
 
-_pending — written once stages 4 and 5 report_
+### Settled, and off the list
+
+| plan item | status |
+|---|---|
+| 1 — oversample fix + re-score | **done.** Headline 0.8926 → 0.8947; ordering unchanged; `rec@1`/`rec@5` unchanged by construction. The gate is clear. |
+| 2 — failure taxonomy + likelihood ranking | **done.** Capability ceiling, not information. Consensus ranking worth +22.2 points of `rec@1`. |
+| 3 — count fingerprints, cheap signal | **done, negative.** No gain. |
+| 3 — counts at comparable scale (~8 h) | **cancelled.** The cheap signal does not justify it. |
+| 5 — constant-epoch corpus point | **done, degenerate.** 2,127 steps is below the competence floor; the question is already answered by `small_100k_long` vs `small_1m` (+5.0 points per decade of data at matched compute). |
+| bit-flip probe | **done, negative.** No latent generative behaviour; the model snaps back. |
+
+That clears one night of machine time (counts at scale) and the small end of the
+corpus axis, and it leaves the two weekend runs as the plan had them.
+
+### Unchanged
+
+- **Full ChEMBL, 3 epochs, 44,112 steps, ~18 h, a ~20 h window.** Still the
+  deliverable, still not an experiment, and now better motivated: failures
+  concentrate on large molecules, and the full corpus is where the large
+  molecules are. Everything the plan said about readiness holds, and item 1 —
+  its only stated prerequisite — is done.
+- **Item 4, step saturation (100k, 52,500 steps, ~21 h).** Still the science,
+  and stage 4 sharpens why: compute is the one lever that moves this model, and
+  the third point has to sit on the 100k corpus where the other two already are.
+- **Capacity (15M) stays last, and remains uncharacterised.** `medium_1m`
+  re-scores at 0.2822 against `small_1m`'s 0.8947, which is tempting to read as
+  the 15M configuration being broken. It is not evidence of that: `medium_1m`
+  stopped on `max_hours` at **2,500 steps**, 8.4× short of `small_1m`'s 21,117,
+  and `small_1m` at 2,500 steps would have been comparably bad — `small_100k_3ep`
+  reached only 0.0603 at 2,127. The two runs differ in capacity *and* compute, so
+  the comparison says nothing, exactly like the three claims this project has
+  already retracted. Capacity is untested, not disproven. The plan's reason for
+  deferring it — compute is the measured lever, MPS scaling goes superlinear past
+  15M, and `medium_1m` costs 2.66 s/step — is unaffected and still right.
+
+### New, and cheap
+
+- **Ship consensus ranking.** Ordering candidates by sampling frequency lifts
+  `rec@1` 0.5302 → 0.7520 and `struct@1` 0.5087 → 0.7249 with no extra forward
+  passes and no retraining. `Morg2Smiles.generate` currently sorts by
+  `(fp_match, tanimoto)`, which is right when the oracle is free and wrong when
+  it is not; frequency is the better tiebreak within each group. ~1 h.
+- **Report `rec@1` under consensus ordering from now on.** Generation order is
+  not a neutral baseline — it discards information already present in the
+  samples.
+- **Measure single-run training variance.** Every retraction here came from a
+  cross-run comparison, and the stage 5 null result is limited by not knowing
+  the noise floor. Two identical runs at 2,127–8,508 steps on the 100k shard
+  would cost ~3–6 h and would put an error bar on every comparison in this
+  repository. This is the highest-value cheap run that is not yet scheduled.
+
+### If the generative direction is still wanted
+
+Stage 3 says it will not fall out of this model. Interpolation and partial
+specification would need **training against a loosened oracle** — Tanimoto ≥
+threshold, or a masked subset of bits — rather than probing a model trained on
+exact equality. That is a new training objective and a new success criterion,
+and it should be scoped as such rather than as an afternoon's probe.
+
+### Revised schedule
+
+| slot | job | machine | note |
+|---|---|---|---|
+| **Working day** | Consensus ranking in `generate` + tests | ~1 h | ships the night's result |
+| | Variance pair on the 100k shard | ~3–6 h | puts an error bar on everything |
+| **Weekend 1** | Full ChEMBL, 3 epochs, 44,112 steps | ~18 h (~20 h window) | the deliverable |
+| **Weekend 2** | Item 4 step saturation, 52,500 steps | ~21 h | the science |
+| *Deferred* | 15M capacity | — | debug, not scale |

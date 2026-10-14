@@ -7,3 +7,10 @@
 [10-14 21:35:24] stage 3: bit-flip probe
 [10-14 21:47:44] stage 3 exit=0
 [10-14 21:47:44] stage 4: small_100k_3ep, 2,127 steps
+[10-14 22:56:20] stage 4 train exit=0
+[10-14 23:12:12] stage 4 score exit=0
+[10-14 23:12:12] stage 5: count_fp_100k, 8,508 steps
+[10-15 02:11:29] stage 5 train exit=0
+[10-15 02:22:39] stage 5 score exit=0
+[10-15 02:22:45] stage 5 rejudge exit=0
+[10-15 02:22:45] === night 3 driver done, 257 min to spare ===
