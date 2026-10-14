@@ -47,6 +47,8 @@ RUNS = [
     ("small_100k_long", "checkpoints/small_100k_long/best.pt", "data/shards/100k"),
     ("small_1m_matched", "checkpoints/small_1m_matched/best.pt", "data/shards/1m"),
     ("small_full", "checkpoints/small_full/best.pt", "data/shards/full"),
+    ("small_100k_3ep", "checkpoints/small_100k_3ep/best.pt", "data/shards/100k"),
+    ("count_fp_100k", "checkpoints/count_fp_100k/best.pt", "data/shards/100k"),
 ]
 
 
@@ -101,6 +103,10 @@ def main(
     # number that could not be compared with the full table it is meant to join.
     # So --only chooses what to score, never what the protocol is.
     shards = sorted({shard for _, _, shard in runs})
+    # Likewise the fingerprint the protocol is defined under: the first present
+    # run's, before --only. Taking it after would let a count-fingerprint run
+    # scored alone redefine fp_unseen for itself.
+    protocol_checkpoint = runs[0][1]
 
     if only:
         known = {n for n, _, _ in runs}
@@ -127,7 +133,7 @@ def main(
 
     # fp_unseen against the union, so the primary slice is honest for every
     # model rather than only for the one whose shard supplied the split.
-    fp_cfg = Morg2SmilesModel.load(runs[0][1], device=select_device())[0].fp_cfg
+    fp_cfg = Morg2SmilesModel.load(protocol_checkpoint, device=select_device())[0].fp_cfg
     click.echo(f"indexing {len(train_molecules):,} training fingerprints ...")
     train_keys = {_fp_key(compute(s, fp_cfg)) for s in train_molecules}
     fp_unseen = [_fp_key(compute(s, fp_cfg)) not in train_keys for s in eval_smiles]
@@ -146,6 +152,7 @@ def main(
             "pool_shard": pool_shard,
             "split": "valid",
             "n_fp_unseen": sum(fp_unseen),
+            "fp_config": fp_cfg.describe(),
             "training_union_size": len(train_molecules),
             "shards_excluded": shards,
         },
