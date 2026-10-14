@@ -12,6 +12,10 @@ that explains it:
 ``too_long``
     The reference needs more tokens than the decoder can emit. Unreachable by
     construction.
+``beyond_budget``
+    A candidate with the right fingerprint *was* drawn, but ranked outside the
+    first k scored. Not a failure of the model's chemistry, only of the order
+    it proposes things in -- so this bucket is what better ranking recovers.
 ``collision``
     Another ChEMBL molecule carries the same fingerprint, so the input
     underdetermines the answer. (Only relevant to struct@k; a twin with the
@@ -150,6 +154,9 @@ def main(run, checkpoint, outcomes, collision_shard, k, out):
         q = {
             "reference": ref,
             "hit": any(r["fp_match"] for r in scored),
+            # Over every candidate drawn, not just the first k scored. The gap
+            # to "hit" is the budget window, not the model.
+            "hit_anywhere": any(r["fp_match"] for r in row["results"]),
             "exact": any(r["exact_structure"] for r in scored),
             "best_tanimoto": max((r["tanimoto"] for r in row["results"]), default=0.0),
             "first_valid": bool(row["results"]) and row["results"][0]["valid"],
@@ -187,6 +194,8 @@ def main(run, checkpoint, outcomes, collision_shard, k, out):
     def bucket(q):
         if q["n_tokens"] > max_tok:
             return "too_long"
+        if q["hit_anywhere"]:
+            return "beyond_budget"
         if q["twins"] > 0:
             return "collision"
         if q["best_tanimoto"] >= 0.9:
@@ -209,6 +218,7 @@ def main(run, checkpoint, outcomes, collision_shard, k, out):
         "run": run,
         "n_fp_unseen": n,
         "recovery": rate(q["hit"] for q in queries),
+        "recovery_any_drawn": rate(q["hit_anywhere"] for q in queries),
         "n_fail": len(fails),
         "taxonomy": dict(taxonomy),
         "first_candidate_validity": rate(q["first_valid"] for q in queries),
