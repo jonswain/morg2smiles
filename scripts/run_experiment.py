@@ -86,7 +86,13 @@ def append_record(record: dict, path: Path = LEADERBOARD) -> None:
     "--oversample",
     default=2.0,
     show_default=True,
-    help="Draw k*oversample strings so k distinct molecules are available.",
+    help="First draw is k*oversample strings; short queries are then topped up.",
+)
+@click.option(
+    "--max-oversample",
+    default=10.0,
+    show_default=True,
+    help="Cap on strings per query, as a multiple of k. Equal to --oversample for a fixed draw.",
 )
 @click.option(
     "--baseline/--no-baseline", default=True, show_default=True, help="Also score retrieval."
@@ -107,6 +113,7 @@ def main(
     top_p,
     budget,
     oversample,
+    max_oversample,
     baseline,
     skip_train,
     checkpoint,
@@ -169,6 +176,7 @@ def main(
         top_p=top_p,
         budget=budget,
         oversample=oversample,
+        max_oversample=max_oversample,
     )
     click.echo("")
     click.secho("model", bold=True)
@@ -222,6 +230,7 @@ def main(
             "top_p": top_p,
             "budget": budget,
             "oversample": oversample,
+            "max_oversample": max_oversample,
         },
         "primary_metric_name": model_report["primary_metric_name"],
         "primary_metric": model_report["primary_metric"],

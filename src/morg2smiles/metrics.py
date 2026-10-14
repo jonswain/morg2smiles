@@ -167,6 +167,10 @@ def _slice_metrics(outcomes: Sequence[QueryOutcome], ks: Sequence[int]) -> dict:
         "mean_samples_per_query": n_samples / len(outcomes) if n_samples else None,
         "mean_candidates_per_query": mean(o.n_candidates for o in outcomes),
         "mean_scored_per_query": mean(o.n_scored for o in outcomes),
+        # Fraction of queries that had the full budget to spend. Below 1.0,
+        # recovery@max(k) was measured over fewer candidates than it claims --
+        # the failure that made the 1M model's 0.8926 pessimistic.
+        "budget_filled_rate": mean(o.n_scored >= max(ks) for o in outcomes),
         # How close the near-misses were. Distinguishes "almost right" from
         # "generating noise" when recovery is low.
         "mean_best_tanimoto": mean(

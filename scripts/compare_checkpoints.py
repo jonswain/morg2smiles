@@ -22,17 +22,19 @@ The test splits are not touched. Everything here comes from validation.
 
 from __future__ import annotations
 
+import dataclasses
 import json
 import random
+import time
 from pathlib import Path
 
 import click
 
 from morg2smiles.baselines.nearest_neighbour import evaluate_baseline
 from morg2smiles.data.dataset import _fp_key, load_split
-from morg2smiles.evaluation import evaluate_model
+from morg2smiles.evaluation import generate_outcomes
 from morg2smiles.fingerprints import compute
-from morg2smiles.metrics import format_report
+from morg2smiles.metrics import evaluate, format_report
 from morg2smiles.model import Morg2SmilesModel, select_device
 
 # Checkpoint -> the shard it trained on. Kept explicit: inferring it from the
@@ -60,6 +62,13 @@ def present_runs() -> list[tuple[str, str, str]]:
 @click.option("--baseline/--no-baseline", default=True, show_default=True)
 @click.option("--pool-shard", default="data/shards/1m", show_default=True)
 @click.option("--out", type=click.Path(path_type=Path), default=Path("results/comparison.json"))
+@click.option("--max-oversample", default=10.0, show_default=True, help="See generate_outcomes.")
+@click.option(
+    "--dump-outcomes",
+    type=click.Path(path_type=Path),
+    default=None,
+    help="Write every query's judged candidates here, one JSONL per run, for failure analysis.",
+)
 @click.option(
     "--only",
     multiple=True,
@@ -77,6 +86,8 @@ def main(
     baseline: bool,
     pool_shard: str,
     out: Path,
+    max_oversample: float,
+    dump_outcomes: Path | None,
     only: tuple[str, ...],
 ) -> None:
     runs = present_runs()
@@ -131,6 +142,7 @@ def main(
             "seed": seed,
             "budget": budget,
             "eval_k": eval_k,
+            "max_oversample": max_oversample,
             "pool_shard": pool_shard,
             "split": "valid",
             "n_fp_unseen": sum(fp_unseen),
@@ -144,14 +156,42 @@ def main(
     for name, checkpoint, shard in runs:
         click.echo(f"\n--- {name} ({checkpoint}) ---")
         model, ckpt = Morg2SmilesModel.load(checkpoint, device=device)
-        report = evaluate_model(
+        started = time.perf_counter()
+        outcomes = generate_outcomes(
             model,
             eval_smiles,
             k=eval_k,
             fp_unseen=fp_unseen,
             budget=budget,
             seed=seed,
+            max_oversample=max_oversample,
         )
+        report = evaluate(
+            outcomes,
+            ks=[n for n in (1, 5, 20, 100) if n <= eval_k] or [eval_k],
+            elapsed_seconds=time.perf_counter() - started,
+        )
+        report["generation"] = {
+            "k": eval_k,
+            "budget": budget,
+            "seed": seed,
+            "max_oversample": max_oversample,
+        }
+        if dump_outcomes is not None:
+            dump_outcomes.mkdir(parents=True, exist_ok=True)
+            with open(dump_outcomes / f"{name}.jsonl", "w") as fh:
+                for o in outcomes:
+                    fh.write(
+                        json.dumps(
+                            {
+                                "reference": o.reference_smiles,
+                                "fp_unseen": o.fp_unseen,
+                                "n_samples": o.n_samples,
+                                "results": [dataclasses.asdict(r) for r in o.results],
+                            }
+                        )
+                        + "\n"
+                    )
         click.echo(format_report(report))
         results["runs"][name] = {
             "checkpoint": checkpoint,

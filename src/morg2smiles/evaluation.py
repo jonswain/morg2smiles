@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import time
 from collections.abc import Sequence
+from dataclasses import replace
 
 import torch
 from tqdm import tqdm
@@ -18,7 +19,7 @@ from .fingerprints import FPConfig, compute
 from .generate import beam_search, sample
 from .metrics import QueryOutcome, evaluate
 from .model import Morg2SmilesModel
-from .oracle import check_many
+from .oracle import OracleResult, check, check_many
 
 __all__ = ["evaluate_model", "generate_outcomes"]
 
@@ -35,6 +36,7 @@ def generate_outcomes(
     top_p: float = 1.0,
     budget: str = "molecules",
     oversample: float = 2.0,
+    max_oversample: float = 10.0,
     seed: int | None = 0,
     show_progress: bool = True,
     **kwargs,
@@ -58,13 +60,21 @@ def generate_outcomes(
             sharply at 64, where the cache stops fitting comfortably.
         budget: ``"molecules"`` or ``"strings"``; see
             :meth:`morg2smiles.metrics.QueryOutcome.scored`.
-        oversample: Draw ``k * oversample`` strings per query so that k
-            *distinct molecules* are actually available to score. Respellings
-            and invalid strings both eat raw samples, and measurement says 20
-            samples yield only about 11.5 distinct molecules, so the default of
-            2.0 roughly fills the budget. Sampling is the cheap half of
-            evaluation -- the oracle is not -- so this costs little. Set to 1.0
-            to reproduce pre-oversampling numbers.
+        oversample: The *first* draw is ``k * oversample`` strings per query.
+            Queries still short of k distinct candidates are then topped up,
+            k strings at a time, until they fill or hit ``max_oversample``.
+        max_oversample: Cap on raw strings per query, as a multiple of k. Set
+            it equal to ``oversample`` to reproduce the old fixed-draw numbers.
+
+            Why adaptive rather than a bigger constant: 2.0 was calibrated on
+            the 100k model, where 40 strings gave ~21 distinct molecules. The
+            1M model repeats itself far more (duplicate rate 0.569 against
+            0.247) and got only 12.6 from the same 40, so its recovery@20 was
+            measured over ~13 candidates while the weaker model had 20. Better
+            models explore less, so any fixed multiplier short-changes exactly
+            the model that matters most. Topping up per query removes the
+            constant; ``budget_filled_rate`` in the report says whether the cap
+            was ever reached.
         seed: Seed for the sampling RNG, so an evaluation is reproducible.
             Defaults to 0 rather than None because unseeded sampling made
             repeated evaluations of *the same checkpoint* differ by 2.2 points
@@ -84,6 +94,7 @@ def generate_outcomes(
     fps = [compute(s, fp_cfg) for s in smiles]
     outcomes: list[QueryOutcome] = []
     n_draw = max(k, int(round(k * oversample)))
+    max_draw = max(n_draw, int(round(k * max_oversample)))
 
     def judge(index: int, candidates: Sequence[str]) -> QueryOutcome:
         return QueryOutcome(
@@ -94,6 +105,12 @@ def generate_outcomes(
             n_samples=len(candidates),
         )
 
+    def fills(results: Sequence[OracleResult]) -> int:
+        # What QueryOutcome.scored() will count, without building one.
+        if budget == "molecules":
+            return sum(1 for r in results if r.valid and not r.duplicate)
+        return sum(1 for r in results if not r.duplicate)
+
     if strategy == "beam":
         # Beam search already returns distinct sequences, so oversampling it
         # would only add lower-ranked beams; k stays k.
@@ -102,11 +119,17 @@ def generate_outcomes(
             outcomes.append(judge(i, beam_search(model, fps[i], k=k, **kwargs)))
         return outcomes
 
-    generator = None
+    # Top-ups draw from their own stream. Sharing one would let a top-up in
+    # batch 1 shift every later batch's first draw, so recovery@1 would move by
+    # seed noise whenever the cap changed. Separate, the first draw is identical
+    # to the fixed-oversample protocol and only the extra candidates are new.
+    generator = topup_generator = None
     if seed is not None:
         device = next(model.parameters()).device
         generator = torch.Generator(device=device)
         generator.manual_seed(seed)
+        topup_generator = torch.Generator(device=device)
+        topup_generator.manual_seed(seed + 1)
 
     total = (len(smiles) + batch_size - 1) // batch_size
     iterator = tqdm(
@@ -118,17 +141,50 @@ def generate_outcomes(
     )
     for start in iterator:
         chunk = list(range(start, min(start + batch_size, len(smiles))))
-        batch_candidates = sample(
-            model,
-            [fps[i] for i in chunk],
-            k=n_draw,
-            temperature=temperature,
-            top_p=top_p,
-            generator=generator,
-            **kwargs,
-        )
-        for i, candidates in zip(chunk, batch_candidates, strict=True):
-            outcomes.append(judge(i, candidates))
+        # Judged incrementally, with check_many's dedupe rules, so a top-up
+        # round only pays the oracle for its new strings.
+        results: dict[int, list[OracleResult]] = {i: [] for i in chunk}
+        seen_raw: dict[int, set[str]] = {i: set() for i in chunk}
+        seen_canonical: dict[int, set[str]] = {i: set() for i in chunk}
+        drawn = dict.fromkeys(chunk, 0)
+
+        pending, per_query, stream = chunk, n_draw, generator
+        while pending:
+            batch_candidates = sample(
+                model,
+                [fps[i] for i in pending],
+                k=per_query,
+                temperature=temperature,
+                top_p=top_p,
+                generator=stream,
+                **kwargs,
+            )
+            for i, candidates in zip(pending, batch_candidates, strict=True):
+                drawn[i] += len(candidates)
+                for candidate in candidates:
+                    if candidate in seen_raw[i]:
+                        continue
+                    seen_raw[i].add(candidate)
+                    r = check(candidate, fps[i], fp_cfg, reference_smiles=smiles[i])
+                    if r.canonical is not None:
+                        if r.canonical in seen_canonical[i]:
+                            r = replace(r, duplicate=True)
+                        else:
+                            seen_canonical[i].add(r.canonical)
+                    results[i].append(r)
+            per_query, stream = k, topup_generator
+            pending = [i for i in pending if fills(results[i]) < k and drawn[i] + k <= max_draw]
+
+        for i in chunk:
+            outcomes.append(
+                QueryOutcome(
+                    results=results[i],
+                    fp_unseen=bool(fp_unseen[i]) if fp_unseen is not None else False,
+                    reference_smiles=smiles[i],
+                    budget=budget,
+                    n_samples=drawn[i],
+                )
+            )
     return outcomes
 
 
