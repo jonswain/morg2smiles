@@ -1,0 +1,9 @@
+[10-14 20:13:15] stage 1 rescore start
+[10-14 20:17:22] === night 3 driver start, git 7e3d71d, 623 min to 06:40 ===
+[10-14 21:29:28] stage 1 rescore exit=0
+[10-14 21:29:54] stage 1 finished; continuing
+[10-14 21:29:54] stage 2: failure analysis
+[10-14 21:35:24] stage 2 exit=0
+[10-14 21:35:24] stage 3: bit-flip probe
+[10-14 21:47:44] stage 3 exit=0
+[10-14 21:47:44] stage 4: small_100k_3ep, 2,127 steps

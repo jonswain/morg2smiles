@@ -24,6 +24,15 @@ dist/
 !/results/overnight/comparison.json
 !/results/overnight/scaffold_probe.json
 !/results/overnight/driver.log
+!/results/overnight3/
+/results/overnight3/*
+!/results/overnight3/comparison_topup.json
+!/results/overnight3/comparison_100k_3ep.json
+!/results/overnight3/comparison_count_fp.json
+!/results/overnight3/failure_analysis.json
+!/results/overnight3/failures_small_1m.jsonl
+!/results/overnight3/bitflip.json
+!/results/overnight3/driver.log
 *.pt
 
 .DS_Store
