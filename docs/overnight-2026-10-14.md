@@ -255,9 +255,65 @@ training change, not a probe.
 
 ---
 
-## Stage 4 — the constant-epoch corpus point
+## Stage 4 — the constant-epoch corpus point, and why it is degenerate
 
-_pending_
+Item 5 of the plan. At a fixed step budget `steps × batch = corpus × passes` is
+an identity, so corpus size and repetition rate cannot be separated — the reason
+night 2's data-scaling fit was withdrawn. The plan's proposed fix was to hold
+*passes* fixed instead: `small_1m` already is 3 epochs at 21,117 steps, so the
+cheap companion point is 3 epochs on the 100k shard, 2,127 steps.
+
+`small_100k_3ep`, 21:47 → 22:56: 2,127 steps in 69 min, completed on its step
+budget. That is 1.95 s/step wall-clock, but ~1.2 s/step of training — three
+in-training oracle evaluations account for the rest. Common protocol:
+**`rec@20` = 0.0603**.
+
+| | steps | corpus | epochs | rec@1 | rec@20 | validity |
+|---|---|---|---|---|---|---|
+| `small_100k_3ep` | 2,127 | 90,682 | 3 | 0.0046 | **0.0603** | 0.262 |
+| `small_1m` | 21,117 | 909,800 | 3 | 0.5302 | **0.8947** | 0.903 |
+
+The run is healthy and simply undertrained. Its curve climbs monotonically —
+0.0000 at step 709, 0.0321 at 1,418, 0.0621 at 2,127, on the in-training
+500-molecule evaluation — train loss is still
+falling (1.43 → 0.77 → 0.61, valid 0.91 → 0.61 → 0.53), and it stopped because
+it hit `max_steps` while still improving. Nothing is broken.
+
+**But the comparison is worthless, and the reason matters.** Validity is 0.262:
+after 2,127 steps the model has not yet learned SMILES syntax, let alone
+fingerprint inversion. `rec@1` is 0.0046 — essentially zero. The 0.0603 → 0.8947
+difference is therefore dominated by *crossing the threshold of basic
+competence*, not by corpus size.
+
+So holding passes fixed does not rescue the corpus question; it relocates the
+confound. Fixing epochs makes compute scale with corpus, and at the small end
+there is not enough compute left to produce a model worth comparing. The two
+framings fail in complementary ways:
+
+| framing | what it confounds | verdict |
+|---|---|---|
+| fixed steps, vary corpus | repetition rate moves with corpus (identity) | night 2's retraction |
+| fixed epochs, vary corpus | compute moves with corpus; small end is pre-competent | this run |
+
+**The corpus question is already answered as well as it can be, by runs
+already on disk.** `small_100k_long` and `small_1m` are matched at 21,117 steps
+and differ tenfold in corpus:
+
+| run | corpus | steps | rec@20 |
+|---|---|---|---|
+| `small_100k_long` | 90,682 | 21,117 | 0.8446 |
+| `small_1m` | 909,800 | 21,117 | **0.8947** |
+
+**A decade more data is worth +5.0 points at matched compute**, against +24.9
+points for 2.5× the compute on a fixed corpus. Repetition rate differs between
+them (30 epochs against 3) and cannot be removed — but both models are competent,
+which is what makes the number readable at all. That is the honest version of
+item 5, and it needed no new run.
+
+The practical consequence: **do not spend further machine time on the small end
+of the corpus axis.** The full-ChEMBL run will supply a third constant-epoch
+point at 44,112 steps, and it will carry the same confound; it is worth running
+as a deliverable, as the plan already says, not as an experiment.
 
 ## Stage 5 — count fingerprints, the cheap signal
 
