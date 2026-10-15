@@ -88,9 +88,81 @@ candidate was drawn but ranked outside the window).
 
 ---
 
-## Stage 1 — decode sweep
+## Stage 1 — decode sweep: no setting beats the default, and that is the finding
 
-_pending_
+Every number in this project was measured at temperature 1.0, top_p 1.0, and
+nothing had ever checked whether that was the right place to sample from.
+`small_1m` fills only 64% of its 20-slot budget because it re-proposes the same
+molecules, which is what a too-cold decoder looks like — so a hotter one might
+buy recovery, or might spend validity for nothing.
+
+15 settings, 400 molecules (386 fingerprint-unseen) drawn from the clean pool
+**excluding the 2,000 of the common protocol**, so a winner could afterwards be
+checked on a set it had not been fitted to. 18:35 → 19:23.
+
+| T | top_p | rec@1 | con@1 | rec@20 | con@20 | validity | uniq/q | fill |
+|---|---|---|---|---|---|---|---|---|
+| 0.70 | 1.00 | 0.5674 | 0.7876 | **0.9145** | **0.9145** | 0.952 | 16.5 | 0.539 |
+| 0.70 | 0.95 | 0.5984 | 0.7746 | 0.9041 | 0.9067 | 0.954 | 15.4 | 0.472 |
+| 0.70 | 0.90 | 0.5829 | 0.7772 | 0.9067 | 0.9093 | 0.958 | 14.5 | 0.446 |
+| 0.80 | 1.00 | 0.5337 | 0.7461 | 0.8912 | 0.8912 | 0.943 | 17.3 | 0.575 |
+| 0.90 | 1.00 | 0.5466 | 0.7565 | 0.8990 | 0.9016 | 0.938 | 18.5 | 0.635 |
+| **1.00** | **1.00** | 0.5026 | 0.7565 | 0.8938 | 0.8990 | 0.925 | 19.3 | 0.671 |
+| 1.00 | 0.90 | 0.5674 | 0.7850 | 0.9093 | 0.9093 | 0.948 | 16.4 | 0.536 |
+| 1.10 | 1.00 | 0.4508 | 0.7565 | 0.8808 | 0.8782 | 0.910 | 20.4 | 0.728 |
+
+(Full grid in `results/overnight4/decode_sweep.json`.)
+
+The nominal best is T=0.7, top_p=1.0, at +1.55 points of consensus `rec@20` over
+the default. **That is not a result, and the arithmetic says so.** At n=386 and
+p≈0.9 the standard error of a single cell is **1.53 points**. The winner's margin
+is one standard error. Worse, it is the maximum of 15 correlated cells, and the
+expected maximum of 15 draws sits well above the true mean even when every cell
+is identical — the classic selection bias. A +1.55 point win selected this way
+is exactly what no effect looks like.
+
+Averaging the three top_p values at each temperature, which is the only read the
+sample size supports:
+
+| temperature | mean con@20 |
+|---|---|
+| 0.7 | 0.9102 |
+| 0.8 | 0.8972 |
+| 0.9 | 0.8998 |
+| 1.0 | 0.9016 |
+| 1.1 | 0.8912 |
+
+A 1.9-point spread across the whole temperature range, non-monotone in the
+middle. There is no decode setting worth adopting on this evidence. Stage 6
+checks T=0.7 on the common protocol, where n=1,956 and the standard error falls
+to 0.68 points, which is the only way to settle it.
+
+### Two things the sweep does establish
+
+**Consensus ranking absorbs the decoder's temperature sensitivity.** This is a
+paired comparison on identical molecules, and the effect is large enough to
+survive the sample size:
+
+| ordering | rec@1 range across the grid | sd |
+|---|---|---|
+| generation | 0.4508 – 0.5984 (**14.8 points**) | 3.73 |
+| consensus | 0.7461 – 0.7876 (**4.1 points**) | 1.30 |
+
+Temperature strongly determines which candidate the model emits *first* —
+15 points of `rec@1` between the coldest and hottest settings — and consensus
+ranking removes nearly three-quarters of that. Tuning the decoder was mostly a
+way of getting the ordering right by accident; ordering it directly is better and
+cheaper. This also means the choice of temperature matters much less than it
+appears to, which is a convenient robustness property for the weekend runs.
+
+**Budget under-fill costs nothing, confirming night 3 from a second direction.**
+Temperature trades diversity against per-candidate correctness exactly as
+expected — validity 0.952 → 0.910 and distinct candidates 16.5 → 20.4 from T=0.7
+to T=1.1 — and `rec@20` does not improve at the diverse end. At T=0.7 the model
+fills barely half its budget and recovers as well as or better than at T=1.1
+where it fills three-quarters. Night 3 found under-fill concentrated on queries
+the model had already solved; this says the same thing from the other side.
+**Diversity is not the binding constraint. Per-candidate correctness is.**
 
 ## Stages 2–4 — training variance
 

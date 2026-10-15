@@ -1,0 +1,4 @@
+[10-15 18:35:17] === night 4 start, git 7918317, 795 min to 07:50 ===
+[10-15 18:35:17] stage 1: decode sweep on small_1m
+[10-15 19:23:21] stage 1 exit=0
+[10-15 19:23:21] stage 2: variance seed 1, 8,508 steps
