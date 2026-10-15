@@ -1,0 +1,78 @@
+{
+  "cold": {
+    "dump": "results/overnight4/outcomes_decode/small_1m.jsonl",
+    "label": "T=0.7",
+    "samples_per_query": 138.97
+  },
+  "warm": {
+    "dump": "results/overnight3/outcomes/small_1m.jsonl",
+    "label": "T=1.0",
+    "samples_per_query": 122.36
+  },
+  "k": 20,
+  "caps": {
+    "20": {
+      "warm": 0.8726993865030674,
+      "cold": 0.8890593047034765,
+      "gap_points": 1.6359918200409052,
+      "paired_se_points": 0.4685660219791247,
+      "mcnemar_p": 0.0006279472715818218,
+      "cold_only": 58,
+      "warm_only": 26
+    },
+    "40": {
+      "warm": 0.8941717791411042,
+      "cold": 0.9049079754601227,
+      "gap_points": 1.0736196319018454,
+      "paired_se_points": 0.43681000742932163,
+      "mcnemar_p": 0.018617751433194638,
+      "cold_only": 47,
+      "warm_only": 26
+    },
+    "60": {
+      "warm": 0.8951942740286298,
+      "cold": 0.9059304703476483,
+      "gap_points": 1.0736196319018454,
+      "paired_se_points": 0.44275327391842473,
+      "mcnemar_p": 0.020298406990107445,
+      "cold_only": 48,
+      "warm_only": 27
+    },
+    "80": {
+      "warm": 0.8962167689161554,
+      "cold": 0.9074642126789366,
+      "gap_points": 1.1247443762781195,
+      "paired_se_points": 0.4397916803191527,
+      "mcnemar_p": 0.014079981429530057,
+      "cold_only": 48,
+      "warm_only": 26
+    },
+    "100": {
+      "warm": 0.8962167689161554,
+      "cold": 0.9074642126789366,
+      "gap_points": 1.1247443762781195,
+      "paired_se_points": 0.4397916803191527,
+      "mcnemar_p": 0.014079981429530057,
+      "cold_only": 48,
+      "warm_only": 26
+    },
+    "120": {
+      "warm": 0.8962167689161554,
+      "cold": 0.9079754601226994,
+      "gap_points": 1.1758691206543936,
+      "paired_se_points": 0.43681000742932163,
+      "mcnemar_p": 0.009542211425865475,
+      "cold_only": 48,
+      "warm_only": 25
+    },
+    "all": {
+      "warm": 0.8962167689161554,
+      "cold": 0.9079754601226994,
+      "gap_points": 1.1758691206543936,
+      "paired_se_points": 0.43681000742932163,
+      "mcnemar_p": 0.009542211425865475,
+      "cold_only": 48,
+      "warm_only": 25
+    }
+  }
+}

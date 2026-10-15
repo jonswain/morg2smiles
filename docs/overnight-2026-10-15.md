@@ -13,8 +13,28 @@ stage 3  variance seed 2, 8,508 steps                    22:25 -> 01:21
 stage 4  variance seed 3, 8,508 steps                    01:21 -> 04:22
 stage 5  score all three on the common protocol          04:22 -> 04:51
 stage 6  verify the swept decode setting                 04:51 -> 05:08
-stage 7  re-run stage 6 with dumps, for a paired test    05:19 -> 05:55
+stage 7  re-run stage 6 with dumps, for a paired test    05:19 -> 05:36
+stage 8  re-measure the T=1.0 default, matched code      05:36 -> __:__
+stage 9  is colder than 0.7 better? (tuning set)         __:__ -> __:__
 ```
+
+Every stage completed, the driver finishing with 161 minutes of its window
+unused; stages 7 to 9 and four free analyses of the dumps (5b to 5d) were added
+in that time.
+
+The headline is the **error bar**. Three runs identical but for `train.seed`
+differ by up to 1.43 points of `rec@20` against a paired standard error of 0.8
+points, so no gap below about 1.6 points between two training runs in this
+repository has ever meant anything. That retires night 3's count-fingerprint
+question as a genuine null (p = 0.32) and leaves every other claim the project
+has made standing, the narrowest at four standard errors.
+
+Two more results came out of the same three runs. The seeds **agree on 80% of
+the evaluation set while proposing almost disjoint molecules** — Jaccard 0.098 —
+so the remaining misses are a property of the molecules, which is night 3's
+capability ceiling confirmed along an independent path. And **pooling the votes
+of models already on disk reaches `rec@20` 0.9039**, the best this project has
+recorded, with no training at all.
 
 ---
 
