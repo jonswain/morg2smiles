@@ -31,6 +31,10 @@ dist/
 !/results/overnight4/comparison_variance.json
 !/results/overnight4/comparison_decode.json
 !/results/overnight4/driver.log
+!/results/overnight4/variance_analysis.json
+!/results/overnight4/paired_tests.json
+!/results/overnight4/paired_tests_consensus.json
+!/results/overnight4/comparison_decode_dumped.json
 !/results/overnight3/
 /results/overnight3/*
 !/results/overnight3/comparison_topup.json

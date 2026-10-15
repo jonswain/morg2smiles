@@ -7,12 +7,13 @@ this repository — single-run training variance.
 
 ```
 stage 0  consensus ranking shipped, dumps re-scored      18:26 -> 18:35
-stage 1  decode sweep on small_1m (disjoint tuning set)  18:35 -> __:__
-stage 2  variance seed 1, 8,508 steps                    __:__ -> __:__
-stage 3  variance seed 2, 8,508 steps                    __:__ -> __:__
-stage 4  variance seed 3, 8,508 steps                    __:__ -> __:__
-stage 5  score all three on the common protocol          __:__ -> __:__
-stage 6  verify the swept decode setting                 __:__ -> __:__
+stage 1  decode sweep on small_1m (disjoint tuning set)  18:35 -> 19:23
+stage 2  variance seed 1, 8,508 steps                    19:23 -> 22:25
+stage 3  variance seed 2, 8,508 steps                    22:25 -> 01:21
+stage 4  variance seed 3, 8,508 steps                    01:21 -> 04:22
+stage 5  score all three on the common protocol          04:22 -> 04:51
+stage 6  verify the swept decode setting                 04:51 -> 05:08
+stage 7  re-run stage 6 with dumps, for a paired test    05:19 -> 05:55
 ```
 
 ---
@@ -164,14 +165,149 @@ where it fills three-quarters. Night 3 found under-fill concentrated on queries
 the model had already solved; this says the same thing from the other side.
 **Diversity is not the binding constraint. Per-candidate correctness is.**
 
-## Stages 2–4 — training variance
 
-_pending_
+---
 
-## Stage 5 — the variance result
+## Stages 2–5 — the error bar this project never had
 
-_pending_
+Every comparison in this repository, across four nights, has been a difference
+between two numbers each measured once. Three retractions have already come out
+of that, all of them cases where two things varied at once. But even a clean
+comparison needs to clear the noise, and nobody here had ever measured the
+noise. This was the night to do it.
 
-## Stage 6 — verifying the swept decode setting
+Three runs, identical in every respect but `train.seed` (1, 2, 3): 8,508 steps
+on the 100k shard, `patience: 0` so the schedule could not end early, scored on
+the common protocol. Just under three hours each, 19:23 to 04:22.
 
-_pending_
+8,508 steps was chosen because `small_100k`, `small_full` and `small_1m_matched`
+all share it. The sd measured here therefore applies directly to the
+fixed-compute data axis, which is where night 2's retracted scaling fit lived
+and where the smallest surviving claim in the project sits.
+
+| seed | rec@1 | rec@5 | rec@20 | con@1 | con@20 | validity |
+|---|---|---|---|---|---|---|
+| 1 | 0.1897 | 0.4243 | 0.6053 | 0.4059 | 0.6115 | 0.800 |
+| 2 | 0.1922 | 0.4387 | 0.6084 | 0.4121 | 0.6130 | 0.800 |
+| 3 | 0.1805 | 0.4228 | 0.5941 | 0.3978 | 0.6022 | 0.791 |
+| **mean** | 0.1875 | 0.4286 | **0.6026** | 0.4052 | **0.6089** | 0.797 |
+| **sd (points)** | 0.62 | 0.87 | **0.75** | 0.72 | **0.58** | 0.52 |
+| range (points) | 1.18 | 1.58 | 1.43 | 1.43 | 1.07 | 0.92 |
+
+**The headline number is an sd of 0.75 points of `rec@20`**, and a spread of
+1.43 points between the luckiest and unluckiest of three seeds that differ in
+nothing but their random initialisation and shuffling order.
+
+Two independent checks agree with it. The training-time validation metric on
+each run's own split — a different measurement on different molecules — has an
+sd of 0.42 points (0.6121, 0.6126, 0.6051). And consensus ordering, which
+night 3 showed absorbs decoder noise, also shrinks seed noise: 0.58 points
+against 0.75.
+
+### The right error bar is the paired one
+
+A detail that matters more than the sd itself. Every run in the common protocol
+is scored on the *same* 1,956 molecules, so comparing two runs is a paired
+comparison, and the binomial error on 1,956 queries — 1.11 points at p=0.60, the
+figure that looks like the obvious uncertainty — is the wrong one. It describes
+the error of a *single* rate against the population of all molecules, not the
+error of a *difference* measured twice on one fixed set, where everything the
+two runs agree about cancels.
+
+What does not cancel is disagreement, and the seeds disagree on 12.7% to 14.1%
+of queries. McNemar's standard error, `sqrt(discordant)/n`:
+
+| pair | difference | discordant | paired SE |
+|---|---|---|---|
+| s1 − s2 | −0.31 pts | 248 (12.7%) | 0.81 pts |
+| s1 − s3 | +1.12 pts | 254 (13.0%) | 0.81 pts |
+| s2 − s3 | +1.43 pts | 276 (14.1%) | 0.85 pts |
+
+These three differences have a true value of exactly zero, and one of them is
++1.43 points — 1.7 paired standard errors. That is the whole lesson in one
+number.
+
+**The operating rule, for every future comparison in this project: a gap in
+`rec@20` between two training runs below about 1.6 points (two paired standard
+errors) is not evidence of anything.** Below 2.4 points it is weak. The sd from
+three seeds and the McNemar error bar from 1,956 queries agree to within the
+precision three seeds can offer — which is poor, since an sd on two degrees of
+freedom is itself uncertain by roughly half its own size, so the McNemar figure,
+computed from 1,956 paired observations, is the one to quote.
+
+### Four fifths of the evaluation set has nothing to say about the model
+
+The dumps answer something the summary table cannot: do the seeds fail on the
+same molecules?
+
+| seeds solving the query | observed | if seeds were independent | median heavy atoms |
+|---|---|---|---|
+| 0 of 3 | **585** | 123 | 34 |
+| 1 of 3 | 188 | 558 | 29 |
+| 2 of 3 | 201 | 847 | 28 |
+| 3 of 3 | **982** | 428 | 24 |
+
+If each seed solved each query with independent probability 0.6026, 28% of
+queries would be unanimous. **80.1% are.** 982 queries are recovered by every
+seed and 585 by none; only 389 — 19.9% — are decided by which seed you trained.
+Across those 389 contested queries the seeds succeed 50.6% of the time, which is
+to say that on the contested fifth a run is a coin flip, and `rec@20` decomposes
+into 50.2 points that are free and 10.1 points of luck.
+
+The median-size column is the same finding night 3 reached from the failure
+taxonomy, arrived at along a completely independent path: 24 heavy atoms for the
+molecules every seed gets, rising monotonically to 34 for the molecules no seed
+gets. Night 3 inferred a capability ceiling concentrated on large molecules from
+one model's misses, where the obvious objection was that one model's bad luck
+had been promoted to a law. Three seeds agreeing on which molecules are
+impossible removes that objection. **The ceiling is in the molecules, and
+training more seeds will not move it.**
+
+## Stage 5b — every past claim, re-tested against that error bar
+
+The error bar is only worth measuring if it is then applied. Every run in the
+common protocol was dumped, so `scripts/paired_tests.py` computes McNemar's
+exact test for all 28 pairs. The p-value asks whether a gap could be sampling
+noise on these molecules; the last column asks the separate question of whether
+it could be seed luck. A claim has to clear both.
+
+| comparison | gap (rec@20) | paired SE | × SE | McNemar p | × seed sd |
+|---|---|---|---|---|---|
+| `count_fp_100k` → `small_100k` | +0.92 | 0.87 | +1.1 | **0.320** | +0.9 |
+| `small_100k` → `small_1m_matched` | +3.43 | 0.83 | +4.1 | 4.6e-05 | +3.2 |
+| `small_100k_long` → `small_1m` | +5.01 | 0.66 | +7.6 | 7.8e-15 | +4.7 |
+| `small_1m_matched` → `small_full` | +10.79 | 0.92 | +11.7 | 7.4e-34 | +10.2 |
+| `small_100k` → `small_100k_long` | +24.64 | 1.14 | +21.6 | 2.2e-133 | +23.2 |
+| `small_100k` → `small_1m` | +29.65 | 1.24 | +24.0 | 2.7e-169 | +28.0 |
+
+(All 28 pairs in `results/overnight4/paired_tests.json`, and under consensus
+ordering in `paired_tests_consensus.json`.)
+
+**Night 3's count-fingerprint result is now a real null.** Count fingerprints
+scored 0.92 points below binary at 100k, which night 3 reported as "no large
+gain" rather than "worse" on the grounds that the variance was unmeasured. The
+variance is now measured, the gap is 1.1 paired standard errors, and McNemar
+gives **p = 0.32** — under consensus ordering, +0.72 points and p = 0.45. The
+caution was correct and is now quantified: on this protocol, at this scale,
+count fingerprints and binary fingerprints are indistinguishable. Cancelling the
+8-hour comparable-scale count run was the right call.
+
+**Everything else the project has claimed survives, and nothing is close.** The
+smallest surviving claim is the fixed-compute data axis, `small_100k` →
+`small_1m_matched` at +3.43 points: four paired standard errors and 3.2 seed
+sds, so it holds, but it is also the only claim that was ever at risk, and it is
+the axis whose fit was retracted on night 2 for a different reason. Every other
+gap in the table clears the bar by 7 to 40 standard errors. The step axis
+(+24.6 points for 2.5× compute) and the corpus axis at matched steps
+(+5.0 points per decade) are both far outside the noise, and their *ratio* — the
+finding that compute buys five times what data buys here — rests on two gaps
+that are 7.6 and 21.6 standard errors wide.
+
+Two kinds of comparison in this project need none of this and should not be
+confused with the ones that do. Night 3's oversample fix and night 4's consensus
+ranking both hold the checkpoint, the candidate draws and the molecules fixed and
+change only how many candidates are kept or what order they are scored in. The
+oversample fix can only add candidates, so its +0.2 to +0.9 points cannot have a
+sign error; consensus ranking reorders a fixed set, and its +22 points are
+immune to training variance entirely. Neither needs a seed sd. Comparisons
+between *training runs* need it, and from tonight they have it.
