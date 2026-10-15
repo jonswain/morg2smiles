@@ -496,3 +496,92 @@ The experiment that follows from both checks is a **size-weighted training mix**
 metric has to be chosen before it runs, because the error bar now demands it:
 watch the **30–39 band** (568 queries, recovery 0.26 to 0.51), not the ≥50 band,
 where 41 queries give a standard error of 7 points and nothing is measurable.
+
+## Stages 6–9 — the decode setting, settled
+
+Stage 1 refused to adopt T=0.7 because a +1.55-point win, selected as the
+maximum of 15 correlated cells at n=386, is what no effect looks like. Stage 6
+ran it on the common protocol, where n=1,956 and the comparison is paired —
+same checkpoint, same molecules, only the temperature differs. **The refusal was
+right as procedure and wrong about the answer.**
+
+| | rec@1 | rec@5 | rec@20 |
+|---|---|---|---|
+| T=1.0, generation order | 0.5302 | 0.7996 | 0.8947 |
+| T=0.7, generation order | 0.5726 | 0.8292 | 0.9064 |
+| T=1.0, consensus | 0.7526 | 0.8676 | 0.8962 |
+| **T=0.7, consensus** | **0.7694** | **0.8834** | **0.9080** |
+| gap, McNemar p | +1.69, p=0.013 | +1.58, p=0.001 | +1.18, p=0.010 |
+
+**Sampling at T=0.7 is worth +1.18 points of `rec@20`, and it is a real
+effect**: 48 queries gained against 25 lost, a paired standard error of 0.44
+points, p = 0.0095.
+
+That error bar is the one from stage 5c, not the one stage 1 guessed. 0.44
+points, against the 0.68 predicted from the binomial and the 1.6-point rule for
+training runs — because the two arms share a checkpoint and most of their
+candidates, so almost everything cancels.
+
+### Three controls
+
+**The baseline is matched, bit for bit.** The T=1.0 arm came from night 3's
+dump, written by code that predates stage 0's changes. Stage 8 re-measured the
+default with tonight's code: 0.5302 / 0.7996 / 0.8947 by generation order,
+0.7526 / 0.8676 / 0.8962 by consensus, 123.4 samples per query, fill 0.6391 —
+**identical to night 3 in every digit**, so the sampling path is unchanged and
+the comparison needs no correction. Three retractions in this project came from
+comparisons where a second thing had also moved; this is the check that costs 35
+minutes and removes the whole class of objection.
+
+**The gain is not bought with extra sampling.** A colder decoder repeats itself,
+so the adaptive top-up keeps drawing and gives up: 140.3 samples per query
+against 123.4, which is 14% more forward passes for the same 20 oracle calls.
+Truncating both arms to the first M candidates drawn, in draw order:
+
+| candidates seen | T=1.0 | T=0.7 | gap | p |
+|---|---|---|---|---|
+| 20 | 0.8727 | 0.8891 | **+1.64** | 6e-04 |
+| 40 | 0.8942 | 0.9049 | +1.07 | 0.019 |
+| 80 | 0.8962 | 0.9075 | +1.12 | 0.014 |
+| all | 0.8962 | 0.9080 | +1.18 | 0.010 |
+
+T=0.7 wins at every matched budget, and by most at the tightest one. T=1.0 has
+saturated by 80 candidates while T=0.7 is still climbing at 120. The gain is the
+decoder, not the compute — and under a *sampling* budget rather than an oracle
+budget the colder setting looks better still.
+
+**0.7 is not the edge of a better region.** Stage 1's grid stopped at its
+coldest cell, so stage 9 extended it on the same disjoint tuning molecules:
+consensus `rec@20` of 0.8990 at T=0.4, 0.9093 at 0.5 and 0.9145 at 0.6, against
+0.9145 at 0.7, 0.8990 at 1.0 and 0.8782 at 1.1. Eight temperatures now trace a
+single peak across 0.6–0.7 with falloff on both sides, so the plateau is found
+rather than guessed at from an endpoint.
+
+### The gain is entirely on large molecules
+
+| heavy atoms | n | T=1.0 | T=0.7 | gap |
+|---|---|---|---|---|
+| 0–24 | 712 | 0.9537 | 0.9579 | +0.42 |
+| 25–29 | 512 | 0.9570 | 0.9590 | +0.20 |
+| 30–34 | 373 | 0.8901 | 0.8981 | +0.80 |
+| **35–44** | **287** | **0.7666** | **0.8153** | **+4.88** |
+| 45+ | 72 | 0.4444 | 0.4722 | +2.78 |
+
+Collapsed and tested: **≥35 heavy atoms, +4.46 points on 359 queries, p = 0.014;
+below 35, +0.44 points on 1,597 queries, p = 0.31.** The queries T=0.7 gains have
+a median of 35 heavy atoms, against 26 for the ones both settings already solve.
+
+**This is the first intervention in the project to move the band where the
+ceiling lives.** The mechanism is plausible without being proven here: sampling
+error compounds along a sequence, so the molecules needing the longest strings
+are the ones a hot decoder is most likely to derail, and the failures above 35
+heavy atoms were never collisions or missing information. One caveat on the
+size of it — five bins were inspected before collapsing to two, so +4.9 locates
+the effect better than it measures it.
+
+It is also complementary to consensus ranking rather than redundant: at T=0.7,
+consensus ordering still lifts `rec@1` from 0.5726 to 0.7694. And stage 1's
+claim that consensus absorbs about three-quarters of the decoder's temperature
+sensitivity holds in direction but was overstated: between these two
+temperatures at n=1,956, `rec@1` moves 4.24 points by generation order and 1.69
+by consensus, so **consensus absorbs 60%, not 75%.**
