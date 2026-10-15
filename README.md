@@ -8,9 +8,9 @@
 
 Generative recovery of SMILES strings from Morgan (ECFP) fingerprints.
 
-**Nearly 90% of held-out Morgan fingerprints can be inverted exactly within 20
-guesses** by an 8M-parameter model trained overnight on a laptop, and **three in
-four on the *first* guess**.
+**Over 91% of held-out Morgan fingerprints can be inverted exactly within 20
+guesses** by an 8M-parameter model trained overnight on a laptop, and **more
+than three in four on the *first* guess**.
 
 Morgan fingerprints are normally treated as one-way: hash atom environments
 into bits, and the molecule is gone. This project tests how true that is, by
@@ -237,7 +237,8 @@ target.
 
 One common protocol: 2,000 held-out molecules (1,956 fingerprint-unseen) in
 **no** model's training set, `fp_unseen` computed against the union of all
-1,989,502 training fingerprints, fixed seed, molecule budget.
+1,989,502 training fingerprints, fixed seed, molecule budget, sampled at
+temperature 1.0 — held fixed across every night so the rows stay comparable.
 
 | | data | steps | rec@1 | rec@5 | **rec@20** | struct@20 | validity |
 |---|---|---|---|---|---|---|---|
@@ -249,8 +250,8 @@ One common protocol: 2,000 held-out molecules (1,956 fingerprint-unseen) in
 | retrieval baseline | — | — | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 1.000 |
 
 **Nearly nine in ten held-out Morgan fingerprints can be inverted exactly
-within 20 guesses, and three in four on the first guess.** Mean best Tanimoto
-is 0.976, so even the failures are near misses.
+within 20 guesses at the protocol's settings, and three in four on the first
+guess.** Mean best Tanimoto is 0.976, so even the failures are near misses.
 
 Candidates are ranked by **consensus**: how many of the model's samples spell
 the same molecule. Sampling the same answer by several routes turns out to be a
@@ -260,9 +261,15 @@ proposal order on this model and between 11 and 26 points on every other
 checkpoint measured ([`docs/overnight-2026-10-15.md`](docs/overnight-2026-10-15.md)).
 The `rec@20` column is nearly insensitive to it, as it should be.
 
-Pooling votes across the three models in the table, still at 20 oracle calls,
-reaches **0.9039** — 0.77 points above the 1M model alone (p = 0.001) and the
-best figure here, from no additional training.
+Two further points come from decoding rather than training, which is why the
+headline is above the table. Sampling the 1M model at **temperature 0.6** rather
+than 1.0 takes it to `rec@1` 0.7730 and **`rec@20` 0.9162** (+1.99 points,
+p = 1.3e-05), and essentially all of that is on large molecules: +7.5 points at
+35 or more heavy atoms against +0.75 below. Pooling the votes of three
+samplings at different temperatures, still within 20 oracle calls, reaches
+**0.9279** — the best figure here, from no additional training. The protocol
+table stays at 1.0 so earlier nights remain comparable; `invert` and
+`Morg2Smiles.generate` default to 0.6.
 
 **How big a gap counts as a difference.** Three runs identical in everything but
 `train.seed` scored 0.6053, 0.6084 and 0.5941, so single-run `rec@20` carries an

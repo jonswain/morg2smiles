@@ -1,0 +1,97 @@
+{
+  "seeds": [
+    "t06",
+    "t07",
+    "t10"
+  ],
+  "n_fp_unseen": 1956,
+  "schemes": {
+    "1": {
+      "single_per_seed": {
+        "t06": 0.7730061349693251,
+        "t07": 0.7694274028629857,
+        "t10": 0.7525562372188139
+      },
+      "single_mean": 0.7649965916837083,
+      "round_robin": 0.7730061349693251,
+      "pooled_votes": 0.7811860940695297,
+      "union_3k": 0.8277096114519428,
+      "oracle_calls": {
+        "single": 1,
+        "round_robin": 1,
+        "pooled_votes": 1,
+        "union_3k": 3
+      },
+      "best_single": 0.7730061349693251,
+      "pooled_vs_best_single": {
+        "gap_points": 0.8179959100204526,
+        "ensemble_only": 48,
+        "best_only": 32,
+        "paired_se_points": 0.45727361503063185,
+        "mcnemar_p": 0.09291188222054621
+      },
+      "round_robin_gain_points": 0.8009543285616871,
+      "pooled_vs_best_single_points": 0.8179959100204526,
+      "pooled_gain_points": 1.6189502385821397,
+      "union_gain_points": 6.271301976823452
+    },
+    "5": {
+      "single_per_seed": {
+        "t06": 0.8870143149284253,
+        "t07": 0.8834355828220859,
+        "t10": 0.8675869120654397
+      },
+      "single_mean": 0.8793456032719836,
+      "round_robin": 0.8982617586912065,
+      "pooled_votes": 0.9049079754601227,
+      "union_3k": 0.9120654396728016,
+      "oracle_calls": {
+        "single": 5,
+        "round_robin": 5,
+        "pooled_votes": 5,
+        "union_3k": 15
+      },
+      "best_single": 0.8870143149284253,
+      "pooled_vs_best_single": {
+        "gap_points": 1.7893660531697386,
+        "ensemble_only": 45,
+        "best_only": 10,
+        "paired_se_points": 0.3791512518965063,
+        "mcnemar_p": 2.0572645155203517e-06
+      },
+      "round_robin_gain_points": 1.8916155419222869,
+      "pooled_vs_best_single_points": 1.7893660531697386,
+      "pooled_gain_points": 2.556237218813906,
+      "union_gain_points": 3.271983640081799
+    },
+    "20": {
+      "single_per_seed": {
+        "t06": 0.9161554192229039,
+        "t07": 0.9079754601226994,
+        "t10": 0.8962167689161554
+      },
+      "single_mean": 0.9067825494205862,
+      "round_robin": 0.9207566462167689,
+      "pooled_votes": 0.9279141104294478,
+      "union_3k": 0.9325153374233128,
+      "oracle_calls": {
+        "single": 20,
+        "round_robin": 20,
+        "pooled_votes": 20,
+        "union_3k": 60
+      },
+      "best_single": 0.9161554192229039,
+      "pooled_vs_best_single": {
+        "gap_points": 1.1758691206543936,
+        "ensemble_only": 28,
+        "best_only": 5,
+        "paired_se_points": 0.2936892968577724,
+        "mcnemar_p": 6.618769839406013e-05
+      },
+      "round_robin_gain_points": 1.3974096796182667,
+      "pooled_vs_best_single_points": 1.1758691206543936,
+      "pooled_gain_points": 2.11315610088616,
+      "union_gain_points": 2.5732788002726603
+    }
+  }
+}

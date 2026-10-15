@@ -14,6 +14,7 @@ The headline metric is recovery@k on fingerprints absent from training; see
 :mod:`morg2smiles.metrics` for why that qualifier is the whole point.
 """
 
+from .defaults import DEFAULT_TEMPERATURE
 from .fingerprints import FPConfig, compute, compute_dense, tanimoto
 from .generate import Morg2Smiles
 from .metrics import evaluate, recovery_at_k
@@ -24,6 +25,7 @@ from .tokenizer import SmilesTokenizer
 __version__ = "0.1.0"
 
 __all__ = [
+    "DEFAULT_TEMPERATURE",
     "FPConfig",
     "ModelConfig",
     "Morg2Smiles",

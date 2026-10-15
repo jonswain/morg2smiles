@@ -38,6 +38,11 @@ dist/
 !/results/overnight4/ensemble_seeds.json
 !/results/overnight4/ensemble_heterogeneous.json
 !/results/overnight4/decode_matched_cost.json
+!/results/overnight4/decode_matched_cost_t06.json
+!/results/overnight4/decode_sweep_cold.json
+!/results/overnight4/comparison_t06.json
+!/results/overnight4/comparison_default_dumped.json
+!/results/overnight4/ensemble_temperatures.json
 !/results/overnight3/
 /results/overnight3/*
 !/results/overnight3/comparison_topup.json

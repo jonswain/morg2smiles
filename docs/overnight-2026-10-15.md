@@ -14,8 +14,9 @@ stage 4  variance seed 3, 8,508 steps                    01:21 -> 04:22
 stage 5  score all three on the common protocol          04:22 -> 04:51
 stage 6  verify the swept decode setting                 04:51 -> 05:08
 stage 7  re-run stage 6 with dumps, for a paired test    05:19 -> 05:36
-stage 8  re-measure the T=1.0 default, matched code      05:36 -> __:__
-stage 9  is colder than 0.7 better? (tuning set)         __:__ -> __:__
+stage 8  re-measure the T=1.0 default, matched code      05:36 -> 05:53
+stage 9  is colder than 0.7 better? (tuning set)         05:53 -> 06:05
+stage 10 verify T=0.6 on the common protocol             06:05 -> 06:38
 ```
 
 Every stage completed, the driver finishing with 161 minutes of its window
@@ -32,9 +33,15 @@ has made standing, the narrowest at four standard errors.
 Two more results came out of the same three runs. The seeds **agree on 80% of
 the evaluation set while proposing almost disjoint molecules** — Jaccard 0.098 —
 so the remaining misses are a property of the molecules, which is night 3's
-capability ceiling confirmed along an independent path. And **pooling the votes
-of models already on disk reaches `rec@20` 0.9039**, the best this project has
-recorded, with no training at all.
+capability ceiling confirmed along an independent path. And **pooling votes across
+several samplings of one model reaches `rec@20` 0.9279**, the best this project
+has recorded, from no training at all.
+
+The decode question that stage 1 left open also closed, in the direction stage 1
+doubted: sampling at **T=0.6 instead of 1.0 is worth +1.99 points** on the common
+protocol (p = 1.3e-05), and **all of it is on molecules of 35 heavy atoms or
+more** (+7.52 points there, +0.75 below). The first thing in this project to
+move the band where the ceiling lives turned out to be a decoder setting.
 
 ---
 
@@ -585,6 +592,75 @@ claim that consensus absorbs about three-quarters of the decoder's temperature
 sensitivity holds in direction but was overstated: between these two
 temperatures at n=1,956, `rec@1` moves 4.24 points by generation order and 1.69
 by consensus, so **consensus absorbs 60%, not 75%.**
+
+## Stage 10 — T=0.6 is better still, and three temperatures beat all of them
+
+Stage 9's tuning-set curve tied 0.6 with 0.7, so 0.6 was chosen on that evidence
+and then measured on the common protocol it had not been fitted to.
+
+| T | rec@1 | rec@5 | rec@20 | validity | uniq/q | samples/q |
+|---|---|---|---|---|---|---|
+| 1.0 (old default) | 0.7526 | 0.8676 | 0.8962 | 0.921 | 18.9 | 123.4 |
+| 0.7 | 0.7694 | 0.8834 | 0.9080 | 0.946 | 15.8 | 140.3 |
+| **0.6** | **0.7730** | **0.8870** | **0.9162** | 0.948 | 14.7 | 145.9 |
+
+(Consensus ordering throughout.)
+
+**T=0.6 reaches 0.9162, +1.99 points over the default at p = 1.3e-05**, and it
+wins at every matched candidate budget too — +2.40 points when only 20
+candidates are seen (p = 7.7e-06). Against T=0.7 it is +0.82 points at p = 0.056,
+which is to say **0.6 and 0.7 are not distinguishable from each other** while
+both clearly beat 1.0. Two independent evaluation sets put 0.6 at or above 0.7,
+so 0.6 is the adopted setting, and the honest summary is a plateau across
+0.6–0.7 rather than a sharp optimum.
+
+The large-molecule effect deepens monotonically as the decoder cools:
+
+| | ≥35 heavy atoms (n=359) | <35 (n=1,597) |
+|---|---|---|
+| T=0.7 − T=1.0 | +4.46, p=0.014 | +0.44, p=0.31 |
+| **T=0.6 − T=1.0** | **+7.52, p=1.4e-05** | +0.75, p=0.08 |
+
+In the 35–44 band alone, T=0.6 moves recovery from 0.7666 to 0.8502. **Eight
+points of the hardest band, from a decoder setting and no retraining.** It
+suggests the optimum temperature is size-dependent — colder for longer strings —
+which is a cheap and well-motivated next experiment, since the fingerprint's
+bit count predicts molecule size before anything is generated.
+
+### Three temperatures of one model, pooled
+
+The seeds showed that cross-model agreement ranks better than within-model
+agreement. Three temperatures of the *same* model are the cheapest possible
+version of that, and all three dumps already existed.
+
+| scheme | oracle calls | rec@1 | rec@5 | rec@20 |
+|---|---|---|---|---|
+| best single (T=0.6) | 20 | 0.7730 | 0.8870 | 0.9162 |
+| **T=0.6/0.7/1.0 pooled** | **20** | **0.7812** | **0.9049** | **0.9279** |
+| gap, McNemar p | | +0.82, p=0.09 | +1.79, p=2e-06 | **+1.18, p=7e-05** |
+
+**0.9279 is the best `rec@20` this project has recorded**, from one trained
+model, one fingerprint, and twenty oracle calls.
+
+It costs 3× the forward passes, so the control matters. Capping each arm so the
+three together see about as many candidates as T=0.6 sees alone:
+
+| per-arm cap | total candidates | pooled | vs T=0.6 alone | p |
+|---|---|---|---|---|
+| 20 | 60 | 0.9131 | −0.31 | 0.39 |
+| **34** | **~102** | **0.9238** | **+0.77** | **0.006** |
+| 50 | 150 | 0.9259 | +0.97 | 0.001 |
+| all | ~440 | 0.9279 | +1.18 | 7e-05 |
+
+**At matched sampling cost the ensemble still wins**, by +0.77 points, and more
+if you spend more. T=0.6 alone is saturated — its curve runs 0.9151, 0.9156,
+0.9162 from 80 candidates to all of them — so the extra samples are not what
+buys the gain. Mixing temperatures is.
+
+That refines stage 1's conclusion rather than contradicting it. Diversity
+*within* one temperature is exhausted and buys nothing, which is what stage 1
+and night 3 both found. Diversity *across* temperatures is not exhausted, and a
+cold arm and a hot arm make different mistakes.
 
 ---
 

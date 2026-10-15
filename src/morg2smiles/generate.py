@@ -23,6 +23,7 @@ import torch
 from torch import Tensor
 
 from .data.dataset import fp_to_indices
+from .defaults import DEFAULT_TEMPERATURE
 from .fingerprints import FPConfig, Sparse
 from .model import Morg2SmilesModel, select_device
 from .oracle import OracleResult, check_many
@@ -275,6 +276,7 @@ class Morg2Smiles:
         strategy: str = "sample",
         verified_only: bool = False,
         oversample: float = 2.0,
+        temperature: float = DEFAULT_TEMPERATURE,
         **kwargs,
     ) -> list[str]:
         """Generate candidate SMILES for one fingerprint, best first.
@@ -289,6 +291,9 @@ class Morg2Smiles:
             oversample: Multiplier on how many raw strings to draw to fill k
                 distinct molecules. Ignored by beam search, which returns
                 distinct sequences already.
+            temperature: Softmax temperature. Defaults to
+                :data:`DEFAULT_TEMPERATURE`, which is colder than 1.0 for the
+                reasons given there.
             verified_only: Return only candidates the oracle accepts. The
                 default returns everything, ordered so verified matches come
                 first, so a caller that wants a best-effort answer still gets
@@ -304,6 +309,8 @@ class Morg2Smiles:
             well and costs nothing; see docs/overnight-2026-10-15.md.
         """
         sparse = _as_sparse(fp, self.fp_config)
+        if strategy == "sample":
+            kwargs["temperature"] = temperature
         results = self._judge(sparse, k=k, strategy=strategy, oversample=oversample, **kwargs)
         if verified_only:
             return [r.smiles for r in results if r.fp_match]

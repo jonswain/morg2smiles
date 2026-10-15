@@ -14,6 +14,7 @@ from pathlib import Path
 import click
 
 from . import __version__
+from .defaults import DEFAULT_TEMPERATURE
 
 
 @click.group(context_settings={"help_option_names": ["-h", "--help"]})
@@ -86,7 +87,7 @@ def train(config: Path, shard_dir: Path | None, out_dir: Path | None, epochs: in
     show_default=True,
 )
 @click.option("--k", default=20, show_default=True, help="Candidates to generate.")
-@click.option("--temperature", default=1.0, show_default=True)
+@click.option("--temperature", default=DEFAULT_TEMPERATURE, show_default=True)
 @click.option("--top-p", default=1.0, show_default=True)
 @click.option(
     "--verified-only",
