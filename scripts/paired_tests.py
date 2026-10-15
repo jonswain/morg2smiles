@@ -20,23 +20,15 @@ from __future__ import annotations
 
 import json
 from itertools import combinations
-from math import comb, sqrt
+from math import sqrt
 from pathlib import Path
 
 import click
 
+from morg2smiles.stats import discordance, mcnemar_exact, paired_se
 from scripts.variance_analysis import hits, load
 
 SEED_SD_POINTS = 0.75  # rec@20, generation order, three seeds at 8,508 steps
-
-
-def mcnemar_exact(b: int, c: int) -> float:
-    n = b + c
-    if n == 0:
-        return 1.0
-    lo = min(b, c)
-    tail = sum(comb(n, i) for i in range(lo + 1)) / 2**n
-    return min(1.0, 2 * tail)
 
 
 @click.command()
@@ -67,10 +59,9 @@ def main(dumps: Path, budget: str, k: int, order: str, pair: tuple[str, ...], ou
     rows = []
     for a, b_name in wanted:
         ha, hb = runs[a], runs[b_name]
-        b = sum(1 for x, y in zip(ha, hb, strict=True) if not x and y)
-        c = sum(1 for x, y in zip(ha, hb, strict=True) if x and not y)
+        b, c = discordance(ha, hb)
         gap = 100 * (sum(hb) - sum(ha)) / n
-        se = 100 * sqrt(b + c) / n
+        se = 100 * paired_se(b, c, n)
         rows.append(
             {
                 "a": a,
