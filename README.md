@@ -8,9 +8,9 @@
 
 Generative recovery of SMILES strings from Morgan (ECFP) fingerprints.
 
-**89% of held-out Morgan fingerprints can be inverted exactly within 20
-guesses** by an 8M-parameter model trained overnight on a laptop. Over half are
-recovered on the *first* guess.
+**Nearly 90% of held-out Morgan fingerprints can be inverted exactly within 20
+guesses** by an 8M-parameter model trained overnight on a laptop, and **three in
+four on the *first* guess**.
 
 Morgan fingerprints are normally treated as one-way: hash atom environments
 into bits, and the molecule is gone. This project tests how true that is, by
@@ -241,28 +241,43 @@ One common protocol: 2,000 held-out molecules (1,956 fingerprint-unseen) in
 
 | | data | steps | rec@1 | rec@5 | **rec@20** | struct@20 | validity |
 |---|---|---|---|---|---|---|---|
-| **8M, ChEMBL 1M** | 909,800 | 21,117 | 0.5302 | 0.7996 | **0.8926** | 0.8834 | 0.903 |
-| 8M, ChEMBL 100k, long | 90,682 | 21,117 | 0.4519 | 0.7214 | 0.8384 | 0.8252 | 0.887 |
-| 8M, ChEMBL full | 1,881,996 | 8,508 | 0.3113 | 0.5808 | 0.7347 | 0.7224 | 0.820 |
-| 8M, ChEMBL 1M, short | 909,800 | 8,508 | 0.2091 | 0.4755 | 0.6299 | 0.6161 | 0.794 |
-| 8M, ChEMBL 100k | 90,682 | 8,508 | 0.1800 | 0.4182 | 0.5890 | 0.5787 | 0.794 |
+| **8M, ChEMBL 1M** | 909,800 | 21,117 | 0.7526 | 0.8676 | **0.8962** | 0.8860 | 0.921 |
+| 8M, ChEMBL 100k, long | 90,682 | 21,117 | 0.6764 | 0.8057 | 0.8476 | 0.8338 | 0.908 |
+| 8M, ChEMBL full | 1,881,996 | 8,508 | 0.5700 | 0.6917 | 0.7444 | 0.7342 | 0.827 |
+| 8M, ChEMBL 1M, short | 909,800 | 8,508 | 0.4407 | 0.5874 | 0.6401 | 0.6278 | 0.795 |
+| 8M, ChEMBL 100k | 90,682 | 8,508 | 0.3793 | 0.5297 | 0.5992 | 0.5879 | 0.790 |
 | retrieval baseline | — | — | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 1.000 |
 
 **Nearly nine in ten held-out Morgan fingerprints can be inverted exactly
-within 20 guesses, and more than half on the first guess.** Mean best Tanimoto
-is 0.974, so even the failures are near misses.
+within 20 guesses, and three in four on the first guess.** Mean best Tanimoto
+is 0.976, so even the failures are near misses.
+
+Candidates are ranked by **consensus**: how many of the model's samples spell
+the same molecule. Sampling the same answer by several routes turns out to be a
+good confidence signal and it costs nothing — the spellings are already drawn,
+and no extra oracle call is needed — which is worth 22 points of `rec@1` over
+proposal order on this model and between 11 and 26 points on every other
+checkpoint measured ([`docs/overnight-2026-10-15.md`](docs/overnight-2026-10-15.md)).
+The `rec@20` column is nearly insensitive to it, as it should be.
+
+**How big a gap counts as a difference.** Three runs identical in everything but
+`train.seed` scored 0.6053, 0.6084 and 0.5941, so single-run `rec@20` carries an
+sd of about 0.75 points; and since every run here is scored on the *same* 1,956
+molecules, the error bar for comparing two of them is McNemar's paired standard
+error of ~0.8 points. **Gaps below about 1.6 points are not evidence of
+anything**, and that threshold is applied to every claim below.
 
 The one axis these rows isolate cleanly is **compute**: the first and last rows
 share an identical 90,682-molecule corpus and differ only in step budget.
 
 | at fixed data | steps | rec@20 | absolute | error ratio |
 |---|---|---|---|---|
-| 90,682 molecules | 8,508 → 21,117 | 0.5890 → 0.8384 | **+24.9 pts** | 2.543× |
+| 90,682 molecules | 8,508 → 21,117 | 0.5992 → 0.8476 | **+24.9 pts** | 2.630× |
 
 Night 1 compared the 100k row at 8,508 steps against the 1M row at 21,117 and
-credited the whole 30.4-point gap to 10× the data. At least 24.9 of those points
-are available from compute on the small corpus alone, so that attribution was
-wrong. The correction is in
+credited the whole gap — 30.4 points as the protocol then measured it — to 10×
+the data. At least 24.9 of those points are available from compute on the small
+corpus alone, so that attribution was wrong. The correction is in
 [`docs/overnight-2026-10-10.md`](docs/overnight-2026-10-10.md), along with the
 same correction to the novel-scaffold penalty — it falls 12.7 → 4.2 points on
 *identical* data trained longer, a lower penalty than the 1M model's 6.2.
@@ -271,16 +286,25 @@ same correction to the novel-scaffold penalty — it falls 12.7 → 4.2 points o
 budget `steps × batch = corpus × passes` is an identity, so a larger shard
 always comes with proportionally fewer passes over each molecule, and the two
 cannot be separated. Measured at 8,508 steps the corpus direction is convex —
-0.5890, 0.6299, 0.7347 for 90,682, 909,800 and 1,881,996 molecules — which is
-not a shape any data-scaling law produces, and is the trace of those two effects
-moving oppositely. An earlier version of this section reported 1.45× error
-reduction per decade from a two-point fit; a third point, predicted in advance
-at 0.705 and measured at 0.6299, falsified it. Settling it needs a corpus sweep
-at constant **epochs**, not constant steps.
+0.5992, 0.6401, 0.7444 for 90,682, 909,800 and 1,881,996 molecules, steps of
++4.1 and +10.4 points at 5.0 and 11.6 paired standard errors, so the shape is
+real and not noise — which is not a shape any data-scaling law produces, and is
+the trace of those two effects moving oppositely. An earlier version of this
+section reported 1.45× error reduction per decade from a two-point fit; a third
+point, predicted in advance at 0.705 and measured at 0.6299 (0.6401 on today's
+protocol), falsified it. Settling it needs a corpus sweep at constant
+**epochs**, not constant steps —
+though night 3 found that comparison relocates the confound rather than removing
+it, since a fixed-epoch budget makes the small-corpus arm pre-competent.
 
 Full numbers, curves and caveats: [`docs/phase1-results.md`](docs/phase1-results.md)
 for the first 100k run, [`docs/overnight-2026-10-09.md`](docs/overnight-2026-10-09.md)
-for the scaling experiments and the two guards that failed along the way.
+for the scaling experiments and the two guards that failed along the way,
+[`docs/overnight-2026-10-14.md`](docs/overnight-2026-10-14.md) for the failure
+taxonomy — the misses are a capability ceiling on large molecules, not an
+information limit, with exactly 2 of 206 explained by fingerprint collisions —
+and [`docs/overnight-2026-10-15.md`](docs/overnight-2026-10-15.md) for the
+error bar above and the re-test of every earlier claim against it.
 
 The retrieval baseline scores exactly zero on the primary slice, which is the
 point of that slice: since the fingerprint is near-injective, a held-out
@@ -365,7 +389,7 @@ how to avoid it. That correction is
 
 Phase 1 complete: harness, oracle, metrics, baseline, recoverability analysis
 and a trained decoder that clears the go/no-go gate (`recovery@20` on
-`fp_unseen` must beat retrieval — 0.8926 vs 0.0000).
+`fp_unseen` must beat retrieval — 0.8962 vs 0.0000).
 
 The 2026-10-09 scaling runs looked like they had answered the "what was the
 ceiling?" question — **data** — but they had varied data and compute together.
@@ -389,10 +413,16 @@ Open questions, in rough order of expected value:
    0.993 and the 0.949 that briefly replaced it.
 3. **A full-length 15M run.** The capacity arm was cut to 1.75 h by the deadline
    and is unanswered. Now known to be affordable at ~5.2 h per epoch.
-4. **The remaining 10%.** Validity is 0.903 and `recovery@20` is 0.8926, so
-   almost every valid candidate is now a correct one. The failures are no longer
-   syntax errors, which moves the bottleneck from decoding to fingerprint
-   reasoning and makes them worth inspecting directly.
+4. **The remaining 10%, now inspected.** Validity is 0.921 and `recovery@20` is
+   0.8962, so almost every valid candidate is a correct one and the failures are
+   not syntax errors. Of 206 misses, **2** are fingerprint collisions: the input
+   nearly always determines the answer and the model cannot reach it. Recovery
+   falls from 0.981 below 15 heavy atoms to 0.366 at 50–69, and from 0.953 with
+   no stereocentres to 0.355 with five or more. Three independently seeded runs
+   then agreed on which molecules are impossible — 80% of the evaluation set is
+   unanimous, and the median miss is 34 heavy atoms against 24 for the
+   unanimously solved. **It is a capability ceiling on large molecules, not an
+   information limit**, which is what the full-ChEMBL run is aimed at.
 
 ## Development
 
