@@ -116,7 +116,13 @@ candidate was drawn but ranked outside the window).
 
 ---
 
-## Stage 1 — decode sweep: no setting beats the default, and that is the finding
+## Stage 1 — decode sweep: a win too small to believe at n=386
+
+> **Read with stage 10.** This stage declined to adopt the swept setting on the
+> grounds that the evidence could not support it, which was right. The setting
+> itself turned out to be real: verified on the common protocol it is worth
+> +1.99 points. The reasoning below stands as the reason not to *act* on a grid
+> maximum; it was not evidence that the effect was absent.
 
 Every number in this project was measured at temperature 1.0, top_p 1.0, and
 nothing had ever checked whether that was the right place to sample from.
@@ -161,9 +167,12 @@ sample size supports:
 | 1.1 | 0.8912 |
 
 A 1.9-point spread across the whole temperature range, non-monotone in the
-middle. There is no decode setting worth adopting on this evidence. Stage 6
-checks T=0.7 on the common protocol, where n=1,956 and the standard error falls
-to 0.68 points, which is the only way to settle it.
+middle. There is no decode setting worth adopting *on this evidence*. Stage 6
+checks T=0.7 on the common protocol, where n=1,956 — and where, as stage 5c
+later worked out, the error bar for a paired comparison on one checkpoint is
+0.44 points rather than the 0.68 guessed here from the binomial. With that much
+resolution the effect is visible, and stage 10 finds a bigger one at T=0.6. The
+grid had the answer; it could not prove it at 386 molecules.
 
 ### Two things the sweep does establish
 
