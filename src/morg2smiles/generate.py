@@ -296,8 +296,12 @@ class Morg2Smiles:
             **kwargs: Passed through to :func:`sample` or :func:`beam_search`.
 
         Returns:
-            Candidate SMILES: exact fingerprint matches first, then by
-            descending similarity to the target.
+            Candidate SMILES, best first: exact fingerprint matches, then —
+            within each group, since the oracle cannot discriminate inside one —
+            the molecules the model sampled by the most distinct spellings, then
+            by descending similarity to the target. Consensus is the tiebreak
+            because agreement among a model's own samples predicts correctness
+            well and costs nothing; see docs/overnight-2026-10-15.md.
         """
         sparse = _as_sparse(fp, self.fp_config)
         results = self._judge(sparse, k=k, strategy=strategy, oversample=oversample, **kwargs)
