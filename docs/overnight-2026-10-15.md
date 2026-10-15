@@ -422,8 +422,8 @@ and by 1.38 points at `rec@5`. `rec@1` does not move.
 The contrast with the seeds is the useful part. Equal-strength members gained
 6.08 points over their best; members 5 and 15 points apart gain 0.77. **Pooling
 pays when the members are comparably strong, not when you combine whatever is
-lying around**: a much weaker model's votes mostly dilute. This is still the
-best `rec@20` the project has recorded — 0.9039 — and it needed no training.
+lying around**: a much weaker model's votes mostly dilute. It needed no
+training, and stage 10 later beat it with three samplings of a *single* model.
 
 ### The 1.6-point rule is for training runs, not for everything
 
@@ -714,9 +714,9 @@ fixed in advance by the error bar: **the 30–39 band, 568 queries** — not the
 queries above 50, where the standard error is 7 points.
 
 Tonight's decode result is the first evidence that the cliff is partly
-*decoding*, not only capability: +4.5 points above 35 heavy atoms from
-temperature alone, with no retraining. That makes the band worth attacking from
-both directions.
+*decoding*, not only capability: **+7.5 points above 35 heavy atoms from
+temperature alone**, with no retraining. That makes the band worth attacking
+from both directions, and it raises the prior that the cliff is reachable.
 
 ### New: adopt the colder decoder, and keep the protocol where it is
 
@@ -729,10 +729,23 @@ protocol agree** — the cost of agreeing is re-measuring the whole table.
 
 ### New: pooled-vote ensembling is the cheapest `rec@20` available
 
-0.9039 at the same oracle budget, from three checkpoints already on disk and no
-training. Worth adding to the library as a multi-checkpoint `generate`, which is
-an API decision rather than a research one, so it is proposed and not built:
-~2 h.
+**0.9279**, from three samplings of one model at different temperatures within
+the same 20 oracle calls, and it survives matching the sampling cost (+0.77
+points, p = 0.006). Pooling three *different checkpoints* gives 0.9039 on the
+same protocol, so the cheaper version — one model, three temperatures — is also
+the better one. Worth adding to the library as a `generate` that pools several
+samplings, which is an API decision rather than a research one, so it is
+proposed and not built: ~2 h.
+
+### New: the optimum temperature is probably size-dependent
+
+Cooling from 1.0 to 0.7 to 0.6 moved the ≥35-heavy-atom band by +4.5 then +7.5
+points while the rest of the distribution barely moved, and 0.5 was worse
+overall but was never measured per band. If the best temperature falls with
+molecule size, it can be chosen *before* generating, since a fingerprint's bit
+count predicts size. One common-protocol run per temperature (~35 min each) with
+the bands reported separately would settle it; the 30–39 band has 568 queries
+and can carry the comparison, which the ≥50 band cannot.
 
 ### Carried forward
 
@@ -755,7 +768,8 @@ weekend axes are.
 |---|---|---|---|
 | **Done tonight** | Consensus ranking, error bar, decode setting, ensembling | — | stages 0–10 |
 | **Working day** | Size-weighted training mix, 8,508 steps | ~3 h | the ceiling; metric is the 30–39 band |
-| | Multi-checkpoint ensemble in the library | ~2 h | best `rec@20`, needs an API decision |
+| | Per-band temperature sweep | ~2 h | is the optimum size-dependent? |
+| | Pooled-sampling `generate` in the library | ~2 h | `rec@20` 0.9279, needs an API decision |
 | **Weekend 1** | Full ChEMBL, 3 epochs, 44,112 steps | ~18 h (~20 h window) | the deliverable |
 | **Weekend 2** | Step saturation, 52,500 steps | ~21 h | the science |
 | *Deferred* | 15M capacity | — | debug, not scale |
