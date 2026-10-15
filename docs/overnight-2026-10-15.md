@@ -417,3 +417,62 @@ trained* runs, where both seed luck and 13% discordance apply. Two ranking or
 decoding schemes evaluated over fixed checkpoints share almost everything,
 almost everything cancels, and gaps far below a point are detectable. Which is
 exactly why stage 6 was worth re-running with dumps.
+
+## Stage 5d — where the ceiling is, and what the weekend run can do about it
+
+Two checks that cost no GPU time and change what the weekend run should be
+expected to achieve.
+
+First, recovery against molecule size across the three seeds, with the column
+that the variance analysis showed actually matters — the fraction of queries the
+seeds *disagree* on, since unanimous queries carry no information about which
+run is better:
+
+| heavy atoms | n | recovery | contested | share of all discriminating power |
+|---|---|---|---|---|
+| 0–19 | 247 | 0.877 | 11.7% | 7.7% |
+| 20–24 | 465 | 0.766 | 15.3% | 18.9% |
+| 25–29 | 512 | 0.702 | 21.3% | 29.1% |
+| 30–34 | 373 | 0.513 | 27.9% | 27.7% |
+| 35–39 | 195 | 0.268 | 23.6% | 12.3% |
+| 40–49 | 123 | 0.114 | 13.0% | 4.3% |
+| 50+ | 41 | 0.024 | **0.0%** | 0.0% |
+
+**It is a cliff, not a slope.** Above 40 heavy atoms the model is almost never
+right; above 50 it recovers about one query in forty-one and **no seed ever
+differs from another** — not one contested query in that band. Those 41 queries
+are a constant and cannot contribute to any comparison between runs.
+
+**And the protocol cannot be sharpened much by reweighting it.** The contested
+fraction peaks at 27.9% in the 30–34 band but sits at 12–24% nearly everywhere
+else, so an evaluation set stratified to the middle of the size range would buy
+about 25% more discriminating power per oracle call — 0.240 contested queries
+per query against 0.192 — which is not worth redesigning the protocol for. The
+80% unanimity is not an artefact of including trivial or impossible molecules.
+It is spread through the distribution.
+
+Second, the shards are random subsets of ChEMBL, so they have identical size
+*distributions*:
+
+| shard | train molecules | ≥35 heavy atoms | ≥50 heavy atoms |
+|---|---|---|---|
+| 100k | 90,682 | 19.0% (17,205) | 2.42% (2,192) |
+| 1M | 900,917 | 19.0% (171,422) | 2.42% (21,757) |
+| full | 1,881,996 | 18.9% (356,074) | 2.31% (43,474) |
+
+(40,000-molecule samples per shard.)
+
+The full-ChEMBL run therefore doubles the absolute number of large molecules the
+model will see while leaving their share of every batch at about 2.3%. **If the
+cliff is a matter of exposure, uniform data scaling closes it only in proportion
+to total data; if it is capacity or architecture, it will not close it at all.**
+The run is still the right deliverable — it is the best model this project can
+build — but night 3 motivated it partly by the hope that more data would reach
+the large molecules, and that hope was never checked against the mix. It should
+not be expected to fix the ceiling.
+
+The experiment that follows from both checks is a **size-weighted training mix**
+— over-sample molecules above 30 heavy atoms, 8,508 steps, three hours — and the
+metric has to be chosen before it runs, because the error bar now demands it:
+watch the **30–39 band** (568 queries, recovery 0.26 to 0.51), not the ≥50 band,
+where 41 queries give a standard error of 7 points and nothing is measurable.
