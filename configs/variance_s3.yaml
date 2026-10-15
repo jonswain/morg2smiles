@@ -1,0 +1,51 @@
+# Variance seed 3 of 3 (next steps, 2026-10-15: "measure single-run training
+# variance").
+#
+# Every claim this project has retracted came from a cross-run comparison, and
+# stage 5 of night 3 could only report "no large gain" for count fingerprints
+# because the noise floor was unknown. Three identical runs differing only in
+# `train.seed` put an error bar on every comparison in the repository.
+#
+# 8,508 steps on the 100k shard deliberately: that is the step budget shared by
+# small_100k, small_full and small_1m_matched, so the resulting sd applies
+# directly to the fixed-compute data axis -- which is where night 2's retracted
+# data-scaling fit lived.
+#
+# Differs from configs/small.yaml in three ways, all to make the three runs
+# schedule-identical: patience disabled, so no run stops early for reasons
+# unrelated to its endpoint; max_steps pinned so the cosine horizon and the
+# stop step agree; evaluation on steps rather than epochs. These three are
+# therefore a variance sample among themselves, and are *not* pooled with
+# small_100k, which ran a different schedule under older code.
+shard_dir: data/shards/100k
+out_dir: checkpoints/variance_s3
+
+fingerprint:
+  radius: 2
+  n_bits: 2048
+  counts: false
+  folded: true
+
+model:
+  d_model: 256
+  n_heads: 8
+  d_ff: 1024
+  n_encoder_layers: 4
+  n_decoder_layers: 4
+  dropout: 0.1
+  max_tokens: 128
+
+train:
+  seed: 3
+  epochs: 12
+  batch_size: 128
+  lr: 0.0005
+  warmup_steps: 300
+  randomize_smiles: true
+  eval_every_steps: 2127
+  eval_n: 500
+  eval_k: 20
+  valid_loss_n: 2000
+  patience: 0
+  max_steps: 8508
+  max_hours: 3.6

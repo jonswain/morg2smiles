@@ -49,6 +49,9 @@ RUNS = [
     ("small_full", "checkpoints/small_full/best.pt", "data/shards/full"),
     ("small_100k_3ep", "checkpoints/small_100k_3ep/best.pt", "data/shards/100k"),
     ("count_fp_100k", "checkpoints/count_fp_100k/best.pt", "data/shards/100k"),
+    ("variance_s1", "checkpoints/variance_s1/best.pt", "data/shards/100k"),
+    ("variance_s2", "checkpoints/variance_s2/best.pt", "data/shards/100k"),
+    ("variance_s3", "checkpoints/variance_s3/best.pt", "data/shards/100k"),
 ]
 
 
@@ -65,6 +68,8 @@ def present_runs() -> list[tuple[str, str, str]]:
 @click.option("--pool-shard", default="data/shards/1m", show_default=True)
 @click.option("--out", type=click.Path(path_type=Path), default=Path("results/comparison.json"))
 @click.option("--max-oversample", default=10.0, show_default=True, help="See generate_outcomes.")
+@click.option("--temperature", default=1.0, show_default=True)
+@click.option("--top-p", default=1.0, show_default=True)
 @click.option(
     "--dump-outcomes",
     type=click.Path(path_type=Path),
@@ -89,6 +94,8 @@ def main(
     pool_shard: str,
     out: Path,
     max_oversample: float,
+    temperature: float,
+    top_p: float,
     dump_outcomes: Path | None,
     only: tuple[str, ...],
 ) -> None:
@@ -149,6 +156,8 @@ def main(
             "budget": budget,
             "eval_k": eval_k,
             "max_oversample": max_oversample,
+            "temperature": temperature,
+            "top_p": top_p,
             "pool_shard": pool_shard,
             "split": "valid",
             "n_fp_unseen": sum(fp_unseen),
@@ -172,6 +181,8 @@ def main(
             budget=budget,
             seed=seed,
             max_oversample=max_oversample,
+            temperature=temperature,
+            top_p=top_p,
         )
         report = evaluate(
             outcomes,

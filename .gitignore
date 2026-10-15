@@ -24,6 +24,13 @@ dist/
 !/results/overnight/comparison.json
 !/results/overnight/scaffold_probe.json
 !/results/overnight/driver.log
+!/results/overnight4/
+/results/overnight4/*
+!/results/overnight4/rerank.json
+!/results/overnight4/decode_sweep.json
+!/results/overnight4/comparison_variance.json
+!/results/overnight4/comparison_decode.json
+!/results/overnight4/driver.log
 !/results/overnight3/
 /results/overnight3/*
 !/results/overnight3/comparison_topup.json
