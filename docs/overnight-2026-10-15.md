@@ -585,3 +585,102 @@ claim that consensus absorbs about three-quarters of the decoder's temperature
 sensitivity holds in direction but was overstated: between these two
 temperatures at n=1,956, `rec@1` moves 4.24 points by generation order and 1.69
 by consensus, so **consensus absorbs 60%, not 75%.**
+
+---
+
+## What tonight changes about the plan
+
+### Unchanged, and now better justified
+
+**Weekend 1 — full ChEMBL, 3 epochs, 44,112 steps, ~18 h — is still the
+deliverable.** Depth beats breadth by about four to one (the step axis buys
++24.6 points for 2.5× compute; three seeds pooled buy +6.5 for 3×), so nothing
+tonight argues for spending training compute on multiple runs. But its
+*motivation* is corrected: it will not close the size cliff, because every shard
+has the same size distribution. It is the best model this project can build, and
+that is reason enough.
+
+**Weekend 2 — step saturation, 52,500 steps on the 100k shard, ~21 h — is still
+the science**, and it is now the axis whose effect most comfortably clears the
+error bar: +24.6 points per 2.5× against a 1.6-point threshold.
+
+**15M capacity stays deferred** as a debugging job, for night 3's reasons.
+
+### New: every experiment now has to be sized before it is run
+
+The error bar splits future work into two classes that need different treatment,
+and this is the most useful thing the night produced.
+
+*Paired comparisons over fixed checkpoints* — ranking, decoding, budget policy,
+ensembling. Error bars of **0.2 to 0.5 points**, because the arms share a
+checkpoint and most of their candidates, so sub-point effects are measurable and
+most of these cost no GPU time at all. **All three of the night's best results
+came from this class**: consensus ranking (+22 points of `rec@1`), T=0.7 (+1.2),
+pooled ensembling (+0.77).
+
+*Independent training runs* — data, capacity, architecture, schedule,
+tokenisation. Error bar **1.6 points** before anything is believable, at three
+hours minimum per arm. An experiment in this class whose expected effect is
+under about 2 points should not be run as a single pair: it needs three seeds, at
+3× the cost, or it should not be run.
+
+Applied now: **counts are closed** (p = 0.32, and a comparable-scale rerun would
+need seeds to say anything). Any "small architectural tweak" belongs in the same
+bin unless someone can argue for a 2-point effect in advance.
+
+### New: the ceiling needs a size-weighted mix, not more data
+
+Recovery falls off a cliff above 35 heavy atoms and above 50 no seed ever
+differs from another. Every shard holds the same ~2.3% of molecules at 50+ heavy
+atoms, so uniform data scaling cannot concentrate learning there. The experiment
+is a **size-weighted training mix** at 8,508 steps (~3 h), and the metric is
+fixed in advance by the error bar: **the 30–39 band, 568 queries** — not the 41
+queries above 50, where the standard error is 7 points.
+
+Tonight's decode result is the first evidence that the cliff is partly
+*decoding*, not only capability: +4.5 points above 35 heavy atoms from
+temperature alone, with no retraining. That makes the band worth attacking from
+both directions.
+
+### New: adopt the colder decoder, and keep the protocol where it is
+
+The user-facing default moves to the measured optimum; `generate_outcomes` and
+`sample` stay at 1.0, so every number measured before tonight keeps its meaning
+and re-scoring an old checkpoint reproduces it exactly. Every report already
+records the temperature it used, so a future protocol change is one flag away.
+**This is a choice worth reversing if you would rather the product and the
+protocol agree** — the cost of agreeing is re-measuring the whole table.
+
+### New: pooled-vote ensembling is the cheapest `rec@20` available
+
+0.9039 at the same oracle budget, from three checkpoints already on disk and no
+training. Worth adding to the library as a multi-checkpoint `generate`, which is
+an API decision rather than a research one, so it is proposed and not built:
+~2 h.
+
+### Carried forward
+
+Report `rec@1` under consensus ordering. Generation order is kept beside it in
+every report, but it is not a neutral baseline — it discards information already
+present in the samples.
+
+### A known unknown
+
+The 0.75-point sd is measured at **one** point: 8,508 steps on the 100k shard,
+with a model whose `rec@20` is 0.60. Whether it shrinks at 21,117 steps, where
+the model is far more competent and may be more tightly determined, is unknown
+and was not worth three more hours tonight. Do not assume it transfers to the
+weekend runs; lean on effects far larger than 1.6 points there, which both
+weekend axes are.
+
+### Revised schedule
+
+| slot | job | cost | note |
+|---|---|---|---|
+| **Done tonight** | Consensus ranking, error bar, decode setting, ensembling | — | stages 0–10 |
+| **Working day** | Size-weighted training mix, 8,508 steps | ~3 h | the ceiling; metric is the 30–39 band |
+| | Multi-checkpoint ensemble in the library | ~2 h | best `rec@20`, needs an API decision |
+| **Weekend 1** | Full ChEMBL, 3 epochs, 44,112 steps | ~18 h (~20 h window) | the deliverable |
+| **Weekend 2** | Step saturation, 52,500 steps | ~21 h | the science |
+| *Deferred* | 15M capacity | — | debug, not scale |
+| *Closed* | Count fingerprints | — | null at p = 0.32 |
