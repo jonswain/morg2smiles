@@ -35,12 +35,12 @@ from __future__ import annotations
 
 import json
 from collections import Counter
-from math import sqrt
 from pathlib import Path
 from statistics import mean
 
 import click
 
+from morg2smiles.stats import discordance, mcnemar_exact, paired_se
 from scripts.variance_analysis import load
 
 
@@ -58,14 +58,22 @@ def hit_at(selected, k: int) -> bool:
 @click.option("--budget", default="molecules")
 @click.option("--ks", default="1,5,20")
 @click.option(
+    "--runs",
+    default="variance_s1,variance_s2,variance_s3",
+    help="Dump stems to combine. Defaults to the three variance seeds.",
+)
+@click.option(
     "--out",
     type=click.Path(path_type=Path),
     default=Path("results/overnight4/ensemble_seeds.json"),
 )
-def main(dumps: Path, budget: str, ks: str, out: Path) -> None:
-    paths = sorted(dumps.glob("variance_s*.jsonl"))
+def main(dumps: Path, budget: str, ks: str, runs: str, out: Path) -> None:
+    names = [x.strip() for x in runs.split(",")]
+    paths = [dumps / f"{name}.jsonl" for name in names]
+    missing = [str(p) for p in paths if not p.exists()]
+    if missing:
+        raise click.ClickException(f"no dump for {', '.join(missing)}")
     runs = [load(p, budget) for p in paths]
-    names = [p.stem for p in paths]
     n_seeds = len(runs)
 
     # Fingerprint-unseen queries only, in the order the protocol drew them.
@@ -82,9 +90,12 @@ def main(dumps: Path, budget: str, ks: str, out: Path) -> None:
     k_list = [int(x) for x in ks.split(",")]
 
     for k in k_list:
-        single = [
-            mean(hit_at(q[i].scored_by_consensus(), k) for q in per_query) for i in range(n_seeds)
+        per_single = [
+            [hit_at(q[i].scored_by_consensus(), k) for q in per_query] for i in range(n_seeds)
         ]
+        single = [mean(h) for h in per_single]
+        best_single = max(single)
+        best_hits = per_single[single.index(best_single)]
 
         round_robin, pooled, union3k = [], [], []
         for outcomes in per_query:
@@ -118,33 +129,57 @@ def main(dumps: Path, budget: str, ks: str, out: Path) -> None:
             "round_robin": mean(round_robin),
             "pooled_votes": mean(pooled),
             "union_3k": mean(union3k),
-            "oracle_calls": {"single": k, "round_robin": k, "pooled_votes": k, "union_3k": 3 * k},
+            "oracle_calls": {
+                "single": k,
+                "round_robin": k,
+                "pooled_votes": k,
+                "union_3k": n_seeds * k,
+            },
+        }
+        # Does the ensemble beat the best member, or only the average one?
+        # The average is not a thing anyone would deploy; the best member is.
+        b, c = discordance(best_hits, pooled)
+        row["best_single"] = best_single
+        row["pooled_vs_best_single"] = {
+            "gap_points": 100 * (mean(pooled) - best_single),
+            "ensemble_only": b,
+            "best_only": c,
+            "paired_se_points": 100 * paired_se(b, c, n),
+            "mcnemar_p": mcnemar_exact(b, c),
         }
         row["round_robin_gain_points"] = 100 * (row["round_robin"] - row["single_mean"])
+        row["pooled_vs_best_single_points"] = 100 * (row["pooled_votes"] - best_single)
         row["pooled_gain_points"] = 100 * (row["pooled_votes"] - row["single_mean"])
         row["union_gain_points"] = 100 * (row["union_3k"] - row["single_mean"])
         report["schemes"][str(k)] = row
 
         click.echo(f"--- budget k={k} ---")
         click.echo(
-            f"  single seed (mean of {n_seeds})      {row['single_mean']:.4f}   {k} oracle calls"
+            f"  single model (mean of {n_seeds})     {row['single_mean']:.4f}   {k} oracle calls"
         )
+        click.echo(f"  best single model               {best_single:.4f}   {k} oracle calls")
         click.echo(
-            f"  three seeds, round-robin        {row['round_robin']:.4f}   {k} oracle calls"
+            f"  all {n_seeds}, round-robin            {row['round_robin']:.4f}   {k} oracle calls"
             f"   {row['round_robin_gain_points']:+.2f} pts"
         )
         click.echo(
-            f"  three seeds, pooled votes       {row['pooled_votes']:.4f}   {k} oracle calls"
-            f"   {row['pooled_gain_points']:+.2f} pts"
+            f"  all {n_seeds}, pooled votes         {row['pooled_votes']:.4f}   {k} oracle calls"
+            f"   {row['pooled_gain_points']:+.2f} pts vs mean,"
+            f" {row['pooled_vs_best_single_points']:+.2f} vs best"
         )
         click.echo(
-            f"  three seeds, union of top-{k:<2}     {row['union_3k']:.4f}   {3 * k} oracle calls"
+            f"  all {n_seeds}, union of top-{k:<2}      {row['union_3k']:.4f}   {n_seeds * k} oracle calls"
             f"   {row['union_gain_points']:+.2f} pts"
         )
         click.echo()
 
-    # The paired error bar for these comparisons, from the same dumps.
-    click.echo(f"paired SE at n={n:,} is ~{100 * sqrt(260) / n:.2f} pts for a 13%-discordant pair")
+        v = row["pooled_vs_best_single"]
+        click.echo(
+            f"  pooled vs best single           {v['gap_points']:+.2f} pts"
+            f"   paired SE {v['paired_se_points']:.2f}"
+            f"   McNemar p {v['mcnemar_p']:.3g}"
+            f"   ({v['ensemble_only']} vs {v['best_only']})"
+        )
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(report, indent=2))
     click.echo(f"wrote {out}")

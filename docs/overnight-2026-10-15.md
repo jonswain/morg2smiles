@@ -374,3 +374,46 @@ change: train longer, do not train three.** The ensemble result is worth having
 for a different reason — it is the cheapest way to raise `rec@1` on a model that
 already exists, and pooled cross-model voting is a ranking idea that may well
 transfer to a single model's samples.
+
+### Pooling the models you already have
+
+Three equally strong seeds is not a situation anyone is in. Three checkpoints of
+differing quality on a disk is. The night-3 dumps hold `small_1m` (0.8962),
+`small_100k_long` (0.8476) and `small_full` (0.7444) on the identical protocol,
+so the same test costs nothing.
+
+| | oracle calls | rec@1 | rec@5 | rec@20 |
+|---|---|---|---|---|
+| best single model (`small_1m`) | k | 0.7526 | 0.8676 | 0.8962 |
+| the three pooled by votes | k | 0.7607 | 0.8814 | 0.9039 |
+| gap, McNemar p | | +0.82, p=0.18 | +1.38, p=4e-05 | +0.77, p=0.001 |
+
+**Pooling the three models already on disk beats the best of them by 0.77 points
+of `rec@20` at the same oracle budget** — 18 queries gained against 3 lost —
+and by 1.38 points at `rec@5`. `rec@1` does not move.
+
+The contrast with the seeds is the useful part. Equal-strength members gained
+6.08 points over their best; members 5 and 15 points apart gain 0.77. **Pooling
+pays when the members are comparably strong, not when you combine whatever is
+lying around**: a much weaker model's votes mostly dilute. This is still the
+best `rec@20` the project has recorded — 0.9039 — and it needed no training.
+
+### The 1.6-point rule is for training runs, not for everything
+
+This nearly went in as a null. Comparing +0.77 against the 0.8-point paired
+standard error measured from the seed pairs makes it one standard error and
+therefore nothing. That comparison is wrong, and the way it is wrong matters for
+every future experiment here.
+
+The 0.8-point figure comes from pairs of runs that disagree on **13%** of
+queries. `small_1m` and a pooled ensemble containing `small_1m` disagree on
+**21 queries — 1.1%** — because they are largely scoring the same candidates.
+The paired standard error is `sqrt(21)/1956` = **0.23 points**, so +0.77 is 3.3
+standard errors, and McNemar gives p = 0.001.
+
+**The error bar has to be computed per comparison, from that comparison's own
+discordance.** The 1.6-point threshold is specifically for two *independently
+trained* runs, where both seed luck and 13% discordance apply. Two ranking or
+decoding schemes evaluated over fixed checkpoints share almost everything,
+almost everything cancels, and gaps far below a point are detectable. Which is
+exactly why stage 6 was worth re-running with dumps.

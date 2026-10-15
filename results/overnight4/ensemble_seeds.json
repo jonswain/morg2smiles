@@ -22,7 +22,16 @@
         "pooled_votes": 1,
         "union_3k": 3
       },
+      "best_single": 0.4120654396728016,
+      "pooled_vs_best_single": {
+        "gap_points": 4.805725971370145,
+        "ensemble_only": 153,
+        "best_only": 59,
+        "paired_se_points": 0.7443875142413617,
+        "mcnemar_p": 8.308981955221778e-11
+      },
       "round_robin_gain_points": 0.06816632583503957,
+      "pooled_vs_best_single_points": 4.805725971370145,
       "pooled_gain_points": 5.4873892297205185,
       "union_gain_points": 13.002726653033402
     },
@@ -42,7 +51,16 @@
         "pooled_votes": 5,
         "union_3k": 15
       },
+      "best_single": 0.556237218813906,
+      "pooled_vs_best_single": {
+        "gap_points": 7.259713701431492,
+        "ensemble_only": 162,
+        "best_only": 20,
+        "paired_se_points": 0.6897105093676913,
+        "mcnemar_p": 8.217830335339622e-29
+      },
       "round_robin_gain_points": 5.606680299931832,
+      "pooled_vs_best_single_points": 7.259713701431492,
       "pooled_gain_points": 7.805044308111797,
       "union_gain_points": 9.492160872528977
     },
@@ -62,7 +80,16 @@
         "pooled_votes": 20,
         "union_3k": 60
       },
+      "best_single": 0.6129856850715747,
+      "pooled_vs_best_single": {
+        "gap_points": 6.083844580777087,
+        "ensemble_only": 150,
+        "best_only": 31,
+        "paired_se_points": 0.6878130903411916,
+        "mcnemar_p": 6.339331068662105e-20
+      },
       "round_robin_gain_points": 4.754601226993859,
+      "pooled_vs_best_single_points": 6.083844580777087,
       "pooled_gain_points": 6.492842535787313,
       "union_gain_points": 9.458077709611445
     }

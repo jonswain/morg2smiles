@@ -36,6 +36,7 @@ dist/
 !/results/overnight4/paired_tests_consensus.json
 !/results/overnight4/comparison_decode_dumped.json
 !/results/overnight4/ensemble_seeds.json
+!/results/overnight4/ensemble_heterogeneous.json
 !/results/overnight3/
 /results/overnight3/*
 !/results/overnight3/comparison_topup.json
