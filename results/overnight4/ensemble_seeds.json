@@ -1,0 +1,70 @@
+{
+  "seeds": [
+    "variance_s1",
+    "variance_s2",
+    "variance_s3"
+  ],
+  "n_fp_unseen": 1956,
+  "schemes": {
+    "1": {
+      "single_per_seed": {
+        "variance_s1": 0.4059304703476483,
+        "variance_s2": 0.4120654396728016,
+        "variance_s3": 0.39775051124744376
+      },
+      "single_mean": 0.4052488070892979,
+      "round_robin": 0.4059304703476483,
+      "pooled_votes": 0.4601226993865031,
+      "union_3k": 0.5352760736196319,
+      "oracle_calls": {
+        "single": 1,
+        "round_robin": 1,
+        "pooled_votes": 1,
+        "union_3k": 3
+      },
+      "round_robin_gain_points": 0.06816632583503957,
+      "pooled_gain_points": 5.4873892297205185,
+      "union_gain_points": 13.002726653033402
+    },
+    "5": {
+      "single_per_seed": {
+        "variance_s1": 0.5449897750511248,
+        "variance_s2": 0.556237218813906,
+        "variance_s3": 0.5511247443762781
+      },
+      "single_mean": 0.5507839127471029,
+      "round_robin": 0.6068507157464212,
+      "pooled_votes": 0.6288343558282209,
+      "union_3k": 0.6457055214723927,
+      "oracle_calls": {
+        "single": 5,
+        "round_robin": 5,
+        "pooled_votes": 5,
+        "union_3k": 15
+      },
+      "round_robin_gain_points": 5.606680299931832,
+      "pooled_gain_points": 7.805044308111797,
+      "union_gain_points": 9.492160872528977
+    },
+    "20": {
+      "single_per_seed": {
+        "variance_s1": 0.6114519427402862,
+        "variance_s2": 0.6129856850715747,
+        "variance_s3": 0.6022494887525562
+      },
+      "single_mean": 0.6088957055214724,
+      "round_robin": 0.656441717791411,
+      "pooled_votes": 0.6738241308793456,
+      "union_3k": 0.7034764826175869,
+      "oracle_calls": {
+        "single": 20,
+        "round_robin": 20,
+        "pooled_votes": 20,
+        "union_3k": 60
+      },
+      "round_robin_gain_points": 4.754601226993859,
+      "pooled_gain_points": 6.492842535787313,
+      "union_gain_points": 9.458077709611445
+    }
+  }
+}

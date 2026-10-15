@@ -311,3 +311,66 @@ oversample fix can only add candidates, so its +0.2 to +0.9 points cannot have a
 sign error; consensus ranking reorders a fixed set, and its +22 points are
 immune to training variance entirely. Neither needs a seed sd. Comparisons
 between *training runs* need it, and from tonight they have it.
+
+## Stage 5c — three seeds are also an ensemble, and that is free to test
+
+The variance runs incidentally produced something this project has never had:
+three independently initialised models of identical cost. Their dumps answer a
+question about where compute should go, at no extra cost.
+
+At least one seed solves 1,371 of the 1,956 queries, against a single-seed mean
+of 1,179 — 9.8 points of headroom. But polling three models costs three times
+the oracle calls, and oracle calls are this project's budget, so the comparison
+has to be made at equal budget. `scripts/ensemble_seeds.py` draws the k
+candidates round-robin by each seed's own consensus rank, deduplicated by
+canonical SMILES, so the oracle is still called exactly k times.
+
+| scheme | oracle calls | rec@1 | rec@5 | rec@20 |
+|---|---|---|---|---|
+| single seed (mean of 3) | k | 0.4052 | 0.5508 | 0.6089 |
+| three seeds, round-robin | k | 0.4059 | 0.6069 | 0.6564 |
+| **three seeds, votes pooled** | **k** | **0.4601** | **0.6288** | **0.6738** |
+| three seeds, union of each top-k | 3k | 0.5353 | 0.6457 | 0.7035 |
+
+**At the same oracle budget, three seeds with their votes pooled beat one seed
+by 6.49 points of `rec@20` and 5.49 points of `rec@1`** — eight paired standard
+errors, far outside the noise measured an hour earlier. That recovers about
+two thirds of what 3× the oracle budget would buy.
+
+Two things in this table are worth more than the headline.
+
+**Agreement between models is a better signal than agreement within one.**
+Round-robin and pooled votes select from exactly the same union of candidates
+and differ only in ranking, and pooling gains 5.4 points of `rec@1` over
+round-robin where round-robin gains nothing at all at k=1. Night 3's consensus
+result said a model reaches its best answer by several routes; this says that
+when three independently trained models reach the same molecule, that is
+stronger evidence still. Some of what single-model consensus measures is the
+idiosyncrasy of one training run, and a second model filters it out.
+
+**The gain is new molecules, not more draws.** A single seed, allowed unlimited
+oracle calls over every candidate it drew, tops out at 0.632 — only 2.3 points
+above its score at 20 calls, which is night 3's under-fill finding again: one
+model's sampling is nearly exhausted. The three-seed union reaches 0.726 on the
+same measure. And the seeds' candidate sets barely overlap: 25.2 distinct valid
+candidates each, 66.8 in the union, mean pairwise Jaccard **0.098**.
+
+That last pair of numbers is the sharpest thing the night produced. **The seeds
+propose almost disjoint molecules while agreeing on four fifths of which queries
+are solvable at all.** Diversity in what they propose, unanimity in what they
+can do. A fifth consecutive confirmation that the ceiling is a property of the
+molecules.
+
+### It still loses to training for longer
+
+The honest comparison is against spending the same compute sequentially. Three
+8,508-step runs cost what one 25,524-step run would, and the step axis is the
+best-measured effect in the project: `small_100k` → `small_100k_long`, 8,508 to
+21,117 steps, is **+24.64 points** for 2.5× compute. Ensembling three seeds buys
++6.49 points for 3× compute.
+
+**Depth beats breadth by roughly four to one, so the weekend plan does not
+change: train longer, do not train three.** The ensemble result is worth having
+for a different reason — it is the cheapest way to raise `rec@1` on a model that
+already exists, and pooled cross-model voting is a ranking idea that may well
+transfer to a single model's samples.
