@@ -238,3 +238,85 @@ def test_unique_valid_is_per_query_not_global():
     ]
     metrics = evaluate(outcomes, ks=[1])["slices"]["fp_unseen"]
     assert metrics["unique_valid_per_query"] == pytest.approx(2.0)
+
+
+# -- consensus ordering --------------------------------------------------------
+def spelled(canonical: str, *, fp_match: bool, times: int, valid: bool = True):
+    """`times` distinct spellings of one molecule, as check_many would mark them."""
+    out = []
+    for i in range(times):
+        out.append(
+            OracleResult(
+                smiles=f"{canonical}#{i}",
+                valid=valid,
+                fp_match=fp_match,
+                exact_structure=False,
+                tanimoto=1.0 if fp_match else 0.5,
+                canonical=canonical,
+                duplicate=i > 0,
+            )
+        )
+    return out
+
+
+def test_consensus_ordering_promotes_the_most_often_proposed_molecule():
+    """The hit is emitted second but spelled three ways, so consensus finds it at k=1."""
+    outcome = QueryOutcome(
+        results=spelled("CCO", fp_match=False, times=1) + spelled("CCC", fp_match=True, times=3)
+    )
+    assert recovery_at_k([outcome], 1) == 0.0
+    assert recovery_at_k([outcome], 1, order="consensus") == 1.0
+
+
+def test_consensus_and_generation_agree_once_k_covers_the_budget():
+    outcome = QueryOutcome(
+        results=spelled("CCO", fp_match=False, times=2) + spelled("CCC", fp_match=True, times=1)
+    )
+    for order in ("generation", "consensus"):
+        assert recovery_at_k([outcome], 20, order=order) == 1.0
+
+
+def test_consensus_ordering_is_stable_on_ties():
+    """Equal vote counts must not reshuffle generation order."""
+    outcome = QueryOutcome(
+        results=spelled("CCO", fp_match=False, times=1)
+        + spelled("CCC", fp_match=False, times=1)
+        + spelled("CCN", fp_match=True, times=1)
+    )
+    assert [r.canonical for r in outcome.scored_by_consensus()] == ["CCO", "CCC", "CCN"]
+    assert recovery_at_k([outcome], 2, order="consensus") == 0.0
+
+
+def test_spelling_counts_ignores_invalid_candidates():
+    outcome = QueryOutcome(results=spelled("CCO", fp_match=True, times=2) + [INVALID])
+    assert outcome.spelling_counts() == {"CCO": 2}
+
+
+def test_structure_accuracy_accepts_an_order_too():
+    hit = OracleResult("CCC", True, True, True, 1.0, "CCC")
+    miss = OracleResult("CCO", True, False, False, 0.5, "CCO")
+    outcome = QueryOutcome(
+        results=[miss, hit, OracleResult("CCC#2", True, True, True, 1.0, "CCC", duplicate=True)]
+    )
+    assert structure_accuracy_at_k([outcome], 1) == 0.0
+    assert structure_accuracy_at_k([outcome], 1, order="consensus") == 1.0
+
+
+def test_unknown_order_is_rejected():
+    outcome = QueryOutcome(results=spelled("CCO", fp_match=True, times=1))
+    with pytest.raises(ValueError, match="unknown order"):
+        recovery_at_k([outcome], 1, order="frequency")
+
+
+def test_report_carries_both_orderings():
+    outcome = QueryOutcome(
+        results=spelled("CCO", fp_match=False, times=1) + spelled("CCC", fp_match=True, times=3),
+        fp_unseen=True,
+    )
+    report = evaluate([outcome], ks=(1, 20))
+    unseen = report["slices"]["fp_unseen"]
+    assert unseen["recovery_at_k"]["1"] == 0.0
+    assert unseen["recovery_at_k_consensus"]["1"] == 1.0
+    # The headline stays the generation-order number, so it means what it
+    # always meant.
+    assert report["primary_metric"] == unseen["recovery_at_k"]["20"]

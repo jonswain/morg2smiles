@@ -18,6 +18,7 @@ and the number any claim should quote.
 
 from __future__ import annotations
 
+from collections import Counter
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from statistics import mean
@@ -75,6 +76,33 @@ class QueryOutcome:
             candidates = [r for r in self.results if not r.duplicate]
         return candidates if k is None else candidates[:k]
 
+    def spelling_counts(self) -> Counter[str]:
+        """How many distinct SMILES strings the model emitted per molecule.
+
+        The model's own confidence, read off the samples already drawn: a
+        molecule it arrived at by six different traversals was proposed six
+        times. Byte-identical repeats are dropped before the oracle sees them,
+        so these are distinct *spellings* of the same molecule, not raw
+        resamples.
+        """
+        return Counter(r.canonical for r in self.results if r.valid and r.canonical is not None)
+
+    def scored_by_consensus(self, k: int | None = None) -> list[OracleResult]:
+        """The k budget's candidates, most-often-proposed first.
+
+        Measured on `small_1m`: ordering this way rather than by generation
+        order lifts recovery@1 from 0.5302 to 0.7520 and structure accuracy@1
+        from 0.5087 to 0.7249, at no cost -- the counts fall out of samples
+        already drawn. See docs/overnight-2026-10-14.md.
+
+        The sort is stable, so generation order breaks ties. Under the
+        ``"strings"`` budget unparseable candidates have no canonical form and
+        count zero, which sorts them last.
+        """
+        counts = self.spelling_counts()
+        ordered = sorted(self.scored(), key=lambda r: -counts.get(r.canonical, 0))
+        return ordered if k is None else ordered[:k]
+
     @property
     def n_candidates(self) -> int:
         """Distinct candidates judged by the oracle -- the oracle's workload."""
@@ -101,19 +129,35 @@ def _slice(outcomes: Sequence[QueryOutcome], name: str) -> list[QueryOutcome]:
     raise ValueError(f"unknown slice {name!r}; expected one of {SLICES}")
 
 
-def recovery_at_k(outcomes: Sequence[QueryOutcome], k: int) -> float:
+def _candidates(outcome: QueryOutcome, k: int, order: str) -> list[OracleResult]:
+    if order == "generation":
+        return outcome.scored(k)
+    if order == "consensus":
+        return outcome.scored_by_consensus(k)
+    raise ValueError(f"unknown order {order!r}; expected 'generation' or 'consensus'")
+
+
+def recovery_at_k(outcomes: Sequence[QueryOutcome], k: int, order: str = "generation") -> float:
     """Fraction of queries with a fingerprint match in the first k candidates.
 
     Queries that produced fewer than k candidates still count in the
     denominator -- failing to generate is a failure, not an exclusion.
+
+    Args:
+        order: ``"generation"`` (the default) reads the candidates in the order
+            the model emitted them. ``"consensus"`` reads them most-often-
+            proposed first. At ``k`` equal to the whole budget the two agree by
+            construction; they differ at low k, which is where ranking lives.
     """
     if not outcomes:
         return 0.0
-    hits = sum(any(r.fp_match for r in o.scored(k)) for o in outcomes)
+    hits = sum(any(r.fp_match for r in _candidates(o, k, order)) for o in outcomes)
     return hits / len(outcomes)
 
 
-def structure_accuracy_at_k(outcomes: Sequence[QueryOutcome], k: int) -> float:
+def structure_accuracy_at_k(
+    outcomes: Sequence[QueryOutcome], k: int, order: str = "generation"
+) -> float:
     """Fraction of queries whose *original* molecule appears in the first k.
 
     Strictly below recovery@k, and capped by fingerprint collisions: where
@@ -122,7 +166,7 @@ def structure_accuracy_at_k(outcomes: Sequence[QueryOutcome], k: int) -> float:
     """
     if not outcomes:
         return 0.0
-    hits = sum(any(r.exact_structure for r in o.scored(k)) for o in outcomes)
+    hits = sum(any(r.exact_structure for r in _candidates(o, k, order)) for o in outcomes)
     return hits / len(outcomes)
 
 
@@ -139,6 +183,15 @@ def _slice_metrics(outcomes: Sequence[QueryOutcome], ks: Sequence[int]) -> dict:
         "n_queries": len(outcomes),
         "recovery_at_k": {str(k): recovery_at_k(outcomes, k) for k in ks},
         "structure_accuracy_at_k": {str(k): structure_accuracy_at_k(outcomes, k) for k in ks},
+        # The same candidates, re-ordered most-often-proposed first. Reported
+        # alongside rather than instead, so every number computed before this
+        # existed stays comparable with every number computed after.
+        "recovery_at_k_consensus": {
+            str(k): recovery_at_k(outcomes, k, order="consensus") for k in ks
+        },
+        "structure_accuracy_at_k_consensus": {
+            str(k): structure_accuracy_at_k(outcomes, k, order="consensus") for k in ks
+        },
         # Fraction of what the model emitted that RDKit accepts, counted over
         # every candidate including same-molecule respellings. Those are marked
         # rather than dropped precisely so this denominator stays a property of

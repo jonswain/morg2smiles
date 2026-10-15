@@ -14,6 +14,7 @@ because beams share prefixes.
 
 from __future__ import annotations
 
+from collections import Counter
 from collections.abc import Iterable, Sequence
 from pathlib import Path
 
@@ -321,12 +322,27 @@ class Morg2Smiles:
         else:
             raise ValueError(f"unknown strategy {strategy!r}; expected 'sample' or 'beam'")
 
+        judged = check_many(candidates, fp, self.fp_config)
+
+        # How many distinct spellings the model gave each molecule. This is the
+        # model's own confidence, and ordering by it lifts recovery@1 from
+        # 0.5302 to 0.7520 (docs/overnight-2026-10-14.md) -- so it is the right
+        # tiebreak among candidates the oracle cannot separate.
+        votes = Counter(r.canonical for r in judged if r.valid and r.canonical is not None)
+
         # check_many marks same-molecule candidates rather than dropping them,
         # so that validity keeps an honest denominator. A caller asking for k
         # candidates wants k *molecules*, so drop them here -- without this the
         # public API happily returns twenty spellings of aspirin.
-        results = [r for r in check_many(candidates, fp, self.fp_config) if not r.duplicate]
-        results.sort(key=lambda r: (r.fp_match, r.tanimoto), reverse=True)
+        results = [r for r in judged if not r.duplicate]
+
+        # fp_match still outranks everything: an exact hit is the answer, and
+        # the oracle is free to the caller who has the query fingerprint.
+        # Within a group the oracle cannot separate, consensus beats Tanimoto,
+        # which beats generation order (sort is stable).
+        results.sort(
+            key=lambda r: (r.fp_match, votes.get(r.canonical, 0), r.tanimoto), reverse=True
+        )
         return results[:k]
 
     def generate_batch(
