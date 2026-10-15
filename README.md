@@ -260,12 +260,20 @@ proposal order on this model and between 11 and 26 points on every other
 checkpoint measured ([`docs/overnight-2026-10-15.md`](docs/overnight-2026-10-15.md)).
 The `rec@20` column is nearly insensitive to it, as it should be.
 
+Pooling votes across the three models in the table, still at 20 oracle calls,
+reaches **0.9039** — 0.77 points above the 1M model alone (p = 0.001) and the
+best figure here, from no additional training.
+
 **How big a gap counts as a difference.** Three runs identical in everything but
 `train.seed` scored 0.6053, 0.6084 and 0.5941, so single-run `rec@20` carries an
 sd of about 0.75 points; and since every run here is scored on the *same* 1,956
 molecules, the error bar for comparing two of them is McNemar's paired standard
-error of ~0.8 points. **Gaps below about 1.6 points are not evidence of
-anything**, and that threshold is applied to every claim below.
+error of ~0.8 points. **Gaps below about 1.6 points between two training runs
+are not evidence of anything**, and that threshold is applied to every claim
+below. Comparisons that share candidates — two ways of ranking one model's
+samples, say — cancel almost everything and are discriminable well below a
+point, so each gap is tested against its own discordance rather than against
+that single threshold.
 
 The one axis these rows isolate cleanly is **compute**: the first and last rows
 share an identical 90,682-molecule corpus and differ only in step budget.
