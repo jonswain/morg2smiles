@@ -1629,3 +1629,54 @@ asymptote below 1 and the first denies one. k ≤ 60 cannot separate them. The
 honest statement is that the fit is excellent over the measured range, that it
 is a lower bound on cost, and that the concentration result is the reason to
 expect the real curve to bend worse than the fit rather than better.
+
+### The exponent is a property of capacity, not of the training mix
+
+The fit costs nothing on a dump that already exists, so it can be run on every
+arm scored tonight. Fitting `1 − rec(k) = A·k^−b` on the k = 5…20 rungs of the
+large protocol, the exponent at 35+ heavy atoms:
+
+| arm | T | b at 30–34 | b at 35–39 | b at 35+ | rec@20 at 35+ |
+|---|---|---|---|---|---|
+| `variance_s1` (100k) | 1.0 | 0.203 | 0.116 | 0.078 | 0.1634 |
+| `variance_s2` | 1.0 | 0.210 | 0.118 | 0.076 | 0.1590 |
+| `variance_s3` | 1.0 | 0.206 | 0.095 | 0.066 | 0.1502 |
+| `size_mix_s1` | 1.0 | 0.216 | 0.123 | 0.081 | 0.1811 |
+| `size_mix_s2` | 1.0 | 0.211 | 0.138 | 0.093 | 0.1935 |
+| `size_mix_t35` | 1.0 | 0.218 | 0.113 | 0.076 | 0.1864 |
+| `variance_s1` | 0.6 | 0.229 | 0.140 | 0.094 | 0.2155 |
+| **`small_1m`** | 0.6 | **0.399** | **0.403** | **0.303** | 0.6890 |
+
+(All in `miss_anatomy.py`'s first-k-slots units, and all fitted over the same
+k ≤ 20 window so the comparison is not a comparison of ladder lengths —
+`small_1m`'s exponents over its full k ≤ 60 range are 0.396, 0.387 and 0.281,
+so the window is not doing the work either.)
+
+Read down the column. **The training mix does not move the exponent**: three
+baseline seeds give 0.078, 0.076, 0.066 at 35+ and three mix arms give 0.081,
+0.093, 0.076, a gap of 0.010 against a between-seed sd of 0.006. What the mix
+moves is the level — rec@20 from 0.159 to 0.187 — which is the same thing the
+rest of tonight said about it in different units: it is a transfer, and
+transfers change where you are on a curve, not the curve. **Cooling moves it
+slightly**, 0.078 → 0.094 at 35+, consistent with cooling and the mix being two
+factors of one product. **Capacity moves it threefold**, 0.094 → 0.303 at the
+same temperature in the same window.
+
+That is the sharpest argument this document has for item 2, and it is a
+different argument from the one item 2 was written with. A tenfold bigger model
+does not merely sit higher on the budget curve; it bends the curve, so each
+doubling of inference buys it four times what it buys the small model above 35
+heavy atoms. Level and slope are separate dials, and nothing found tonight
+except capacity touches the slope. If the 15M model continues the trend, the
+brute-force route and the capacity route are the same route — which would also
+explain why the one thing that reliably helps big molecules is the thing that
+helps everything.
+
+Three caveats, in descending order of how much they ought to worry the reader.
+The `small_1m` cell differs from the rest in training corpus as well as
+capacity (1M molecules against 100k), so "capacity" here means the whole step
+between the two models. The 100k arms' exponents at 40–49 sit between 0.040 and
+0.063, where a single hit moves the fit, so only the 30–34 and 35–39 columns
+carry weight. And eight points are not a trend — this is one contrast with a
+seed-level error bar attached, pre-registering a prediction for the 15M run
+rather than reporting a law.
