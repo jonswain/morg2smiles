@@ -1052,14 +1052,37 @@ measured and dead — more models, and splitting a budget across them — and th
 training-side route is measured and priced at an exchange rate that gets worse
 as it is pushed. What is left is narrow and concrete.
 
-**1. Generate past k=20 (first, and cheap).** Every claim about the brute-force
-route rests on extrapolating the 10 → 20 step of a 20-slot list, and the
-factors are visibly decaying inside the measured range. One `compare_checkpoints.py`
-run at `--eval-k 100` on 400 fingerprint-unseen molecules above 35 heavy atoms,
-`small_1m` at T=0.6, settles whether k ≈ 170 reaches 0.50 or whether the curve
-flattens at 0.3. Perhaps 90 minutes. Pre-registered prediction: the factor
-decays, 0.50 is not reached by k=100, and the measured rec@100 at 35+ lands
-between 0.28 and 0.38.
+**1. Generate past k=20 (first, and cheap), because two models of the cliff now
+disagree about it.** Every claim about the brute-force route rests on
+extrapolating the 10 → 20 step of a 20-slot list. One
+`compare_checkpoints.py` run at `--eval-k 100` on 400 fingerprint-unseen
+molecules above 35 heavy atoms, `small_1m` at T=0.6, discriminates between two
+accounts that fit everything measured so far and part company at k=100:
+
+- *Independent draws.* The factorisation says each 20 samples yield about 1.9
+  right-sized proposals at 35+, each an exact preimage with probability 0.107.
+  If successive draws are independent, rec@k = 1 − (1 − 0.107)^(0.095k), which
+  gives 0.191 at k=20 — the measured value is 0.1885, so the model is
+  calibrated where it was fitted — and **0.66 at k=100**.
+- *Decaying returns.* The measured doubling factors are already falling inside
+  the window (1.61 for 5 → 10 at 35+, 1.45 for 10 → 20). Extrapolating the
+  last one gives **0.35 at k=100**.
+
+Pre-registered: the measurement lands between 0.28 and 0.38, so the decay is
+real and the draws are not independent — the decoder keeps re-proposing from
+the same shrinking neighbourhood. If it instead lands near 0.6, brute force is
+the answer to the whole problem and the next six months are cheap.
+
+A note on what this experiment subsumes. The obvious decode-time fix for the
+size defect — reject candidates whose heavy-atom count is far from the size the
+fingerprint implies, and keep sampling — turns out not to need building. A
+candidate's Tanimoto to the query is computable at inference without the
+answer, every exact preimage scores 1.0, and so filtering by it can never
+discard a true hit: reporting the best 20 of n samples by Tanimoto is
+*identical* to reporting rec@n. The size filter is the k-widening route wearing
+a different hat, and it is this run that prices it. What the size defect does
+leave open is the train-time version — conditioning the decoder on the size the
+fingerprint implies — which is item 2b below.
 
 **2. Capacity, with a pre-registered location.** The only surviving
 non-sampling route is changing what the model can represent, and tonight's
@@ -1070,6 +1093,18 @@ on *both* protocols with the band table. Pre-registered: if the limit is
 capacity the gain concentrates above 35 atoms and the 0–24 band moves by less
 than a point; if the gain is flat across bands it is not the size cliff that
 got better and the cliff is in the fingerprint or the data.
+
+**2b. Tell the decoder how big the molecule is.** The size defect is the
+sharpest single flaw tonight found — 10.7 atoms short above 50 heavy atoms, and
+only 37.8% of those queries get even one right-sized proposal out of twenty —
+and the information is in the input. The cheap version is a size token on the
+encoder sequence, derived from the fingerprint at inference, trained on the
+true count. Note that a *scalar* prediction from the set-bit count is not good
+enough to steer with: r = 0.83 leaves a residual of roughly five heavy atoms,
+far wider than the ±1 that a filter would need, which is why this has to be a
+learned head on the encoder rather than a rule on the bit count. Worth one 3 h
+run on the 100k shard, scored per band, with a pre-registered location: the
+gain should appear above 40 atoms, where the truncation is, and nowhere else.
 
 **3. Demote the full-ChEMBL run.** It was Weekend 1's deliverable at ~18 h for
 3 epochs / 44,112 steps. Two things argue against it now. At a fixed step
