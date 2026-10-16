@@ -1,0 +1,21 @@
+[10-16 20:17:13] === night 5 start, git 579987d, 853 min to 10:30 ===
+[10-16 20:17:13] stage 1: size-weighted mix seed 1, 8,508 steps, 30+ heavy atoms x3
+[10-16 23:10:45] stage 1 exit=0
+[10-16 23:10:45] stage 2: size-weighted mix seed 2, 8,508 steps, 30+ heavy atoms x3
+[10-17 02:04:48] stage 2 exit=0
+[10-17 02:04:48] stage 3: large-molecule protocol (2,400 molecules, 30+ heavy atoms) --only variance_s1 --only variance_s2 --only variance_s3 --only size_mix_s1 --only size_mix_s2
+[10-17 02:55:26] stage 3 exit=0
+[10-17 02:55:26] stage 4: common protocol --only size_mix_s1 --only size_mix_s2
+[10-17 03:14:55] stage 4 exit=0
+[10-17 03:14:55] === night 5 done, 435 min to spare ===
+[10-17 03:15:00] === night 5b start, 435 min to 10:30 ===
+[10-17 03:15:00] stage 5: temperature sweep on 500 molecules of 30+ heavy atoms, disjoint from protocol
+[10-17 03:40:07] stage 5 exit=0
+[10-17 03:40:07] stage 6: large protocol at T in [0.3 0.6] (sweep picked 0.3)
+[10-17 04:02:01] stage 6 (T=0.3) exit=0
+[10-17 04:22:20] stage 6 (T=0.6) exit=0
+[10-17 04:22:20] stage 7: common protocol at T=0.3, for the small-molecule cost
+[10-17 04:40:41] stage 7 exit=0
+[10-17 04:40:41] === night 5b done, 349 min to spare ===
+[10-17 04:40:41] === night 5c start, 380 min to 11:00 ===
+[10-17 04:40:41] stage 8: size mix at threshold 35, factor 6, 8,508 steps

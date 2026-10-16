@@ -1,0 +1,129 @@
+{
+  "protocol": {
+    "eval_n": 2400,
+    "seed": 0,
+    "budget": "molecules",
+    "eval_k": 20,
+    "max_oversample": 10.0,
+    "temperature": 0.3,
+    "top_p": 1.0,
+    "pool_shard": "data/shards/1m",
+    "split": "valid",
+    "n_fp_unseen": 2321,
+    "fp_config": "morgan r=2 binary folded/2048",
+    "training_union_size": 1989502,
+    "shards_excluded": [
+      "data/shards/100k",
+      "data/shards/1m",
+      "data/shards/full"
+    ],
+    "min_heavy_atoms": 30,
+    "max_heavy_atoms": null
+  },
+  "runs": {
+    "small_1m": {
+      "checkpoint": "checkpoints/small_1m/best.pt",
+      "train_shard": "data/shards/1m",
+      "n_parameters": 7962225,
+      "trained_epoch": 3,
+      "trained_step": 21117,
+      "model_config": {
+        "d_model": 256,
+        "n_heads": 8,
+        "d_ff": 1024,
+        "n_encoder_layers": 4,
+        "n_decoder_layers": 4,
+        "dropout": 0.1,
+        "max_tokens": 128,
+        "vocab_size": 113,
+        "fp_vocab_size": 2048
+      },
+      "report": {
+        "ks": [
+          1,
+          5,
+          20
+        ],
+        "budget": "molecules",
+        "slices": {
+          "all": {
+            "n_queries": 2400,
+            "recovery_at_k": {
+              "1": 0.44875,
+              "5": 0.7158333333333333,
+              "20": 0.8191666666666667
+            },
+            "structure_accuracy_at_k": {
+              "1": 0.3958333333333333,
+              "5": 0.6725,
+              "20": 0.78125
+            },
+            "recovery_at_k_consensus": {
+              "1": 0.61375,
+              "5": 0.7633333333333333,
+              "20": 0.8208333333333333
+            },
+            "structure_accuracy_at_k_consensus": {
+              "1": 0.555,
+              "5": 0.7241666666666666,
+              "20": 0.7833333333333333
+            },
+            "validity": 0.9303829705444236,
+            "duplicate_rate": 0.7375762817740618,
+            "unique_valid_per_query": 16.71875,
+            "mean_samples_per_query": 133.4,
+            "mean_candidates_per_query": 86.7125,
+            "mean_scored_per_query": 16.71875,
+            "budget_filled_rate": 0.5325,
+            "mean_best_tanimoto": 0.9603575065654245,
+            "mean_hit_rank": 1.9894366197183098
+          },
+          "fp_unseen": {
+            "n_queries": 2321,
+            "recovery_at_k": {
+              "1": 0.44851357173632056,
+              "5": 0.7173632055148643,
+              "20": 0.8199052132701422
+            },
+            "structure_accuracy_at_k": {
+              "1": 0.4067212408444636,
+              "5": 0.6880654890133563,
+              "20": 0.7957776820336062
+            },
+            "recovery_at_k_consensus": {
+              "1": 0.6161137440758294,
+              "5": 0.7656182679879362,
+              "20": 0.8216286083584662
+            },
+            "structure_accuracy_at_k_consensus": {
+              "1": 0.5708746230073244,
+              "5": 0.7414907367514002,
+              "20": 0.7979319258940112
+            },
+            "validity": 0.9308522167487685,
+            "duplicate_rate": 0.7424088669950739,
+            "unique_valid_per_query": 16.481688927186557,
+            "mean_samples_per_query": 135.06247307195176,
+            "mean_candidates_per_query": 87.46230073244291,
+            "mean_scored_per_query": 16.481688927186557,
+            "budget_filled_rate": 0.5234812580784145,
+            "mean_best_tanimoto": 0.9602373967630554,
+            "mean_hit_rank": 1.977130977130977
+          }
+        },
+        "primary_metric": 0.8199052132701422,
+        "primary_metric_name": "recovery@20 (fp_unseen)",
+        "fp_unseen_fraction": 0.9670833333333333,
+        "elapsed_seconds": 1086.0597943749744,
+        "queries_per_second": 2.2098230801198158,
+        "candidates_per_second": 191.61928383488953,
+        "generation": {
+          "k": 20,
+          "budget": "molecules",
+          "seed": 0,
+          "max_oversample": 10.0
+        }
+      }
+    }
+  }
+}

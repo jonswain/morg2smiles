@@ -62,3 +62,17 @@ dist/
 !/results/overnight5/band_temperatures.json
 !/results/overnight5/driver.log
 !/results/overnight5/size_from_fingerprint.json
+!/results/overnight5/band_large_generation.json
+!/results/overnight5/comparison_large.json
+!/results/overnight5/comparison_size_mix.json
+!/results/overnight5/band_common_mix_generation.json
+!/results/overnight5/arm_common_mix.json
+!/results/overnight5/decode_sweep_large.json
+!/results/overnight5/comparison_large_t03.json
+!/results/overnight5/comparison_large_t06.json
+!/results/overnight5/comparison_common_t03.json
+!/results/overnight5/band_large_temps.json
+!/results/overnight5/band_common_temps.json
+!/results/overnight5/temperature_policy_t03_t06.json
+!/results/overnight5/comparison_large_t35.json
+!/results/overnight5/comparison_common_t35.json

@@ -3,6 +3,7 @@
 #
 #   5  sweep T on a *large-molecule* tuning set, disjoint from the protocol  ~45 min
 #   6  verify the coldest useful setting on the large-molecule protocol      ~70 min
+#   7  the same setting on the common protocol, for what it costs small      ~35 min
 #
 # Night 4 cooled the decoder from 1.0 to 0.6 and gained +1.99 points overall,
 # all of it above 30 heavy atoms. Reading its three temperature dumps band by
@@ -81,6 +82,45 @@ print(' '.join(str(t) for t in dict.fromkeys([picked, 0.6])))
             mv "$LOGS/dump_tmp_t$TAG/small_1m.jsonl" "$LOGS/outcomes_large_temps/t$TAG.jsonl" && \
             rmdir "$LOGS/dump_tmp_t$TAG"
     done
+fi
+
+# What the cold setting costs on the molecules it was not chosen for. The
+# large protocol cannot see this: it holds no molecule under 30 heavy atoms.
+# Dumped next to symlinks to night 4's three temperature dumps, which are the
+# same checkpoint on the same 1,956 molecules, so the four arms form one paired
+# set and a size-conditional policy can be evaluated over them without
+# generating anything again.
+if [ -f "$LOGS/decode_sweep_large.json" ] && fits 3000 "stage 7"; then
+    T=$($PY -c "
+import json
+d = json.load(open('$LOGS/decode_sweep_large.json'))
+print(d['best_by_consensus_rec20']['temperature'])
+")
+    TAG=$($PY -c "print(str($T).replace('.',''))")
+    # Night 4's dumps first, so that a sweep landing back on 0.6, 0.7 or 1.0
+    # finds the measurement already there instead of repeating it.
+    mkdir -p "$LOGS/outcomes_common_temps"
+    for PAIR in t06:outcomes_t06 t07:outcomes_decode t10:outcomes_default; do
+        NAME=${PAIR%%:*}; DIR=${PAIR##*:}
+        [ -f "results/overnight4/$DIR/small_1m.jsonl" ] && \
+            ln -sf "../../overnight4/$DIR/small_1m.jsonl" \
+                   "$LOGS/outcomes_common_temps/$NAME.jsonl"
+    done
+    if [ ! -e "$LOGS/outcomes_common_temps/t$TAG.jsonl" ]; then
+        say "stage 7: common protocol at T=$T, for the small-molecule cost"
+        $PY -u scripts/compare_checkpoints.py --no-baseline --only small_1m \
+            --temperature "$T" \
+            --out "$LOGS/comparison_common_t$TAG.json" \
+            --dump-outcomes "$LOGS/dump_common_t$TAG" \
+            > "$LOGS/stage7_common_t$TAG.log" 2>&1
+        say "stage 7 exit=$?"
+        [ -f "$LOGS/dump_common_t$TAG/small_1m.jsonl" ] && \
+            mv "$LOGS/dump_common_t$TAG/small_1m.jsonl" \
+               "$LOGS/outcomes_common_temps/t$TAG.jsonl" && \
+            rmdir "$LOGS/dump_common_t$TAG"
+    else
+        say "stage 7 skipped: T=$T is already measured on the common protocol"
+    fi
 fi
 
 say "=== night 5b done, $(( $(remaining) / 60 )) min to spare ==="

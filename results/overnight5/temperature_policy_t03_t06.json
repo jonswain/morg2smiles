@@ -1,0 +1,217 @@
+{
+  "n_fp_unseen": 1956,
+  "k": 20,
+  "order": "consensus",
+  "cold": "t03",
+  "hot": "t06",
+  "bits_threshold": 62,
+  "fixed_arms": {
+    "t03": 0.9125766871165644,
+    "t06": 0.9161554192229039
+  },
+  "policy": 0.9171779141104295,
+  "n_routed_cold": 300,
+  "comparisons": {
+    "t03": {
+      "gap_points": 0.4601226993865115,
+      "policy_only": 26,
+      "arm_only": 17,
+      "paired_se_points": 0.33524736831809815,
+      "mcnemar_p": 0.2220528201560228
+    },
+    "t06": {
+      "gap_points": 0.10224948875255935,
+      "policy_only": 13,
+      "arm_only": 11,
+      "paired_se_points": 0.2504590739042104,
+      "mcnemar_p": 0.8388197422027588
+    }
+  },
+  "curve": [
+    {
+      "bits": 30,
+      "routed_cold": 1869,
+      "recovery": 0.9125766871165644
+    },
+    {
+      "bits": 32,
+      "routed_cold": 1828,
+      "recovery": 0.9125766871165644
+    },
+    {
+      "bits": 34,
+      "routed_cold": 1775,
+      "recovery": 0.9125766871165644
+    },
+    {
+      "bits": 36,
+      "routed_cold": 1714,
+      "recovery": 0.9125766871165644
+    },
+    {
+      "bits": 38,
+      "routed_cold": 1637,
+      "recovery": 0.9125766871165644
+    },
+    {
+      "bits": 40,
+      "routed_cold": 1549,
+      "recovery": 0.9125766871165644
+    },
+    {
+      "bits": 42,
+      "routed_cold": 1444,
+      "recovery": 0.911042944785276
+    },
+    {
+      "bits": 44,
+      "routed_cold": 1331,
+      "recovery": 0.911042944785276
+    },
+    {
+      "bits": 46,
+      "routed_cold": 1205,
+      "recovery": 0.9115541922290389
+    },
+    {
+      "bits": 48,
+      "routed_cold": 1060,
+      "recovery": 0.9115541922290389
+    },
+    {
+      "bits": 50,
+      "routed_cold": 928,
+      "recovery": 0.9115541922290389
+    },
+    {
+      "bits": 52,
+      "routed_cold": 798,
+      "recovery": 0.9115541922290389
+    },
+    {
+      "bits": 54,
+      "routed_cold": 682,
+      "recovery": 0.91359918200409
+    },
+    {
+      "bits": 56,
+      "routed_cold": 569,
+      "recovery": 0.9146216768916156
+    },
+    {
+      "bits": 58,
+      "routed_cold": 462,
+      "recovery": 0.9161554192229039
+    },
+    {
+      "bits": 60,
+      "routed_cold": 371,
+      "recovery": 0.9161554192229039
+    },
+    {
+      "bits": 62,
+      "routed_cold": 300,
+      "recovery": 0.9171779141104295
+    },
+    {
+      "bits": 64,
+      "routed_cold": 241,
+      "recovery": 0.9166666666666666
+    },
+    {
+      "bits": 66,
+      "routed_cold": 199,
+      "recovery": 0.9171779141104295
+    },
+    {
+      "bits": 68,
+      "routed_cold": 156,
+      "recovery": 0.9171779141104295
+    },
+    {
+      "bits": 70,
+      "routed_cold": 125,
+      "recovery": 0.918200408997955
+    },
+    {
+      "bits": 72,
+      "routed_cold": 93,
+      "recovery": 0.9197341513292433
+    },
+    {
+      "bits": 74,
+      "routed_cold": 67,
+      "recovery": 0.918200408997955
+    },
+    {
+      "bits": 76,
+      "routed_cold": 57,
+      "recovery": 0.9166666666666666
+    },
+    {
+      "bits": 78,
+      "routed_cold": 44,
+      "recovery": 0.9161554192229039
+    },
+    {
+      "bits": 80,
+      "routed_cold": 34,
+      "recovery": 0.9161554192229039
+    },
+    {
+      "bits": 82,
+      "routed_cold": 30,
+      "recovery": 0.9161554192229039
+    },
+    {
+      "bits": 84,
+      "routed_cold": 20,
+      "recovery": 0.9161554192229039
+    },
+    {
+      "bits": 86,
+      "routed_cold": 19,
+      "recovery": 0.9161554192229039
+    },
+    {
+      "bits": 88,
+      "routed_cold": 18,
+      "recovery": 0.9161554192229039
+    },
+    {
+      "bits": 90,
+      "routed_cold": 13,
+      "recovery": 0.9161554192229039
+    },
+    {
+      "bits": 92,
+      "routed_cold": 9,
+      "recovery": 0.9161554192229039
+    },
+    {
+      "bits": 94,
+      "routed_cold": 7,
+      "recovery": 0.9161554192229039
+    },
+    {
+      "bits": 96,
+      "routed_cold": 4,
+      "recovery": 0.9161554192229039
+    },
+    {
+      "bits": 98,
+      "routed_cold": 2,
+      "recovery": 0.9161554192229039
+    },
+    {
+      "bits": 100,
+      "routed_cold": 2,
+      "recovery": 0.9161554192229039
+    }
+  ],
+  "per_query_oracle": 0.9314928425357873,
+  "routing_on_this_set": {
+    "precision": 0.78,
+    "recall": 0.6518105849582173
+  }
+}
