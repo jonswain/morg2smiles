@@ -63,7 +63,7 @@ route.** What is left is widening k inside one model — priced at k ≈ 170 for
 0.50 above 35 atoms, on an extrapolation that should now be measured — and
 changing what the model can represent.
 
-Underneath all of it is one measurement error, found four times in one night.
+Underneath all of it is one measurement error, found five times in one night.
 The common protocol draws 2,000 molecules at random and 63% of them are under
 30 heavy atoms, so it cannot see anything that acts on part of the size
 distribution. It reported the size mix as a flat −1.13 when band by band it is
