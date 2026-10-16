@@ -23,12 +23,12 @@ import torch
 from torch import Tensor
 
 from .data.dataset import fp_to_indices
-from .defaults import DEFAULT_TEMPERATURE
+from .defaults import DEFAULT_TEMPERATURE, TEMPERATURE_POOL
 from .fingerprints import FPConfig, Sparse
 from .model import Morg2SmilesModel, select_device
 from .oracle import OracleResult, check_many
 
-__all__ = ["Morg2Smiles", "sample", "beam_search"]
+__all__ = ["Morg2Smiles", "sample", "beam_search", "TEMPERATURE_POOL"]
 
 
 def _as_sparse(fp: Sparse | np.ndarray | Sequence[int], cfg: FPConfig) -> Sparse:
@@ -42,6 +42,16 @@ def _as_sparse(fp: Sparse | np.ndarray | Sequence[int], cfg: FPConfig) -> Sparse
         raise ValueError(f"expected {cfg.n_bits} bits, got {arr.size}")
     nz = np.nonzero(arr)[0]
     return {int(i): int(arr[i]) for i in nz}
+
+
+def _temperatures(value: float | Sequence[float]) -> tuple[float, ...]:
+    """One temperature or several, always as a tuple."""
+    if isinstance(value, (int, float)):
+        return (float(value),)
+    temperatures = tuple(float(x) for x in value)
+    if not temperatures:
+        raise ValueError("temperature cannot be an empty sequence")
+    return temperatures
 
 
 def _batch_inputs(
@@ -276,7 +286,7 @@ class Morg2Smiles:
         strategy: str = "sample",
         verified_only: bool = False,
         oversample: float = 2.0,
-        temperature: float = DEFAULT_TEMPERATURE,
+        temperature: float | Sequence[float] = DEFAULT_TEMPERATURE,
         **kwargs,
     ) -> list[str]:
         """Generate candidate SMILES for one fingerprint, best first.
@@ -291,9 +301,15 @@ class Morg2Smiles:
             oversample: Multiplier on how many raw strings to draw to fill k
                 distinct molecules. Ignored by beam search, which returns
                 distinct sequences already.
-            temperature: Softmax temperature. Defaults to
+            temperature: Softmax temperature, or several. Defaults to
                 :data:`DEFAULT_TEMPERATURE`, which is colder than 1.0 for the
-                reasons given there.
+                reasons given there. Given a sequence -- for instance
+                :data:`TEMPERATURE_POOL` -- the model is sampled once per
+                temperature and the union is ranked by spelling counts summed
+                across all of them, which is the best-measured configuration
+                here (recovery@20 0.9279 against 0.9162) at a proportional cost
+                in forward passes. To pool without paying for it, divide
+                ``oversample`` by the number of temperatures.
             verified_only: Return only candidates the oracle accepts. The
                 default returns everything, ordered so verified matches come
                 first, so a caller that wants a best-effort answer still gets
@@ -312,6 +328,7 @@ class Morg2Smiles:
         if strategy == "sample":
             kwargs["temperature"] = temperature
         results = self._judge(sparse, k=k, strategy=strategy, oversample=oversample, **kwargs)
+
         if verified_only:
             return [r.smiles for r in results if r.fp_match]
         return [r.smiles for r in results]
@@ -323,11 +340,27 @@ class Morg2Smiles:
         k: int,
         strategy: str,
         oversample: float = 2.0,
+        temperature: float | Sequence[float] = DEFAULT_TEMPERATURE,
         **kwargs,
     ) -> list[OracleResult]:
         if strategy == "sample":
             n_draw = max(k, int(round(k * oversample)))
-            candidates = sample(self.model, [fp], k=n_draw, device=self.device, **kwargs)[0]
+            # One sampling pass per temperature, pooled into one candidate list.
+            # The votes below are then counted across the whole union, which is
+            # the whole point: the arms agree on the molecule far more often
+            # than on the spelling, and they fail differently.
+            candidates = []
+            for value in _temperatures(temperature):
+                candidates.extend(
+                    sample(
+                        self.model,
+                        [fp],
+                        k=n_draw,
+                        temperature=value,
+                        device=self.device,
+                        **kwargs,
+                    )[0]
+                )
         elif strategy == "beam":
             candidates = beam_search(self.model, fp, k=k, device=self.device, **kwargs)
         else:

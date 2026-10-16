@@ -26,3 +26,24 @@ Deliberately *not* the default in
 project has published keeps its meaning and re-scoring an old checkpoint
 reproduces it exactly. See docs/overnight-2026-10-15.md, stages 6 to 10.
 """
+
+
+TEMPERATURE_POOL = (0.6, 0.7, 1.0)
+"""Temperatures to pool when one sampling pass is not the budget.
+
+Also measured. Drawing candidates at these three temperatures from *one* model
+and ranking the union by how many spellings it received gives recovery@20
+0.9279 on the common protocol -- the best this project has recorded, +1.18
+points over sampling at 0.6 alone (McNemar p = 6.6e-05), and ahead of pooling
+three *differently trained* checkpoints (0.9039). It costs three forward passes
+per query; capping each arm so the three together draw what 0.6 alone draws
+still gives 0.9238 (+0.77, p = 0.006), so what buys the gain is mixing
+temperatures rather than drawing more.
+
+The reason it works: a model's samples at one temperature exhaust their
+diversity quickly -- night 4 found extra candidates at a fixed temperature buy
+nothing past about 80 -- while a cold arm and a hot arm make *different*
+mistakes. Not the default for :meth:`morg2smiles.generate.Morg2Smiles.generate`,
+because a default that silently triples the work is the caller's decision to
+make: pass ``temperature=TEMPERATURE_POOL`` to take it.
+"""
