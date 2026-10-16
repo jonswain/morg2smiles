@@ -15,8 +15,8 @@ GPU queue
   stage 5  temperature sweep on a large-molecule tuning set      03:15 -> 03:40
   stage 6  T=0.3 and T=0.6 on the large protocol                 03:40 -> 04:22
   stage 7  T=0.3 on the common protocol (the cost)               04:22 -> 04:40
-  stage 8  size mix at threshold 35, factor 6 (8,508 steps)      04:40 -> TBD
-  stage 9  score it on both protocols                               TBD
+  stage 8  size mix at threshold 35, factor 6 (8,508 steps)      04:40 -> 07:33
+  stage 9  score it on both protocols                            07:33 -> 07:58
   stage 10 every arm on the large protocol at T=0.6                 TBD
   stage 11 count fingerprints on the large protocol                 TBD
 
@@ -721,3 +721,128 @@ cooled. Better and sharper models collide less, and the floor underneath them
 is the fingerprint's own 2.65% at 35+ — which is a floor for structure
 accuracy, and for the *corpus*; the decoder's floor is higher, since it may
 propose preimages ChEMBL does not contain.
+
+---
+
+## Stages 8–9 — a second dose, and the price of exposure
+
+Stage 8 trained the same architecture on the same 100k shard for the same
+8,508 steps with the sampler re-weighted harder and higher: threshold 35
+heavy atoms, factor 6, one seed (`size_mix_t35`, 2 h 53 min). The two mixes
+now in hand differ only in how much of the model's training diet comes from
+which size band:
+
+| band | share of shard | mix3x30 (thr 30, ×3) | mix6x35 (thr 35, ×6) |
+|---|---|---|---|
+| 0–24 | 35.2% | 19.8% (0.56×) | 17.9% (0.51×) |
+| 25–29 | 25.9% | 14.6% (0.56×) | 13.2% (0.51×) |
+| 30–34 | 19.6% | 33.1% (1.69×) | 10.0% (0.51×) |
+| 35–39 | 10.3% | 17.3% (1.69×) | 31.4% (3.06×) |
+| 40–49 | 6.5% | 11.0% (1.69×) | 19.9% (3.06×) |
+| 50+ | 2.5% | 4.2% (1.69×) | 7.6% (3.06×) |
+
+The point of the second dose was to ask whether the response keeps growing.
+It does not. On the large protocol, which has 1,132 fingerprint-unseen queries
+above 35 heavy atoms, `rec@20` in generation order:
+
+| band | queries | baseline | mix3x30 | mix6x35 |
+|---|---|---|---|---|
+| 30–34 | 1,189 | 0.4886 | +0.46 | **−1.43** |
+| 35–39 | 625 | 0.2757 | +2.51 | +2.19 |
+| 40–49 | 380 | 0.1026 | +3.42 | +4.47 |
+| 50+ | 127 | 0.0157 | +1.97 | +1.57 |
+| 35+ | 1,132 | 0.1885 | **+2.75** | **+2.89** |
+| all 30+ | 2,321 | 0.3422 | +1.58 | +0.67 |
+
+Tripling the large-molecule exposure again — 1.69× to 3.06×, and 19.3% of the
+diet to 58.9% — moved 35+ recovery by +0.14 points, which is a tenth of its
+error bar. On structure accuracy it moved it the other way, +3.09 to +2.74.
+The common protocol's 359 queries above 35 atoms read the second dose as
+larger (+4.60 to +6.13, and +3.71 to +5.66 on structure), but that is a third
+as many queries and the two readings are compatible; the better-powered
+protocol is the one to quote, and it says the first dose had already taken
+what exposure has to give above 35 atoms.
+
+### What it cost, and the price of a doubling
+
+`scripts/exposure_response.py` (new) puts each band's gap next to that band's
+exposure ratio, converts points into molecules, and divides. On the common
+protocol, which is the only one of the two that contains the bands being paid
+from:
+
+| band | queries | exposure | gap | molecules | points per doubling |
+|---|---|---|---|---|---|
+| 0–24 | 712 | 0.51× | −6.55 | −46.7 | +6.74 |
+| 25–29 | 512 | 0.51× | −6.71 | −34.3 | +6.89 |
+| 30–34 | 373 | 0.51× | −4.47 | −16.7 | +4.59 |
+| 35–39 | 195 | 3.06× | +6.50 | +12.7 | +4.03 |
+| 40–49 | 123 | 3.06× | +5.96 | +7.3 | +3.70 |
+| 50+ | 41 | 3.06× | +4.88 | +2.0 | +3.03 |
+| all | 1,956 | — | **−3.87** | **−75.7** | — |
+
+Six bands, gaps running from −6.71 to +6.50, and a straight line through
+log₂ exposure fits them at **+4.52 points per doubling with r = 0.989**. For
+this mix there is no band that defies its exposure: tell me how much more or
+less often the model saw a size band and I can tell you what happened to that
+band's recovery. The lower dose fits the same line less well (+3.91 per
+doubling, r = 0.779), and the band that spoils it is 30–34, the one band
+whose exposure the two mixes move in opposite directions.
+
+In molecules the trade got worse exactly as fast as the dose grew:
+
+| | molecules lost | molecules gained | given up per one gained | whole protocol |
+|---|---|---|---|---|
+| mix3x30 | 38.7 | 16.5 | 2.3 | −1.13 |
+| mix6x35 | 97.7 | 22.0 | **4.4** | **−3.87** |
+| the step between them | +59.0 | +5.5 | **10.7** | −2.74 |
+
+**The second dose bought five and a half molecules for fifty-nine.** That is
+the whole result. Re-weighting a fixed corpus is a transfer at a roughly
+constant price in points, and a transfer at a constant price in points is a
+losing trade in molecules, because the bands being paid from hold 1,597 of
+the protocol's queries and the bands being bought hold 359. No setting of
+threshold and factor escapes that arithmetic; the only question a mix can
+answer is which population the project is willing to pay for.
+
+### The band that changed sides changed sign
+
+30–34 is the internal control. It is above the first mix's threshold and
+below the second's, so it is the one band that goes from up-weighted to
+down-weighted while everything else keeps its direction, and it tracks its own
+exposure both times — +0.46 at 1.69× and −1.43 at 0.51× on the large protocol,
+−0.45 and −4.47 on the common one. The response is also clearly asymmetric:
+nearly doubling this band's exposure bought it nothing measurable, halving it
+cost 1.4 to 4.5 points. Three bands at 1.69× in the first mix gained 2.5 and
+3.4 points per doubling while 30–34 at the same dose gained none, so the
+asymmetry is specific to this band rather than a general law, and it is
+recorded here rather than explained.
+
+### Each protocol is blind in its own direction
+
+Running the same analysis on the large protocol prints a refusal:
+
+```
+every band here sits at the same exposure, so this protocol cannot price a doubling
+```
+
+Under a threshold-30 mix, every band the large protocol contains is above the
+threshold and sits at 1.69×, so the protocol has no contrast in the quantity
+that explains the result and no band on the paying side — it reports the
+mix as a free +1.58 with nothing given up. The common protocol has the
+contrast but only 359 queries where the gain lives, and reports the same mix
+as −1.13. Neither number is wrong and neither is the answer. This is the
+night's recurring error in its clearest form: the protocol decides what can
+be seen, and the band table is the only place both halves of a size-dependent
+result appear at once.
+
+### Verdict on the size-weighted mix
+
+Adopt neither as a default. `mix3x30` is the better of the two on every
+summary that includes small molecules, `mix6x35` is the strongest arm the
+project has above 35 heavy atoms (+6.13 on the common protocol, +2.89 on the
+large one, +5.66 and +2.74 on structure accuracy), and both lose on the
+headline metric. If large-molecule recovery becomes the deliverable, the
+checkpoint to ship is `mix6x35` and the number to report is per-band. If the
+headline stays as it is, the baseline stands and this line of work is closed:
+exposure has been pushed 3× and then 3× again, and the second push bought
+nothing the error bar can see.

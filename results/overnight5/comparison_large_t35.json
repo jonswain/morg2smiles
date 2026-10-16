@@ -1,0 +1,129 @@
+{
+  "protocol": {
+    "eval_n": 2400,
+    "seed": 0,
+    "budget": "molecules",
+    "eval_k": 20,
+    "max_oversample": 10.0,
+    "temperature": 1.0,
+    "top_p": 1.0,
+    "pool_shard": "data/shards/1m",
+    "split": "valid",
+    "n_fp_unseen": 2321,
+    "fp_config": "morgan r=2 binary folded/2048",
+    "training_union_size": 1989502,
+    "shards_excluded": [
+      "data/shards/100k",
+      "data/shards/1m",
+      "data/shards/full"
+    ],
+    "min_heavy_atoms": 30,
+    "max_heavy_atoms": null
+  },
+  "runs": {
+    "size_mix_t35": {
+      "checkpoint": "checkpoints/size_mix_t35/best.pt",
+      "train_shard": "data/shards/100k",
+      "n_parameters": 7951945,
+      "trained_epoch": 12,
+      "trained_step": 8508,
+      "model_config": {
+        "d_model": 256,
+        "n_heads": 8,
+        "d_ff": 1024,
+        "n_encoder_layers": 4,
+        "n_decoder_layers": 4,
+        "dropout": 0.1,
+        "max_tokens": 128,
+        "vocab_size": 73,
+        "fp_vocab_size": 2048
+      },
+      "report": {
+        "ks": [
+          1,
+          5,
+          20
+        ],
+        "budget": "molecules",
+        "slices": {
+          "all": {
+            "n_queries": 2400,
+            "recovery_at_k": {
+              "1": 0.060833333333333336,
+              "5": 0.19208333333333333,
+              "20": 0.35208333333333336
+            },
+            "structure_accuracy_at_k": {
+              "1": 0.04666666666666667,
+              "5": 0.16625,
+              "20": 0.32125
+            },
+            "recovery_at_k_consensus": {
+              "1": 0.18916666666666668,
+              "5": 0.28958333333333336,
+              "20": 0.3545833333333333
+            },
+            "structure_accuracy_at_k_consensus": {
+              "1": 0.16625,
+              "5": 0.26458333333333334,
+              "20": 0.32458333333333333
+            },
+            "validity": 0.6658356854327582,
+            "duplicate_rate": 0.10736559230652222,
+            "unique_valid_per_query": 27.535833333333333,
+            "mean_samples_per_query": 49.766666666666666,
+            "mean_candidates_per_query": 49.30583333333333,
+            "mean_scored_per_query": 27.535833333333333,
+            "budget_filled_rate": 0.9933333333333333,
+            "mean_best_tanimoto": 0.8241347406075283,
+            "mean_hit_rank": 7.425806451612903
+          },
+          "fp_unseen": {
+            "n_queries": 2321,
+            "recovery_at_k": {
+              "1": 0.05945713054717794,
+              "5": 0.19000430848772082,
+              "20": 0.34898750538560963
+            },
+            "structure_accuracy_at_k": {
+              "1": 0.04825506247307195,
+              "5": 0.16932356742783283,
+              "20": 0.3248599741490737
+            },
+            "recovery_at_k_consensus": {
+              "1": 0.1904351572598018,
+              "5": 0.2890995260663507,
+              "20": 0.35157259801809565
+            },
+            "structure_accuracy_at_k_consensus": {
+              "1": 0.17104696251615684,
+              "5": 0.26928048255062476,
+              "20": 0.32787591555364065
+            },
+            "validity": 0.6673250367055863,
+            "duplicate_rate": 0.10907676711179473,
+            "unique_valid_per_query": 27.52132701421801,
+            "mean_samples_per_query": 49.76303317535545,
+            "mean_candidates_per_query": 49.2994398965963,
+            "mean_scored_per_query": 27.52132701421801,
+            "budget_filled_rate": 0.993106419646704,
+            "mean_best_tanimoto": 0.8220977805684417,
+            "mean_hit_rank": 7.435955056179775
+          }
+        },
+        "primary_metric": 0.34898750538560963,
+        "primary_metric_name": "recovery@20 (fp_unseen)",
+        "fp_unseen_fraction": 0.9670833333333333,
+        "elapsed_seconds": 550.5716864999849,
+        "queries_per_second": 4.359105378732667,
+        "candidates_per_second": 214.92932328622976,
+        "generation": {
+          "k": 20,
+          "budget": "molecules",
+          "seed": 0,
+          "max_oversample": 10.0
+        }
+      }
+    }
+  }
+}

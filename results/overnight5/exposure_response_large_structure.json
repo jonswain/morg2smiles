@@ -1,0 +1,133 @@
+{
+  "bands_report": "results/overnight5/band_large_t35_structure.json",
+  "metric": "structure",
+  "reference": {
+    "name": "baseline",
+    "runs": [
+      "variance_s1",
+      "variance_s2",
+      "variance_s3"
+    ]
+  },
+  "mixes": {
+    "mix3x30": {
+      "rows": [
+        {
+          "band": "30-34",
+          "n_queries": 1189,
+          "exposure_ratio": 1.6876302729528538,
+          "log2_exposure": 0.7549988721716983,
+          "reference": 0.4704233249229044,
+          "mix": 0.47098402018502944,
+          "gap_points": 0.056069526212504384,
+          "molecules": 0.6666666666666772,
+          "points_per_doubling": 0.07426438406619675
+        },
+        {
+          "band": "35-39",
+          "n_queries": 625,
+          "exposure_ratio": 1.6876302729528536,
+          "log2_exposure": 0.754998872171698,
+          "reference": 0.24639999999999998,
+          "mix": 0.2792,
+          "gap_points": 3.2800000000000025,
+          "molecules": 20.500000000000014,
+          "points_per_doubling": 4.344377350611567
+        },
+        {
+          "band": "40-49",
+          "n_queries": 380,
+          "exposure_ratio": 1.6876302729528536,
+          "log2_exposure": 0.754998872171698,
+          "reference": 0.09035087719298246,
+          "mix": 0.125,
+          "gap_points": 3.4649122807017543,
+          "molecules": 13.166666666666666,
+          "points_per_doubling": 4.589294644553829
+        },
+        {
+          "band": "50+",
+          "n_queries": 127,
+          "exposure_ratio": 1.6876302729528538,
+          "log2_exposure": 0.7549988721716983,
+          "reference": 0.005249343832020997,
+          "mix": 0.015748031496062992,
+          "gap_points": 1.0498687664041995,
+          "molecules": 1.3333333333333333,
+          "points_per_doubling": 1.3905567347197882
+        }
+      ],
+      "molecules_lost": 0,
+      "molecules_gained": 35.66666666666669,
+      "molecules_net": 35.66666666666669,
+      "net_points": 1.5366939537555662,
+      "given_up_per_gain": null,
+      "fit": null
+    },
+    "mix6x35": {
+      "rows": [
+        {
+          "band": "30-34",
+          "n_queries": 1189,
+          "exposure_ratio": 0.5095152744455744,
+          "log2_exposure": -0.9728026981791547,
+          "reference": 0.4704233249229044,
+          "mix": 0.44911690496215306,
+          "gap_points": -2.1306419960751333,
+          "molecules": -25.333333333333336,
+          "points_per_doubling": 2.1902097928625883
+        },
+        {
+          "band": "35-39",
+          "n_queries": 625,
+          "exposure_ratio": 3.057091646673447,
+          "log2_exposure": 1.6121598025420016,
+          "reference": 0.24639999999999998,
+          "mix": 0.2704,
+          "gap_points": 2.3999999999999995,
+          "molecules": 14.999999999999996,
+          "points_per_doubling": 1.4886861688374544
+        },
+        {
+          "band": "40-49",
+          "n_queries": 380,
+          "exposure_ratio": 3.0570916466734466,
+          "log2_exposure": 1.6121598025420014,
+          "reference": 0.09035087719298246,
+          "mix": 0.12894736842105264,
+          "gap_points": 3.8596491228070184,
+          "molecules": 14.66666666666667,
+          "points_per_doubling": 2.3940859440368434
+        },
+        {
+          "band": "50+",
+          "n_queries": 127,
+          "exposure_ratio": 3.057091646673447,
+          "log2_exposure": 1.6121598025420016,
+          "reference": 0.005249343832020997,
+          "mix": 0.015748031496062992,
+          "gap_points": 1.0498687664041995,
+          "molecules": 1.3333333333333333,
+          "points_per_doubling": 0.6512187965168218
+        }
+      ],
+      "molecules_lost": -25.333333333333336,
+      "molecules_gained": 30.999999999999996,
+      "molecules_net": 5.666666666666661,
+      "net_points": 0.24414763751256616,
+      "given_up_per_gain": 0.817204301075269,
+      "fit": {
+        "points_per_doubling": 1.7668140090509588,
+        "intercept": -0.4118805608896303,
+        "r": 0.893550316521322
+      }
+    }
+  },
+  "marginal": {
+    "mix3x30->mix6x35": {
+      "extra_gained": -4.666666666666696,
+      "extra_lost": -25.333333333333336,
+      "given_up_per_gain": null
+    }
+  }
+}
