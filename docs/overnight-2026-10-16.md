@@ -56,13 +56,17 @@ then survived two predictions and a test it could have failed:
 The practical ledger is short. **T=0.6, top_p 1.0, everywhere** — free, +1.99
 points overall and +7.5 above 35 heavy atoms, and the size-conditional version
 of it is dead because cooling never hurts small molecules. **The size-weighted
-training mix is a trade, not a gain**, and the trade gets worse as it is
-pushed: 2.3 small molecules given up per large one gained at threshold 30 ×3,
-4.4 at threshold 35 ×6, and 10.7 for the step between them, with the second
-dose buying nothing the error bar can see above 35 atoms. **Ensembling is not a
-route.** What is left is widening k inside one model — priced at k ≈ 170 for
-0.50 above 35 atoms, on an extrapolation that should now be measured — and
-changing what the model can represent.
+training mix is a trade, not a gain**, and the trade gets worse the harder it
+is pushed: 2.3 small molecules given up per large one gained at threshold 30
+×3, 4.4 at threshold 35 ×6, and 10.7 for the step between them, with the
+second dose buying nothing the error bar can see above 35 atoms. **The two
+compose.** Cooling and the threshold-30 mix stack additively or better in every
+band — the mix is worth +3.28 above 35 heavy atoms at T=0.6 against +2.75 at
+T=1.0 — which is what two factors of a product do, and which is why the
+night's first prediction about them was wrong. **Ensembling is not a route.**
+What is left is widening k inside one model — priced at k ≈ 170 for 0.50 above
+35 atoms, on an extrapolation that stage 12 is measuring — and changing what
+the model can represent.
 
 Underneath all of it is one measurement error, found five times in one night.
 The common protocol draws 2,000 molecules at random and 63% of them are under
@@ -74,7 +78,9 @@ degeneracy rare from an 11,669-molecule corpus where the real figure at scale
 is 1.40%, and 6.13% at 50–59 atoms; and it closed the count-fingerprint
 question at p = 0.32. Tonight's own plan item — the 30–39 band, chosen because
 night 4's error bar was small there — was the same error a fifth time, and it
-did not clear.
+did not clear. Though only half of that was the band's fault: scored at T=0.6
+rather than the T=1.0 night 4 had already superseded, the same pre-registered
+metric reports +2.25 at 2.4 SE with all six pairs agreeing.
 
 ---
 

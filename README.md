@@ -388,6 +388,15 @@ common protocol stays the right table for capacity questions, where every band
 moves together, and it cannot describe an intervention that redistributes; see
 `docs/overnight-2026-10-16.md` for the large-molecule protocol it is read on.
 
+**It composes with the cooled decoder, though.** Scored at the adopted T=0.6
+rather than at T=1.0, the threshold-30 mix is worth **+3.28 points above 35
+heavy atoms** (3.1 SE, 6/6 pairs; +3.56 on structure accuracy) and +2.69 across
+the whole large protocol, against +2.75 and +1.58 measured hot. Band by band
+the two interventions are additive to within noise or better, which is what the
+size factorisation above predicts of two independent factors — the mix supplies
+right-sized proposals, cooling makes a right-sized proposal likelier to be the
+molecule. What the cooled decoder does to the *cost* side is not yet measured.
+
 **And the exposure is already spent.** A second mix pushed harder and higher —
 threshold 35, factor 6, so 58.9% of the training diet comes from 35+ atoms
 against the first mix's 19.3% — moved recovery above 35 atoms by +0.14 points
