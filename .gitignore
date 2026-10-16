@@ -56,3 +56,8 @@ dist/
 
 .DS_Store
 .venv/
+!/results/overnight5/
+/results/overnight5/*
+!/results/overnight5/band_seed_sd.json
+!/results/overnight5/band_temperatures.json
+!/results/overnight5/driver.log
