@@ -7,19 +7,24 @@ after re-sizing the first of them, because night 4's own error bar turned out
 not to apply where the plan proposed to read it.
 
 ```
-stage 0  error bar inside each size band, from night 4's dumps   20:08 -> 20:17
-stage 0b temperature dose-response per band, from night 4's dumps
-stage 0c size from the fingerprint, and a routing threshold      -> 20:24
-stage 1  size-weighted mix, seed 1 (8,508 steps, 100k shard)     20:17 -> 23:10
-stage 2  size-weighted mix, seed 2                               23:10 -> 02:04
-stage 3  5 checkpoints on a new large-molecule protocol          02:04 -> 02:55
-stage 4  both mix seeds on the common protocol (the cost side)   02:55 -> 03:14
-stage 5  temperature sweep on a large-molecule tuning set        03:15 -> 03:40
-stage 6  T=0.3 and T=0.6 on the large protocol                   03:40 -> 04:22
-stage 7  T=0.3 on the common protocol (the cost side)            04:22 -> 04:40
-stage 8  size mix at threshold 35, factor 6 (8,508 steps)        04:40 -> TBD
-stage 9  score it on both protocols                                 TBD
-stage 10 every arm on the large protocol at T=0.6 (do they stack?)  TBD
+GPU queue
+  stage 1  size-weighted mix, seed 1 (8,508 steps, 100k shard)   20:17 -> 23:10
+  stage 2  size-weighted mix, seed 2                             23:10 -> 02:04
+  stage 3  5 checkpoints on a new large-molecule protocol        02:04 -> 02:55
+  stage 4  both mix seeds on the common protocol (the cost)      02:55 -> 03:14
+  stage 5  temperature sweep on a large-molecule tuning set      03:15 -> 03:40
+  stage 6  T=0.3 and T=0.6 on the large protocol                 03:40 -> 04:22
+  stage 7  T=0.3 on the common protocol (the cost)               04:22 -> 04:40
+  stage 8  size mix at threshold 35, factor 6 (8,508 steps)      04:40 -> TBD
+  stage 9  score it on both protocols                               TBD
+  stage 10 every arm on the large protocol at T=0.6                 TBD
+  stage 11 count fingerprints on the large protocol                 TBD
+
+free, from dumps that already existed
+  stage 0  the error bar inside each size band                   20:08 -> 20:17
+  stage 0b the temperature gain, band by band                       "
+  stage 0c size from the fingerprint, and a routing threshold    -> 20:24
+  the anatomy of the cliff, and what it reframes                 04:45 -> 05:20
 ```
 
 HEADLINE TBD
@@ -403,7 +408,13 @@ needs that trade.
 
 ---
 
-## Stage 0d — what the cliff is made of
+## The anatomy of the cliff — written while stage 8 trained
+
+Everything in this part is free: it re-reads dumps that already exist, so it
+cost no GPU and ran on the CPU while the `size_mix_t35` arm was training. It
+began as one question — what is a large-molecule miss actually made of — and
+turned into the night's main thread, because the answer reframes both of the
+results above and one of the README's claims.
 
 Five nights have measured how far recovery falls with molecule size and none
 has asked what the failure consists of. The dumps answer it for nothing.
