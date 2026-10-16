@@ -1,0 +1,132 @@
+{
+  "dumps": "results/overnight5/outcomes_large",
+  "runs": [
+    "variance_s1",
+    "variance_s2",
+    "variance_s3"
+  ],
+  "k": 20,
+  "metric": "structure",
+  "bands": {
+    "30-34": {
+      "n_queries": 1189,
+      "per_seed": {
+        "variance_s1": 0.4802354920100925,
+        "variance_s2": 0.4701429772918419,
+        "variance_s3": 0.4608915054667788
+      },
+      "one_seed": 0.4704233249229044,
+      "union": 0.6063919259882254,
+      "union_if_independent": 0.8515290490403946,
+      "all_seeds_miss": 0.3936080740117746,
+      "luck_share_of_misses": 0.2567496029645316,
+      "doubling_factor": 1.2685645979703357,
+      "projected_one_seed_at_k_times_n": 0.6858599190690995,
+      "equal_spend": {
+        "1_seeds_at_k_20": 0.4704233249229044,
+        "2_seeds_at_k_10": 0.471825063078217,
+        "3_seeds_at_k_6": 0.4592094196804037
+      }
+    },
+    "35-39": {
+      "n_queries": 625,
+      "per_seed": {
+        "variance_s1": 0.2464,
+        "variance_s2": 0.256,
+        "variance_s3": 0.2368
+      },
+      "one_seed": 0.2464,
+      "union": 0.392,
+      "union_if_independent": 0.5720902451200001,
+      "all_seeds_miss": 0.608,
+      "luck_share_of_misses": 0.19320594479830147,
+      "doubling_factor": 1.5613687047274376,
+      "projected_one_seed_at_k_times_n": 0.4992747669976835,
+      "equal_spend": {
+        "1_seeds_at_k_20": 0.2464,
+        "2_seeds_at_k_10": 0.2304,
+        "3_seeds_at_k_6": 0.2256
+      }
+    },
+    "40-49": {
+      "n_queries": 380,
+      "per_seed": {
+        "variance_s1": 0.10526315789473684,
+        "variance_s2": 0.08947368421052632,
+        "variance_s3": 0.07631578947368421
+      },
+      "one_seed": 0.09035087719298246,
+      "union": 0.15789473684210525,
+      "union_if_independent": 0.24749161685376886,
+      "all_seeds_miss": 0.8421052631578947,
+      "luck_share_of_misses": 0.07425265188042428,
+      "doubling_factor": 1.4671717171717171,
+      "projected_one_seed_at_k_times_n": 0.16588168209359583,
+      "equal_spend": {
+        "1_seeds_at_k_20": 0.09035087719298246,
+        "2_seeds_at_k_10": 0.09605263157894736,
+        "3_seeds_at_k_6": 0.07894736842105263
+      }
+    },
+    "50+": {
+      "n_queries": 127,
+      "per_seed": {
+        "variance_s1": 0.0,
+        "variance_s2": 0.007874015748031496,
+        "variance_s3": 0.007874015748031496
+      },
+      "one_seed": 0.005249343832020997,
+      "union": 0.007874015748031496,
+      "union_if_independent": 0.015686031372062703,
+      "all_seeds_miss": 0.9921259842519685,
+      "luck_share_of_misses": 0.002638522427440633,
+      "doubling_factor": NaN,
+      "projected_one_seed_at_k_times_n": NaN,
+      "equal_spend": {
+        "1_seeds_at_k_20": 0.005249343832020997,
+        "2_seeds_at_k_10": 0.007874015748031496,
+        "3_seeds_at_k_6": 0.007874015748031496
+      }
+    },
+    "35+": {
+      "n_queries": 1132,
+      "per_seed": {
+        "variance_s1": 0.17137809187279152,
+        "variance_s2": 0.17226148409893993,
+        "variance_s3": 0.15724381625441697
+      },
+      "one_seed": 0.16696113074204946,
+      "union": 0.2703180212014134,
+      "union_if_independent": 0.42196847692013306,
+      "all_seeds_miss": 0.7296819787985865,
+      "luck_share_of_misses": 0.12407211028632023,
+      "doubling_factor": 1.5386279041303987,
+      "projected_one_seed_at_k_times_n": 0.33053322645619554,
+      "equal_spend": {
+        "1_seeds_at_k_20": 0.16696113074204946,
+        "2_seeds_at_k_10": 0.1603356890459364,
+        "3_seeds_at_k_6": 0.1519434628975265
+      }
+    },
+    "all": {
+      "n_queries": 2321,
+      "per_seed": {
+        "variance_s1": 0.3295993106419647,
+        "variance_s2": 0.3248599741490737,
+        "variance_s3": 0.3127962085308057
+      },
+      "one_seed": 0.32241849777394804,
+      "union": 0.44248168892718653,
+      "union_if_independent": 0.6889617103420327,
+      "all_seeds_miss": 0.5575183110728135,
+      "luck_share_of_misses": 0.17719372615515042,
+      "doubling_factor": 1.3270853098730626,
+      "projected_one_seed_at_k_times_n": 0.5049053886694022,
+      "equal_spend": {
+        "1_seeds_at_k_20": 0.32241849777394804,
+        "2_seeds_at_k_10": 0.3199052132701422,
+        "3_seeds_at_k_6": 0.3093494183541577
+      }
+    }
+  }
+}

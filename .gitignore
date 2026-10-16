@@ -100,6 +100,7 @@ dist/
 !/results/overnight5/seed_union_large_mix.json
 !/results/overnight5/seed_union_large_structure.json
 !/results/overnight5/seed_union_large.json
+!/results/overnight5/seed_union_large_cross_arm.json
 !/results/overnight5/band_large_t35_structure.json
 !/results/overnight5/band_common_t35.json
 !/results/overnight5/band_common_t35_structure.json

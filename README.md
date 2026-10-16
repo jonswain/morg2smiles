@@ -234,6 +234,18 @@ would be needed to lift recovery above 35 atoms from 0.163 to 0.50. That is a
 lower bound, since the returns decay, and nothing in the curve reaches the 50+
 band at all.
 
+**Ensembling is not a route, and that is informative.** The cloud is narrow in
+the same place for every model: the share of one seed's misses that a second
+seed recovers falls from 25.3% at 30–34 heavy atoms to **1.6% above 50**, where
+96.9% of molecules are missed by all three seeds against the 95.3% that chance
+alone would give. At equal spend one model given 20 candidates beats two given
+10 each and three given 6 each in almost every band, and three *differently
+trained* models — a baseline and both size mixes — do no better
+(`scripts/seed_union.py`). So the twenty molecules a checkpoint proposes for a
+55-atom fingerprint are not an unlucky draw from a wide distribution of
+neighbourhoods; they are the neighbourhood this architecture on this data has
+learned, and a differently initialised copy proposes the same one.
+
 ## Architecture
 
 A fingerprint is a **set**, so it is encoded as one. Each set bit becomes a
