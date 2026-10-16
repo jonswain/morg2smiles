@@ -17,7 +17,7 @@ GPU queue
   stage 7  T=0.3 on the common protocol (the cost)               04:22 -> 04:40
   stage 8  size mix at threshold 35, factor 6 (8,508 steps)      04:40 -> 07:33
   stage 9  score it on both protocols                            07:33 -> 07:58
-  stage 10 every arm on the large protocol at T=0.6              07:58 -> TBD
+  stage 10 every arm on the large protocol at T=0.6              07:58 -> 09:08
   stage 11 count fingerprints on the large protocol                 TBD
   stage 12 small_1m at k=60, to measure the budget curve             TBD
 
@@ -1222,3 +1222,68 @@ Registered, before any stage 10 number exists: **the mix's 35+ recovery gap at
 T=0.6 is at least +2.0 points**, against the earlier prediction of under +1.5.
 If it comes in below +1.5 the factorisation is wrong about their independence,
 and the first prediction was right for the wrong reason.
+
+---
+
+## Stage 10 — they stack, and the pre-registered metric clears after all
+
+Five arms, each scored on the large protocol at T=0.6: the three baseline seeds
+and the two threshold-30 mix seeds, one `compare_checkpoints.py` call apiece,
+07:58 → 09:08.
+
+| band | queries | baseline | mix3x30 | gap | | pairs |
+|---|---|---|---|---|---|---|
+| 30–34 | 1,189 | 0.5548 | 0.5761 | +2.13 | 2.0 SE | 6/6 |
+| 35–39 | 625 | 0.3472 | 0.3720 | +2.48 | 2.7 SE | 6/6 |
+| 40–49 | 380 | 0.1509 | 0.2013 | +5.04 | 2.3 SE | 6/6 |
+| 50+ | 127 | 0.0236 | 0.0433 | +1.97 | 1.6 SE | 5/6 |
+| **30–39 (pre-registered)** | 1,814 | 0.4833 | 0.5058 | **+2.25** | **2.4 SE** | 6/6 |
+| 35+ | 1,132 | 0.2450 | 0.2778 | **+3.28** | 3.1 SE | 6/6 |
+| all 30+ | 2,321 | 0.4037 | 0.4306 | +2.69 | 2.8 SE | 6/6 |
+
+On structure accuracy: 35–39 +3.47, 40–49 +4.61, **35+ +3.56** at 3.0 SE, and
+30–39 +2.59 at 3.0 SE — all 6/6.
+
+**The 05:30 prediction was wrong and the 08:20 one was right.** The mix's gap
+above 35 atoms did not fall below +1.5 when the decoder was cooled; it rose
+from +2.75 to +3.28, and from +3.09 to +3.56 on structure. Nothing competes.
+Band by band, the gain from applying both against applying neither, beside the
+sum of the two applied alone:
+
+| band | cooling alone | mix alone | both | sum of the parts |
+|---|---|---|---|---|
+| 30–34 | +6.62 | +0.46 | **+8.75** | +7.08 |
+| 35–39 | +7.15 | +2.51 | +9.63 | +9.66 |
+| 40–49 | +4.83 | +3.42 | **+9.87** | +8.25 |
+| 50+ | +0.79 | +1.97 | +2.76 | +2.76 |
+| 35+ | +5.65 | +2.75 | +8.93 | +8.40 |
+
+Additive to within noise in three bands and better than additive in two, with
+40–49 landing on the multiplicative prediction exactly (0.1509 × 1.333 =
+0.2012 against a measured 0.2013). That is what two factors of a product look
+like when each is improved independently, and it is the behaviour the size
+factorisation predicted five hours after the prediction that said the
+opposite. The reason the first prediction was wrong is worth keeping: "both
+interventions narrow the cloud" was true and still useless, because narrowing
+is not one operation — one of them makes the proposals the right size and the
+other makes a right-sized proposal more likely to be the molecule.
+
+**And the plan's own metric clears.** The 30–39 band was pre-registered on
+night 4 as the place the mix would be read, it failed at 1.8 SE when measured
+at T=1.0, and this document's opening section blamed the choice of metric. Half
+of that blame was misplaced. The band is three-fifths 30–34 molecules, which is
+still the reason the metric was a poor choice — but those molecules do respond
+to the mix once the decoder is cooled (+0.46 hot, +2.13 cold), so a second
+error was stacked on the first: the experiment was scored at a temperature
+night 4 had already shown to be the wrong one. Had stages 1–4 been run at
+T=0.6, the pre-registered metric would have reported +2.25 at 2.4 SE with all
+six pairs agreeing, and the night's first finding would have been a
+confirmation rather than a near miss.
+
+The practical consequence is a correction to the stage 8–9 verdict. The size
+mix at threshold 30 is worth more than it looked: at the adopted decode
+setting it is +3.28 above 35 heavy atoms and +2.69 across the whole large
+protocol, against the +2.75 and +1.58 measured hot. Whether the small-molecule
+cost also grows with cooling is unmeasured — it needs the common protocol at
+T=0.6 for both mix seeds, which is two more runs and the first thing to queue
+next time.

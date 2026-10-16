@@ -29,3 +29,13 @@
 [10-17 07:58:11] stage 10: size_mix_s1 on the large protocol at T=0.6
 [10-17 08:12:24] stage 10 size_mix_s1 exit=0
 [10-17 08:12:24] stage 10: variance_s1 on the large protocol at T=0.6
+[10-17 08:26:33] stage 10 variance_s1 exit=0
+[10-17 08:26:33] stage 10: size_mix_s2 on the large protocol at T=0.6
+[10-17 08:40:57] stage 10 size_mix_s2 exit=0
+[10-17 08:40:57] stage 10: variance_s2 on the large protocol at T=0.6
+[10-17 08:54:54] stage 10 variance_s2 exit=0
+[10-17 08:54:54] stage 10: variance_s3 on the large protocol at T=0.6
+[10-17 09:08:36] stage 10 variance_s3 exit=0
+[10-17 09:08:36] === night 5d done, 126 min to spare ===
+[10-17 09:08:58] === night 5e start, 141 min to 11:30 ===
+[10-17 09:08:58] stage 11: count_fp_100k on the large protocol

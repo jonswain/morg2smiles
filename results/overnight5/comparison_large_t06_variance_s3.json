@@ -1,0 +1,129 @@
+{
+  "protocol": {
+    "eval_n": 2400,
+    "seed": 0,
+    "budget": "molecules",
+    "eval_k": 20,
+    "max_oversample": 10.0,
+    "temperature": 0.6,
+    "top_p": 1.0,
+    "pool_shard": "data/shards/1m",
+    "split": "valid",
+    "n_fp_unseen": 2321,
+    "fp_config": "morgan r=2 binary folded/2048",
+    "training_union_size": 1989502,
+    "shards_excluded": [
+      "data/shards/100k",
+      "data/shards/1m",
+      "data/shards/full"
+    ],
+    "min_heavy_atoms": 30,
+    "max_heavy_atoms": null
+  },
+  "runs": {
+    "variance_s3": {
+      "checkpoint": "checkpoints/variance_s3/best.pt",
+      "train_shard": "data/shards/100k",
+      "n_parameters": 7951945,
+      "trained_epoch": 12,
+      "trained_step": 8508,
+      "model_config": {
+        "d_model": 256,
+        "n_heads": 8,
+        "d_ff": 1024,
+        "n_encoder_layers": 4,
+        "n_decoder_layers": 4,
+        "dropout": 0.1,
+        "max_tokens": 128,
+        "vocab_size": 73,
+        "fp_vocab_size": 2048
+      },
+      "report": {
+        "ks": [
+          1,
+          5,
+          20
+        ],
+        "budget": "molecules",
+        "slices": {
+          "all": {
+            "n_queries": 2400,
+            "recovery_at_k": {
+              "1": 0.09041666666666667,
+              "5": 0.25708333333333333,
+              "20": 0.40041666666666664
+            },
+            "structure_accuracy_at_k": {
+              "1": 0.07625,
+              "5": 0.23208333333333334,
+              "20": 0.37125
+            },
+            "recovery_at_k_consensus": {
+              "1": 0.20791666666666667,
+              "5": 0.3375,
+              "20": 0.40375
+            },
+            "structure_accuracy_at_k_consensus": {
+              "1": 0.1825,
+              "5": 0.3129166666666667,
+              "20": 0.3745833333333333
+            },
+            "validity": 0.810774753796148,
+            "duplicate_rate": 0.28375297142579925,
+            "unique_valid_per_query": 27.15875,
+            "mean_samples_per_query": 54.96666666666667,
+            "mean_candidates_per_query": 51.5325,
+            "mean_scored_per_query": 27.15875,
+            "budget_filled_rate": 0.9704166666666667,
+            "mean_best_tanimoto": 0.8412510780566145,
+            "mean_hit_rank": 5.994258373205741
+          },
+          "fp_unseen": {
+            "n_queries": 2321,
+            "recovery_at_k": {
+              "1": 0.0904782421370099,
+              "5": 0.2559241706161137,
+              "20": 0.4006893580353296
+            },
+            "structure_accuracy_at_k": {
+              "1": 0.07841447651874192,
+              "5": 0.23739767341663076,
+              "20": 0.3791469194312796
+            },
+            "recovery_at_k_consensus": {
+              "1": 0.21025420077552778,
+              "5": 0.3373545885394227,
+              "20": 0.4041361482119776
+            },
+            "structure_accuracy_at_k_consensus": {
+              "1": 0.18785006462731582,
+              "5": 0.31925894011202066,
+              "20": 0.3825937096079276
+            },
+            "validity": 0.812149025825024,
+            "duplicate_rate": 0.2876548875631023,
+            "unique_valid_per_query": 27.08229211546747,
+            "mean_samples_per_query": 55.1314088754847,
+            "mean_candidates_per_query": 51.63507109004739,
+            "mean_scored_per_query": 27.08229211546747,
+            "budget_filled_rate": 0.969409737182249,
+            "mean_best_tanimoto": 0.8403067499663166,
+            "mean_hit_rank": 6.070019723865878
+          }
+        },
+        "primary_metric": 0.4006893580353296,
+        "primary_metric_name": "recovery@20 (fp_unseen)",
+        "fp_unseen_fraction": 0.9670833333333333,
+        "elapsed_seconds": 593.9900120419916,
+        "queries_per_second": 4.040471979906514,
+        "candidates_per_second": 208.21562230453245,
+        "generation": {
+          "k": 20,
+          "budget": "molecules",
+          "seed": 0,
+          "max_oversample": 10.0
+        }
+      }
+    }
+  }
+}
