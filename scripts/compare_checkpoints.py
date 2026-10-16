@@ -55,6 +55,7 @@ RUNS = [
     ("variance_s3", "checkpoints/variance_s3/best.pt", "data/shards/100k"),
     ("size_mix_s1", "checkpoints/size_mix_s1/best.pt", "data/shards/100k"),
     ("size_mix_s2", "checkpoints/size_mix_s2/best.pt", "data/shards/100k"),
+    ("size_mix_t35", "checkpoints/size_mix_t35/best.pt", "data/shards/100k"),
 ]
 
 

@@ -1,0 +1,62 @@
+# Concentrate the extra exposure where the gain actually was.
+#
+# configs/size_mix_s{1,2}.yaml over-sampled 30+ heavy atoms threefold and moved
+# the large-molecule protocol by +2.75 points above 35 heavy atoms (3.2 SE)
+# while moving the 30-34 band by +0.46 (0.8 SE) -- nothing. So a third of every
+# batch was spent boosting a band that did not respond, and the band that did
+# respond got 32.5% of draws.
+#
+# This run changes both knobs in the same direction: threshold 35, factor 6,
+# which takes molecules of 35+ heavy atoms from 19.3% of the shard to 58.8% of
+# draws, 1.8x what the first arm gave them. Not a clean one-variable
+# dose-response -- it is the setting the first arm's band structure argues for,
+# and the point is to find out whether the effect keeps growing with exposure
+# or saturates.
+#
+# Sized before running, as everything now is. The first arm's effect is +2.75
+# points above 35 heavy atoms with a 0.86-point standard error from two seeds
+# against three. This run is a single seed, so its error bar against the three
+# baselines is ~1.1 points in that band: it needs about +4 points to say
+# anything that the two-seed arm has not already said, which is roughly what
+# 1.8x the exposure predicts if the response is near-linear in it.
+#
+# The cost side matters as much as the gain: 41% of draws are now under 35
+# heavy atoms against 81% in the baseline, so this is also the clearest
+# measurement of what the small molecules pay. Scored on both protocols.
+#
+# Seed 1 throughout, so it shares an initialisation with variance_s1 and with
+# size_mix_s1.
+shard_dir: data/shards/100k
+out_dir: checkpoints/size_mix_t35
+
+fingerprint:
+  radius: 2
+  n_bits: 2048
+  counts: false
+  folded: true
+
+model:
+  d_model: 256
+  n_heads: 8
+  d_ff: 1024
+  n_encoder_layers: 4
+  n_decoder_layers: 4
+  dropout: 0.1
+  max_tokens: 128
+
+train:
+  seed: 1
+  epochs: 12
+  batch_size: 128
+  lr: 0.0005
+  warmup_steps: 300
+  randomize_smiles: true
+  eval_every_steps: 2127
+  eval_n: 500
+  eval_k: 20
+  valid_loss_n: 2000
+  patience: 0
+  max_steps: 8508
+  max_hours: 3.6
+  size_weight_threshold: 35
+  size_weight_factor: 6.0
