@@ -846,3 +846,69 @@ checkpoint to ship is `mix6x35` and the number to report is per-band. If the
 headline stays as it is, the baseline stands and this line of work is closed:
 exposure has been pushed 3× and then 3× again, and the second push bought
 nothing the error bar can see.
+
+### Does the mix actually narrow the cloud? Yes, and that is the problem
+
+The combinatorial account above says the mix works by tightening the cloud of
+molecules the decoder proposes, and makes two predictions that the dumps can
+check without any more GPU time. `scripts/cloud_quality.py` (new) groups the
+`miss_anatomy.py` reports into the same three arms and reads the between-seed
+spread off the three baseline seeds.
+
+The first prediction holds, and sharply. Mean best Tanimoto to the target
+among the queries an arm *missed* — how close the cloud got when it failed:
+
+| band | queries | baseline | sd | mix3x30 | mix6x35 | exposure, 3×/6× |
+|---|---|---|---|---|---|---|
+| 30–34 | 1,189 | 0.7017 | 0.0014 | −0.36 | **−0.71** | 1.69× / 0.51× |
+| 35–39 | 625 | 0.6942 | 0.0025 | +0.69 | +0.25 | 1.69× / 3.06× |
+| 40–49 | 380 | 0.6408 | 0.0041 | +1.37 | +1.60 | 1.69× / 3.06× |
+| 50+ | 127 | 0.5690 | 0.0066 | +1.74 | **+4.05** | 1.69× / 3.06× |
+| 35+ | 1,132 | 0.6582 | 0.0018 | +1.05 | +1.24 | 1.69× / 3.06× |
+
+The between-seed sd of this quantity is 0.0018 at 35+, so a +1.24 move is
+roughly seven sd — far better resolved than any recovery number in this
+document, because it averages over every miss instead of counting a rare
+success. The cloud moves in the direction of the band's exposure in every row,
+including the one row where exposure went down.
+
+The second prediction also holds, and it is the more interesting one. Dividing
+each arm's recovery gain by its cloud gain gives recovery points bought per
+point of Tanimoto:
+
+| band | mix3x30 | mix6x35 |
+|---|---|---|
+| 35–39 | +3.20 / +0.69 = **4.6** | +2.24 / +0.25 = 8.8 |
+| 40–49 | +3.07 / +1.37 = **2.2** | +4.39 / +1.60 = **2.8** |
+| 50+ | +1.57 / +1.74 = **0.9** | +1.57 / +4.05 = **0.4** |
+
+(The 35–39 column for `mix6x35` divides by a cloud gain of 0.25 points and
+should not be read closely; the 40–49 and 50+ rows rest on gains of 1.6 to 4.1
+points. These recovery levels come from `miss_anatomy.py`, which reads rec@k
+off the first k slots rather than off a budget of k unique molecules, so they
+run about four points below the protocol's own; the arms are read alike, so
+the gaps and the ratios stand.)
+
+**Above 50 heavy atoms the mix buys the largest improvement in proposal
+quality of any band and the smallest improvement in recovery.** Tripling the
+exposure of those molecules moved the cloud 4.05 points closer to the target
+and recovery 1.57 points, a conversion five to seven times worse than at
+40–49. That is the cliff restated as an exchange rate, and it is what the
+combinatorial account predicts: the cloud closing in on a 55-atom molecule
+from 0.569 to 0.610 Tanimoto is still nowhere near containing its exact
+preimage, so the proposal quality is real and the recovery is not there to
+collect.
+
+It also corrects something from the free analysis earlier tonight, which read
+the cloud's distance as flat across bands at about 0.68. On 41 queries above
+50 atoms it looked flat; on 127 it is not — 0.694 at 35–39, 0.641 at 40–49,
+0.569 at 50+. The cloud does get further away as molecules grow. It just gets
+further away far more slowly than recovery falls, which is why the distance
+cannot be the whole story and the combinatorics has to be.
+
+The collision rate among hits is the one quantity here that cannot be read
+across these arms: its between-seed sd is 0.0139 at 35+ and 0.2887 at 50+,
+where an arm has one to three hits to compute it from. The cooled-decoder
+comparison reported above is the one to trust on collisions, because it is
+three temperatures of a single checkpoint on a single query set rather than
+six separately trained models.

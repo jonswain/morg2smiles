@@ -53,13 +53,13 @@
         "20": 0.09473684210526316
       }
     },
-    "50-59": {
-      "n_queries": 95,
+    "50+": {
+      "n_queries": 127,
       "recovery": 0.0,
       "structure": 0.0,
       "collision_rate_among_hits": 0.0,
-      "mean_best_tanimoto_among_misses": 0.5735808662408545,
-      "fraction_of_misses_above_0.9_tanimoto": 0.031578947368421054,
+      "mean_best_tanimoto_among_misses": 0.561958026793285,
+      "fraction_of_misses_above_0.9_tanimoto": 0.023622047244094488,
       "budget_filled_rate": 1.0,
       "mean_fp_hit_rank": NaN,
       "recovery_at_k": {
@@ -70,21 +70,21 @@
         "20": 0.0
       }
     },
-    "60+": {
-      "n_queries": 32,
-      "recovery": 0.0,
-      "structure": 0.0,
-      "collision_rate_among_hits": 0.0,
-      "mean_best_tanimoto_among_misses": 0.527452722183313,
-      "fraction_of_misses_above_0.9_tanimoto": 0.0,
+    "30-39": {
+      "n_queries": 1814,
+      "recovery": 0.37651598676957,
+      "structure": 0.3528114663726571,
+      "collision_rate_among_hits": 0.0629575402635432,
+      "mean_best_tanimoto_among_misses": 0.6982539108916784,
+      "fraction_of_misses_above_0.9_tanimoto": 0.08576480990274093,
       "budget_filled_rate": 1.0,
-      "mean_fp_hit_rank": NaN,
+      "mean_fp_hit_rank": 6.484626647144949,
       "recovery_at_k": {
-        "1": 0.0,
-        "2": 0.0,
-        "5": 0.0,
-        "10": 0.0,
-        "20": 0.0
+        "1": 0.07552370452039692,
+        "2": 0.1207276736493936,
+        "5": 0.21334068357221608,
+        "10": 0.2894156560088203,
+        "20": 0.37651598676957
       }
     },
     "35+": {

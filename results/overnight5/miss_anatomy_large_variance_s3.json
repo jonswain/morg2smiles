@@ -1,0 +1,125 @@
+{
+  "dump": "results/overnight5/outcomes_large/variance_s3.jsonl",
+  "k": 20,
+  "bands": {
+    "30-34": {
+      "n_queries": 1189,
+      "recovery": 0.42640874684608915,
+      "structure": 0.4053826745164003,
+      "collision_rate_among_hits": 0.04930966469428008,
+      "mean_best_tanimoto_among_misses": 0.7005149640261407,
+      "fraction_of_misses_above_0.9_tanimoto": 0.08357771260997067,
+      "budget_filled_rate": 1.0,
+      "mean_fp_hit_rank": 6.414201183431953,
+      "recovery_at_k": {
+        "1": 0.08578637510513036,
+        "2": 0.1404541631623213,
+        "5": 0.23633305298570226,
+        "10": 0.32716568544995794,
+        "20": 0.42640874684608915
+      }
+    },
+    "35-39": {
+      "n_queries": 625,
+      "recovery": 0.216,
+      "structure": 0.1888,
+      "collision_rate_among_hits": 0.1259259259259259,
+      "mean_best_tanimoto_among_misses": 0.6955700854014732,
+      "fraction_of_misses_above_0.9_tanimoto": 0.0836734693877551,
+      "budget_filled_rate": 1.0,
+      "mean_fp_hit_rank": 7.488888888888889,
+      "recovery_at_k": {
+        "1": 0.0192,
+        "2": 0.0544,
+        "5": 0.1056,
+        "10": 0.152,
+        "20": 0.216
+      }
+    },
+    "40-49": {
+      "n_queries": 380,
+      "recovery": 0.0868421052631579,
+      "structure": 0.07631578947368421,
+      "collision_rate_among_hits": 0.12121212121212122,
+      "mean_best_tanimoto_among_misses": 0.6413259749438639,
+      "fraction_of_misses_above_0.9_tanimoto": 0.05763688760806916,
+      "budget_filled_rate": 1.0,
+      "mean_fp_hit_rank": 9.454545454545455,
+      "recovery_at_k": {
+        "1": 0.005263157894736842,
+        "2": 0.013157894736842105,
+        "5": 0.031578947368421054,
+        "10": 0.04473684210526316,
+        "20": 0.0868421052631579
+      }
+    },
+    "50+": {
+      "n_queries": 127,
+      "recovery": 0.015748031496062992,
+      "structure": 0.007874015748031496,
+      "collision_rate_among_hits": 0.5,
+      "mean_best_tanimoto_among_misses": 0.5751041091113532,
+      "fraction_of_misses_above_0.9_tanimoto": 0.024,
+      "budget_filled_rate": 1.0,
+      "mean_fp_hit_rank": 9,
+      "recovery_at_k": {
+        "1": 0.0,
+        "2": 0.0,
+        "5": 0.0,
+        "10": 0.007874015748031496,
+        "20": 0.015748031496062992
+      }
+    },
+    "30-39": {
+      "n_queries": 1814,
+      "recovery": 0.3539140022050717,
+      "structure": 0.33076074972436603,
+      "collision_rate_among_hits": 0.06542056074766354,
+      "mean_best_tanimoto_among_misses": 0.6984475659663394,
+      "fraction_of_misses_above_0.9_tanimoto": 0.08361774744027303,
+      "budget_filled_rate": 1.0,
+      "mean_fp_hit_rank": 6.640186915887851,
+      "recovery_at_k": {
+        "1": 0.06284454244762955,
+        "2": 0.11080485115766263,
+        "5": 0.19128996692392503,
+        "10": 0.26681367144432194,
+        "20": 0.3539140022050717
+      }
+    },
+    "35+": {
+      "n_queries": 1132,
+      "recovery": 0.1501766784452297,
+      "structure": 0.13074204946996468,
+      "collision_rate_among_hits": 0.12941176470588237,
+      "mean_best_tanimoto_among_misses": 0.6603507991592118,
+      "fraction_of_misses_above_0.9_tanimoto": 0.06652806652806653,
+      "budget_filled_rate": 1.0,
+      "mean_fp_hit_rank": 7.8882352941176475,
+      "recovery_at_k": {
+        "1": 0.012367491166077738,
+        "2": 0.03445229681978799,
+        "5": 0.06890459363957598,
+        "10": 0.09982332155477032,
+        "20": 0.1501766784452297
+      }
+    },
+    "all": {
+      "n_queries": 2321,
+      "recovery": 0.2916846186988367,
+      "structure": 0.2714347264110297,
+      "collision_rate_among_hits": 0.06942392909896603,
+      "mean_best_tanimoto_among_misses": 0.6770125755821105,
+      "fraction_of_misses_above_0.9_tanimoto": 0.07360097323600973,
+      "budget_filled_rate": 1.0,
+      "mean_fp_hit_rank": 6.784342688330871,
+      "recovery_at_k": {
+        "1": 0.04997845756139595,
+        "2": 0.08875484704868591,
+        "5": 0.15467470917707885,
+        "10": 0.21628608358466178,
+        "20": 0.2916846186988367
+      }
+    }
+  }
+}
