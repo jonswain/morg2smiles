@@ -25,10 +25,16 @@ from pathlib import Path
 import numpy as np
 import torch
 from torch import nn
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, WeightedRandomSampler
 from tqdm import tqdm
 
-from .data.dataset import FingerprintDataset, collate, fp_unseen_mask, load_split
+from .data.dataset import (
+    FingerprintDataset,
+    collate,
+    fp_unseen_mask,
+    load_split,
+    size_weights,
+)
 from .evaluation import evaluate_model
 from .fingerprints import FPConfig
 from .metrics import format_report
@@ -86,6 +92,14 @@ class TrainConfig:
     #: eats the analysis that was supposed to follow it. Stopping at a budget
     #: costs the tail of one curve; overrunning costs the whole night.
     max_hours: float | None = None
+    #: Over-sample training molecules with at least this many heavy atoms, by
+    #: ``size_weight_factor``. ``None`` keeps the shard's own distribution.
+    #: Every shard is a random subset of ChEMBL and so holds the same ~2.4% of
+    #: molecules above 50 heavy atoms, which is the band where recovery
+    #: collapses; scaling data uniformly cannot change that share, so the mix
+    #: is the only training-side lever on the size cliff.
+    size_weight_threshold: int | None = None
+    size_weight_factor: float = 1.0
     #: Stop after this many optimiser steps, whatever the epoch schedule says.
     #: Data-scaling comparisons need runs matched on *compute*, not on epochs:
     #: one epoch of the 1M shard is 11 epochs of the 100k shard, so comparing
@@ -172,10 +186,42 @@ def train(
         randomize=train_cfg.randomize_smiles,
         seed=train_cfg.seed,
     )
+    # Weighted sampling draws *with replacement*, so an epoch sees the same
+    # number of molecules and the run stays step-for-step comparable with an
+    # unweighted one -- at the cost of a given molecule appearing twice in one
+    # epoch (and then with the same augmented string, since augmentation is
+    # seeded on the index) while another appears not at all. Over 12 epochs
+    # that evens out; it is noted because it is a second difference from the
+    # unweighted baseline, not only the mix.
+    sampler = None
+    mix_summary = None
+    if train_cfg.size_weight_threshold is not None and train_cfg.size_weight_factor != 1.0:
+        weights, mix_summary = size_weights(
+            train_smiles,
+            train_cfg.size_weight_threshold,
+            train_cfg.size_weight_factor,
+            show_progress=show_progress,
+        )
+        sampler = WeightedRandomSampler(
+            weights,
+            num_samples=len(dataset),
+            replacement=True,
+            generator=torch.Generator().manual_seed(train_cfg.seed),
+        )
+        print(
+            f"size-weighted mix: >={train_cfg.size_weight_threshold} heavy atoms "
+            f"{mix_summary['share_at_or_above_threshold']:.1%} of the shard -> "
+            f"{mix_summary['weighted_share_at_or_above_threshold']:.1%} of draws "
+            f"(factor {train_cfg.size_weight_factor})"
+        )
+        for band, row in mix_summary["bands"].items():
+            print(f"  {band:>8}: {row['share']:.1%} -> {row['weighted_share']:.1%}")
+
     loader = DataLoader(
         dataset,
         batch_size=train_cfg.batch_size,
-        shuffle=True,
+        sampler=sampler,
+        shuffle=sampler is None,
         # partial, not a lambda: with num_workers > 0 macOS spawns worker
         # processes and a lambda collate_fn cannot be pickled.
         collate_fn=partial(collate, pad_id=tokenizer.pad_id),
@@ -434,6 +480,7 @@ def train(
         "train_config": train_cfg.to_dict(),
         "n_parameters": model.n_parameters,
         "n_train": len(train_smiles),
+        "size_weighted_mix": mix_summary,
         "best_checkpoint": best_label,
         "best_epoch": history[best_index]["epoch"] if best_index >= 0 else -1,
         "best_step": history[best_index]["step"] if best_index >= 0 else -1,

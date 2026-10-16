@@ -1,0 +1,64 @@
+# Does the size cliff come from exposure, or from capability?
+#
+# Recovery falls from 0.88 below 20 heavy atoms to 0.02 above 50, and night 4
+# showed the three shards are random ChEMBL subsets with the *same* size
+# distribution -- 38.9% of the 100k shard is at or above 30 heavy atoms, 19.3%
+# at or above 35, 2.5% above 50, and the 1M and full shards match it to within
+# a tenth of a point. Uniform data scaling therefore cannot concentrate
+# learning where the model fails. The mix can, and this run is the test: a
+# molecule with 30 or more heavy atoms is three times as likely to be drawn,
+# which takes the large half of the shard from 39% of draws to 66%.
+#
+# Deliberately aggressive. The question is whether exposure is the bottleneck
+# at all, and a mild re-weighting that failed would not answer it. If 3x moves
+# nothing, exposure is not the lever and the cliff is capacity, architecture or
+# tokenisation -- a useful negative. If it works, the trade-off against small
+# molecules is the next thing to measure.
+#
+# **The metric was fixed before the run.** Night 4's per-band seed variance:
+# the 30-39 band holds 568 of the common protocol's 1,956 queries and the
+# between-seed sd there is 1.84 points, so a single run would need about 4
+# points to be evidence -- too high to be worth three hours. Hence two
+# changes to the design: two seeds rather than one, and a second, larger
+# evaluation protocol drawn only from molecules of 30+ heavy atoms, where the
+# same comparison has roughly a 1-point standard error.
+#
+# Schedule-identical to configs/variance_s1.yaml, and on the same seed, so the
+# two share an initialisation and differ only in the sampler. 8,508 steps keeps
+# it comparable with every other run at that budget.
+shard_dir: data/shards/100k
+out_dir: checkpoints/size_mix_s1
+
+fingerprint:
+  radius: 2
+  n_bits: 2048
+  counts: false
+  folded: true
+
+model:
+  d_model: 256
+  n_heads: 8
+  d_ff: 1024
+  n_encoder_layers: 4
+  n_decoder_layers: 4
+  dropout: 0.1
+  max_tokens: 128
+
+train:
+  seed: 1
+  epochs: 12
+  batch_size: 128
+  lr: 0.0005
+  warmup_steps: 300
+  randomize_smiles: true
+  eval_every_steps: 2127
+  eval_n: 500
+  eval_k: 20
+  valid_loss_n: 2000
+  patience: 0
+  max_steps: 8508
+  max_hours: 3.6
+  # The whole experiment. Weighted sampling draws with replacement, so the
+  # epoch length and therefore the step schedule are unchanged.
+  size_weight_threshold: 30
+  size_weight_factor: 3.0

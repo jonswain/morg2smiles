@@ -29,6 +29,7 @@ import time
 from pathlib import Path
 
 import click
+from rdkit import Chem
 
 from morg2smiles.baselines.nearest_neighbour import evaluate_baseline
 from morg2smiles.data.dataset import _fp_key, load_split
@@ -52,7 +53,14 @@ RUNS = [
     ("variance_s1", "checkpoints/variance_s1/best.pt", "data/shards/100k"),
     ("variance_s2", "checkpoints/variance_s2/best.pt", "data/shards/100k"),
     ("variance_s3", "checkpoints/variance_s3/best.pt", "data/shards/100k"),
+    ("size_mix_s1", "checkpoints/size_mix_s1/best.pt", "data/shards/100k"),
+    ("size_mix_s2", "checkpoints/size_mix_s2/best.pt", "data/shards/100k"),
 ]
+
+
+def _heavy_atoms(smiles: str) -> int:
+    mol = Chem.MolFromSmiles(smiles)
+    return mol.GetNumHeavyAtoms() if mol is not None else 0
 
 
 def present_runs() -> list[tuple[str, str, str]]:
@@ -77,6 +85,21 @@ def present_runs() -> list[tuple[str, str, str]]:
     help="Write every query's judged candidates here, one JSONL per run, for failure analysis.",
 )
 @click.option(
+    "--min-heavy-atoms",
+    type=int,
+    default=None,
+    help=(
+        "Draw the evaluation set only from molecules this large. The common "
+        "protocol's 2,000 random molecules hold just 568 in the 30-39 band, "
+        "where the between-seed sd is 1.84 points, so a training experiment "
+        "aimed at large molecules cannot be measured on it. Restricting the "
+        "pool first buys power exactly where it is missing; the resulting set "
+        "is a different protocol and its numbers are not comparable with the "
+        "unrestricted table."
+    ),
+)
+@click.option("--max-heavy-atoms", type=int, default=None)
+@click.option(
     "--only",
     multiple=True,
     help=(
@@ -97,6 +120,8 @@ def main(
     temperature: float,
     top_p: float,
     dump_outcomes: Path | None,
+    min_heavy_atoms: int | None,
+    max_heavy_atoms: int | None,
     only: tuple[str, ...],
 ) -> None:
     runs = present_runs()
@@ -135,6 +160,21 @@ def main(
     pool = [s for s in load_split(pool_shard, "valid") if s not in train_molecules]
     click.echo(f"clean pool: {len(pool):,} of {pool_shard} valid, held out of every training set")
 
+    if min_heavy_atoms is not None or max_heavy_atoms is not None:
+        lo = min_heavy_atoms if min_heavy_atoms is not None else 0
+        hi = max_heavy_atoms if max_heavy_atoms is not None else 10**9
+        before = len(pool)
+        pool = [s for s in pool if lo <= _heavy_atoms(s) <= hi]
+        click.echo(
+            f"size-restricted pool: {len(pool):,} of {before:,} molecules have "
+            f"{lo}-{hi} heavy atoms"
+        )
+        if len(pool) < eval_n:
+            raise click.ClickException(
+                f"only {len(pool):,} molecules in the pool satisfy the size restriction, "
+                f"fewer than the {eval_n:,} requested"
+            )
+
     rng = random.Random(seed)
     eval_smiles = [pool[i] for i in sorted(rng.sample(range(len(pool)), min(eval_n, len(pool))))]
 
@@ -164,6 +204,8 @@ def main(
             "fp_config": fp_cfg.describe(),
             "training_union_size": len(train_molecules),
             "shards_excluded": shards,
+            "min_heavy_atoms": min_heavy_atoms,
+            "max_heavy_atoms": max_heavy_atoms,
         },
         "runs": {},
     }

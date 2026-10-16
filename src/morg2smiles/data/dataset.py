@@ -40,6 +40,7 @@ __all__ = [
     "fp_to_indices",
     "fp_unseen_mask",
     "randomize_smiles",
+    "size_weights",
     "MAX_COUNT",
 ]
 
@@ -83,6 +84,60 @@ def randomize_smiles(smiles: str, rng: random.Random) -> str:
         return out or smiles
     except Exception:
         return smiles
+
+
+def size_weights(
+    smiles: list[str], threshold: int, factor: float, *, show_progress: bool = False
+) -> tuple[list[float], dict]:
+    """Sampling weights that over-represent molecules of at least ``threshold`` heavy atoms.
+
+    Recovery collapses with molecule size -- 0.88 below 20 heavy atoms, 0.02
+    above 50 -- and every shard is a random subset of ChEMBL, so all three hold
+    the same ~2.4% of molecules above 50 heavy atoms. More *uniform* data
+    therefore cannot concentrate learning where the model fails; only a
+    different mix can. This is the mix.
+
+    One threshold and one factor rather than a smooth function of size, because
+    the point is to ask whether exposure is the bottleneck at all, and a single
+    interpretable knob makes the answer readable: a molecule at or above
+    ``threshold`` is ``factor`` times as likely to be drawn.
+
+    Returns:
+        ``(weights, summary)`` -- one weight per molecule, and the band shares
+        before and after weighting, which the training loop logs so that a run
+        records its own mix.
+    """
+    if factor <= 0:
+        raise ValueError(f"factor must be positive, got {factor}")
+    iterator = tqdm(smiles, desc="sizing train set", disable=not show_progress)
+    sizes = []
+    for s in iterator:
+        mol = Chem.MolFromSmiles(s)
+        sizes.append(mol.GetNumHeavyAtoms() if mol is not None else 0)
+    weights = [factor if size >= threshold else 1.0 for size in sizes]
+    total = sum(weights)
+    bands = [(0, 24), (25, 29), (30, 34), (35, 39), (40, 49), (50, 10**9)]
+    summary = {
+        "threshold": threshold,
+        "factor": factor,
+        "n": len(sizes),
+        "share_at_or_above_threshold": sum(1 for s in sizes if s >= threshold) / max(len(sizes), 1),
+        "weighted_share_at_or_above_threshold": sum(
+            w for w, s in zip(weights, sizes, strict=True) if s >= threshold
+        )
+        / total,
+        "bands": {
+            f"{lo}-{hi}" if hi < 10**9 else f"{lo}+": {
+                "share": sum(1 for s in sizes if lo <= s <= hi) / max(len(sizes), 1),
+                "weighted_share": sum(
+                    w for w, s in zip(weights, sizes, strict=True) if lo <= s <= hi
+                )
+                / total,
+            }
+            for lo, hi in bands
+        },
+    }
+    return weights, summary
 
 
 def fp_to_indices(fp: Sparse, cfg: FPConfig) -> tuple[list[int], list[int]]:
