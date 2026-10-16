@@ -228,11 +228,13 @@ the bigger the molecule. Two independent predictions of that account have held:
   (`scripts/cloud_quality.py`).
 
 The brute-force route is priced too. Returns per doubling of k rise with size —
-1.14× below 24 heavy atoms, 1.41× at 35–39, 1.44× at 40–49 — so widening the
-search is *more* efficient on exactly the molecules that fail, and k ≈ 200
-would be needed to lift recovery above 35 atoms from 0.163 to 0.50. That is a
-lower bound, since the returns decay, and nothing in the curve reaches the 50+
-band at all.
+1.14× below 24 heavy atoms, and on three seeds of the large protocol 1.28× at
+30–34, 1.42× at 35–39, 1.59× at 40–49 — so widening the search is *more*
+efficient on exactly the molecules that fail. At that rate **k ≈ 170** would
+lift recovery above 35 heavy atoms to 0.50, and **k ≈ 24,000** would do it
+above 50. Both are lower bounds, since the returns decay with k and these
+factors are read off the 10 → 20 step of a 20-slot list; measuring the curve
+past 20 is the first item of the next session.
 
 **Ensembling is not a route, and that is informative.** The cloud is narrow in
 the same place for every model: the share of one seed's misses that a second

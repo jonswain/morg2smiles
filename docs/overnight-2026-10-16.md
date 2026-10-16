@@ -970,3 +970,29 @@ leaves the two routes already priced tonight — widening k within one model,
 where returns per doubling are 1.41 to 1.44 and k ≈ 200 reaches 0.50 above 35
 atoms, and changing what the model can represent. Spending on more models is
 not a third route.
+
+### The budget price, replicated on three seeds
+
+The k-curve that prices the brute-force route was first read off one seed on
+the common protocol, where the 50+ band holds 41 queries. The large protocol's
+three baseline seeds give it properly, and the pattern is the same but steeper:
+
+| band | queries | rec@5 | rec@10 | rec@20 | ×, 5→10 | ×, 10→20 | hits in slots 11–20 |
+|---|---|---|---|---|---|---|---|
+| 30–34 | 1,189 | 0.2590 | 0.3465 | 0.4435 | 1.338 | 1.280 | 21.9% |
+| 35–39 | 625 | 0.1040 | 0.1621 | 0.2304 | 1.559 | 1.421 | 29.6% |
+| 40–49 | 380 | 0.0298 | 0.0553 | 0.0877 | 1.853 | **1.587** | 37.0% |
+| 50+ | 127 | 0.0000 | 0.0052 | 0.0079 | — | 1.500 | 33.3% |
+| 35+ | 1,132 | 0.0674 | 0.1087 | 0.1575 | 1.611 | 1.450 | 31.0% |
+
+Taking the 10 → 20 factor at face value, reaching 0.50 needs **k ≈ 92** at
+35–39, **k ≈ 272** at 40–49, **k ≈ 173** at 35+ and **k ≈ 24,000** above 50
+atoms. The earlier reading that the curve "does not reach the 50+ band at all"
+was an artefact of a band with 41 queries and no hits below k=20; it does reach
+it, at a price that says the same thing more usefully.
+
+Every one of these numbers is an extrapolation from the last doubling of a
+20-slot list, and the factors are already falling within the measured range
+(1.85 → 1.59 at 40–49). The only honest way to price the one sampling route
+tonight left standing is to generate past k=20 and look, which is where the
+next session should start.
