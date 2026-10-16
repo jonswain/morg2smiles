@@ -18,7 +18,7 @@ GPU queue
   stage 8  size mix at threshold 35, factor 6 (8,508 steps)      04:40 -> 07:33
   stage 9  score it on both protocols                            07:33 -> 07:58
   stage 10 every arm on the large protocol at T=0.6              07:58 -> 09:08
-  stage 11 count fingerprints on the large protocol                 TBD
+  stage 11 count fingerprints on the large protocol              09:08 -> 09:36
   stage 12 small_1m at k=60, to measure the budget curve             TBD
   stage 13 three arms on the common protocol at T=0.6, the cost      TBD
 
@@ -1346,3 +1346,70 @@ of right-sized molecules in the budget — 2.56 of 20 even in the best cell abov
 molecule should be is the most direct way to attack it. The counterfactual from
 earlier stands: with twenty right-sized proposals at the measured 11.2%
 conditional rate, recovery above 35 atoms would be 0.90 rather than 0.28.
+
+---
+
+## Stage 11 — counts, re-opened on the right protocol, and the hypothesis was wrong
+
+Night 3 trained `count_fp_100k` — identical to `small_100k` but for
+`counts: true` — and closed the question at 0.5890 against 0.5890 on the common
+protocol, p = 0.32. Tonight's whole thesis is that this protocol averages away
+anything acting on part of the size distribution, and the degeneracy scan gave
+a reason to expect counts to act there: they cut corpus-level fingerprint
+ambiguity 5.6× overall and from 6.13% to 1.11% at 50–59 heavy atoms. So both
+models were re-scored on the large protocol, 09:08 → 09:36.
+
+Each arm is a single run, so the SE column `arm_table.py` prints is empty.
+The error bars below come from the three `variance_s*` seeds, which share
+`small_100k`'s recipe exactly — 100k shard, 8,508 steps — scored on these same
+2,321 queries, and a one-against-one gap gets √2 times that sd.
+
+| band | queries | binary | counts | gap | seed sd | | |
+|---|---|---|---|---|---|---|---|
+| 30–34 | 1,189 | 0.4920 | 0.4239 | **−6.81** | 0.67 | 0.94 SE | −7.2 |
+| 35–39 | 625 | 0.2496 | 0.2320 | −1.76 | 1.03 | 1.45 SE | −1.2 |
+| 40–49 | 380 | 0.0842 | 0.0658 | −1.84 | 1.90 | 2.68 SE | −0.7 |
+| 50+ | 127 | 0.0079 | 0.0236 | +1.57 | 1.36 | 1.93 SE | +0.8 |
+| 35+ | 1,132 | 0.1670 | 0.1528 | −1.41 | 0.94 | 1.32 SE | −1.1 |
+| all 30+ | 2,321 | 0.3335 | 0.2917 | **−4.18** | 0.79 | 1.12 SE | −3.7 |
+
+**The prediction registered at 05:30 was that counts would be neutral or worse
+on recovery, and they are worse — by more than the common protocol could see.**
+That protocol's null was hiding a loss, not a gain. The loss is concentrated at
+30–34, where the binary model is strongest, and above 35 atoms the gap is
+−1.41 at 1.1 SE, which is nothing either way.
+
+The same prediction said the informative number is the collision rate among
+each model's own hits, because that one is not confounded by the count model's
+strictly harder oracle. It moves, and in the direction counts are for:
+
+| | 30–34 | 35–39 | 40–49 | 35+ | all 30+ |
+|---|---|---|---|---|---|
+| collisions among hits, binary | 4.6% | 11.5% | 23.1% | 13.3% | 6.7% |
+| collisions among hits, counts | **3.2%** | **7.7%** | 22.2% | **9.6%** | **4.7%** |
+| best Tanimoto on a miss, binary | 0.693 | 0.682 | 0.635 | 0.651 | 0.668 |
+| best Tanimoto on a miss, counts | **0.734** | **0.719** | **0.666** | **0.681** | **0.704** |
+
+So counts do what they are supposed to do. A quarter fewer of the count model's
+recoveries are a different molecule with the same fingerprint, and its
+proposals land measurably closer to the target when it fails — 0.681 against
+0.651 at 35+, where the between-seed sd of that quantity is 0.0018. The
+representation carries more information and the decoder uses it.
+
+It just does not convert into exact answers. The fairest single comparison is
+structure accuracy, since that asks both models for the query's own molecule
+rather than for a match to their own fingerprint: −3.45 points overall, −0.62
+at 35+ (0.5 SE), +1.57 at 50+ on three hits against one. Counts are a wash
+above 35 heavy atoms and a clear loss below, and they cost validity too (0.566
+against 0.673).
+
+**The honest summary is that the hypothesis was wrong.** The reasoning that
+sent this experiment back to the GPU — that ambiguity rises steeply with size,
+that counts cut it 5.6×, and that the common protocol had therefore hidden a
+large-molecule gain — was sound in every step and false in its conclusion.
+Ambiguity was never what made the cliff: 1.63% of molecules at 35–39 share a
+fingerprint against 75% of queries failing there, a point this document already
+made before the run and should have weighed more heavily against the
+re-opening. What counts buy is precision in what recovery *means*, which is
+worth having for the degeneracy caveat and is not a route to inverting bigger
+molecules. The question is closed again, for a better reason than p = 0.32.

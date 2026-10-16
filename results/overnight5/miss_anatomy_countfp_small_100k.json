@@ -1,0 +1,125 @@
+{
+  "dump": "results/overnight5/outcomes_large_countfp/small_100k.jsonl",
+  "k": 20,
+  "bands": {
+    "30-34": {
+      "n_queries": 1189,
+      "recovery": 0.4415475189234651,
+      "structure": 0.4213624894869638,
+      "collision_rate_among_hits": 0.045714285714285714,
+      "mean_best_tanimoto_among_misses": 0.6926338999399102,
+      "fraction_of_misses_above_0.9_tanimoto": 0.07379518072289157,
+      "budget_filled_rate": 1.0,
+      "mean_fp_hit_rank": 6.112380952380953,
+      "recovery_at_k": {
+        "1": 0.08915054667788057,
+        "2": 0.1438183347350715,
+        "5": 0.26156433978132887,
+        "10": 0.351555929352397,
+        "20": 0.4415475189234651
+      }
+    },
+    "35-39": {
+      "n_queries": 625,
+      "recovery": 0.2224,
+      "structure": 0.1968,
+      "collision_rate_among_hits": 0.11510791366906475,
+      "mean_best_tanimoto_among_misses": 0.6818068124446436,
+      "fraction_of_misses_above_0.9_tanimoto": 0.09053497942386832,
+      "budget_filled_rate": 1.0,
+      "mean_fp_hit_rank": 7.273381294964029,
+      "recovery_at_k": {
+        "1": 0.0224,
+        "2": 0.0448,
+        "5": 0.1024,
+        "10": 0.1696,
+        "20": 0.2224
+      }
+    },
+    "40-49": {
+      "n_queries": 380,
+      "recovery": 0.06842105263157895,
+      "structure": 0.05263157894736842,
+      "collision_rate_among_hits": 0.23076923076923078,
+      "mean_best_tanimoto_among_misses": 0.6353409964703328,
+      "fraction_of_misses_above_0.9_tanimoto": 0.05084745762711865,
+      "budget_filled_rate": 1.0,
+      "mean_fp_hit_rank": 8.23076923076923,
+      "recovery_at_k": {
+        "1": 0.007894736842105263,
+        "2": 0.013157894736842105,
+        "5": 0.02631578947368421,
+        "10": 0.04736842105263158,
+        "20": 0.06842105263157895
+      }
+    },
+    "50+": {
+      "n_queries": 127,
+      "recovery": 0.007874015748031496,
+      "structure": 0.007874015748031496,
+      "collision_rate_among_hits": 0.0,
+      "mean_best_tanimoto_among_misses": 0.577379448822129,
+      "fraction_of_misses_above_0.9_tanimoto": 0.047619047619047616,
+      "budget_filled_rate": 1.0,
+      "mean_fp_hit_rank": 13,
+      "recovery_at_k": {
+        "1": 0.0,
+        "2": 0.0,
+        "5": 0.0,
+        "10": 0.0,
+        "20": 0.007874015748031496
+      }
+    },
+    "30-39": {
+      "n_queries": 1814,
+      "recovery": 0.36604189636163176,
+      "structure": 0.3439911797133407,
+      "collision_rate_among_hits": 0.060240963855421686,
+      "mean_best_tanimoto_among_misses": 0.6880582786158236,
+      "fraction_of_misses_above_0.9_tanimoto": 0.0808695652173913,
+      "budget_filled_rate": 1.0,
+      "mean_fp_hit_rank": 6.355421686746988,
+      "recovery_at_k": {
+        "1": 0.06615214994487321,
+        "2": 0.10970231532524807,
+        "5": 0.20672546857772878,
+        "10": 0.288864388092613,
+        "20": 0.36604189636163176
+      }
+    },
+    "35+": {
+      "n_queries": 1132,
+      "recovery": 0.14664310954063603,
+      "structure": 0.127208480565371,
+      "collision_rate_among_hits": 0.13253012048192772,
+      "mean_best_tanimoto_among_misses": 0.6511580063666489,
+      "fraction_of_misses_above_0.9_tanimoto": 0.07039337474120083,
+      "budget_filled_rate": 1.0,
+      "mean_fp_hit_rank": 7.457831325301205,
+      "recovery_at_k": {
+        "1": 0.015017667844522967,
+        "2": 0.029151943462897525,
+        "5": 0.06537102473498234,
+        "10": 0.10954063604240283,
+        "20": 0.14664310954063603
+      }
+    },
+    "all": {
+      "n_queries": 2321,
+      "recovery": 0.2977165015079707,
+      "structure": 0.27789745799224475,
+      "collision_rate_among_hits": 0.06657018813314038,
+      "mean_best_tanimoto_among_misses": 0.6680537077977198,
+      "fraction_of_misses_above_0.9_tanimoto": 0.07177914110429448,
+      "budget_filled_rate": 1.0,
+      "mean_fp_hit_rank": 6.435600578871201,
+      "recovery_at_k": {
+        "1": 0.05299439896596295,
+        "2": 0.08789314950452391,
+        "5": 0.16587677725118483,
+        "10": 0.23352003446790176,
+        "20": 0.2977165015079707
+      }
+    }
+  }
+}

@@ -97,6 +97,12 @@ dist/
 !/results/overnight5/miss_anatomy_large_variance_s3.json
 !/results/overnight5/miss_anatomy_large_variance_s2.json
 !/results/overnight5/cloud_quality_large.json
+!/results/overnight5/arm_large_countfp_structure.json
+!/results/overnight5/arm_large_countfp.json
+!/results/overnight5/band_large_countfp_structure.json
+!/results/overnight5/band_large_countfp.json
+!/results/overnight5/miss_anatomy_countfp_small_100k.json
+!/results/overnight5/miss_anatomy_countfp_count_fp_100k.json
 !/results/overnight5/arm_common_t06_structure.json
 !/results/overnight5/band_common_t06_structure.json
 !/results/overnight5/arm_common_t06.json

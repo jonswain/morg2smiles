@@ -1,0 +1,129 @@
+{
+  "protocol": {
+    "eval_n": 2400,
+    "seed": 0,
+    "budget": "molecules",
+    "eval_k": 20,
+    "max_oversample": 10.0,
+    "temperature": 1.0,
+    "top_p": 1.0,
+    "pool_shard": "data/shards/1m",
+    "split": "valid",
+    "n_fp_unseen": 2321,
+    "fp_config": "morgan r=2 binary folded/2048",
+    "training_union_size": 1989502,
+    "shards_excluded": [
+      "data/shards/100k",
+      "data/shards/1m",
+      "data/shards/full"
+    ],
+    "min_heavy_atoms": 30,
+    "max_heavy_atoms": null
+  },
+  "runs": {
+    "small_100k": {
+      "checkpoint": "checkpoints/small/best.pt",
+      "train_shard": "data/shards/100k",
+      "n_parameters": 7951945,
+      "trained_epoch": 12,
+      "trained_step": null,
+      "model_config": {
+        "d_model": 256,
+        "n_heads": 8,
+        "d_ff": 1024,
+        "n_encoder_layers": 4,
+        "n_decoder_layers": 4,
+        "dropout": 0.1,
+        "max_tokens": 128,
+        "vocab_size": 73,
+        "fp_vocab_size": 2048
+      },
+      "report": {
+        "ks": [
+          1,
+          5,
+          20
+        ],
+        "budget": "molecules",
+        "slices": {
+          "all": {
+            "n_queries": 2400,
+            "recovery_at_k": {
+              "1": 0.06125,
+              "5": 0.1925,
+              "20": 0.3329166666666667
+            },
+            "structure_accuracy_at_k": {
+              "1": 0.0475,
+              "5": 0.17,
+              "20": 0.3104166666666667
+            },
+            "recovery_at_k_consensus": {
+              "1": 0.17625,
+              "5": 0.27416666666666667,
+              "20": 0.33708333333333335
+            },
+            "structure_accuracy_at_k_consensus": {
+              "1": 0.15833333333333333,
+              "5": 0.25458333333333333,
+              "20": 0.3145833333333333
+            },
+            "validity": 0.6723378284605931,
+            "duplicate_rate": 0.12308232520420363,
+            "unique_valid_per_query": 27.37375,
+            "mean_samples_per_query": 50.46666666666667,
+            "mean_candidates_per_query": 49.837916666666665,
+            "mean_scored_per_query": 27.37375,
+            "budget_filled_rate": 0.99375,
+            "mean_best_tanimoto": 0.8063722452590597,
+            "mean_hit_rank": 6.702078521939954
+          },
+          "fp_unseen": {
+            "n_queries": 2321,
+            "recovery_at_k": {
+              "1": 0.061611374407582936,
+              "5": 0.1925894011202068,
+              "20": 0.3334769495906937
+            },
+            "structure_accuracy_at_k": {
+              "1": 0.04868591124515295,
+              "5": 0.17277035760448084,
+              "20": 0.3145196036191297
+            },
+            "recovery_at_k_consensus": {
+              "1": 0.17794054286945282,
+              "5": 0.2761740629039207,
+              "20": 0.3377854373115037
+            },
+            "structure_accuracy_at_k_consensus": {
+              "1": 0.16199913830245583,
+              "5": 0.25937096079276173,
+              "20": 0.31882809133993967
+            },
+            "validity": 0.6734697404347977,
+            "duplicate_rate": 0.12488335119068192,
+            "unique_valid_per_query": 27.35415769065058,
+            "mean_samples_per_query": 50.49547608789315,
+            "mean_candidates_per_query": 49.86299009047824,
+            "mean_scored_per_query": 27.35415769065058,
+            "budget_filled_rate": 0.993537268418785,
+            "mean_best_tanimoto": 0.8052232543055566,
+            "mean_hit_rank": 6.632775119617225
+          }
+        },
+        "primary_metric": 0.3334769495906937,
+        "primary_metric_name": "recovery@20 (fp_unseen)",
+        "fp_unseen_fraction": 0.9670833333333333,
+        "elapsed_seconds": 533.1874436249491,
+        "queries_per_second": 4.501231281223102,
+        "candidates_per_second": 224.3319894909902,
+        "generation": {
+          "k": 20,
+          "budget": "molecules",
+          "seed": 0,
+          "max_oversample": 10.0
+        }
+      }
+    }
+  }
+}

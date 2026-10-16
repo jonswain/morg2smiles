@@ -1,0 +1,219 @@
+{
+  "bands_report": "results/overnight5/band_large_countfp_structure.json",
+  "k": 20,
+  "order": "generation",
+  "arms": {
+    "binary": [
+      "small_100k"
+    ],
+    "counts": [
+      "count_fp_100k"
+    ]
+  },
+  "reference_arm": "binary",
+  "bands": {
+    "30-34": {
+      "n_queries": 1189,
+      "arms": {
+        "binary": {
+          "mean": 0.47434819175777965,
+          "sd": null,
+          "values": [
+            0.47434819175777965
+          ]
+        },
+        "counts": {
+          "mean": 0.4129520605550883,
+          "sd": null,
+          "values": [
+            0.4129520605550883
+          ]
+        }
+      },
+      "vs_reference": {
+        "counts": {
+          "gap_points": -6.139613120269133,
+          "se_points": 0.0,
+          "se_units": null,
+          "pairs_favouring": 0,
+          "pairs_total": 1,
+          "sd_borrowed_from_reference": true
+        }
+      }
+    },
+    "35-39": {
+      "n_queries": 625,
+      "arms": {
+        "binary": {
+          "mean": 0.2208,
+          "sd": null,
+          "values": [
+            0.2208
+          ]
+        },
+        "counts": {
+          "mean": 0.216,
+          "sd": null,
+          "values": [
+            0.216
+          ]
+        }
+      },
+      "vs_reference": {
+        "counts": {
+          "gap_points": -0.47999999999999987,
+          "se_points": 0.0,
+          "se_units": null,
+          "pairs_favouring": 0,
+          "pairs_total": 1,
+          "sd_borrowed_from_reference": true
+        }
+      }
+    },
+    "40-49": {
+      "n_queries": 380,
+      "arms": {
+        "binary": {
+          "mean": 0.07105263157894737,
+          "sd": null,
+          "values": [
+            0.07105263157894737
+          ]
+        },
+        "counts": {
+          "mean": 0.05526315789473684,
+          "sd": null,
+          "values": [
+            0.05526315789473684
+          ]
+        }
+      },
+      "vs_reference": {
+        "counts": {
+          "gap_points": -1.5789473684210527,
+          "se_points": 0.0,
+          "se_units": null,
+          "pairs_favouring": 0,
+          "pairs_total": 1,
+          "sd_borrowed_from_reference": true
+        }
+      }
+    },
+    "50+": {
+      "n_queries": 127,
+      "arms": {
+        "binary": {
+          "mean": 0.007874015748031496,
+          "sd": null,
+          "values": [
+            0.007874015748031496
+          ]
+        },
+        "counts": {
+          "mean": 0.023622047244094488,
+          "sd": null,
+          "values": [
+            0.023622047244094488
+          ]
+        }
+      },
+      "vs_reference": {
+        "counts": {
+          "gap_points": 1.574803149606299,
+          "se_points": 0.0,
+          "se_units": null,
+          "pairs_favouring": 1,
+          "pairs_total": 1,
+          "sd_borrowed_from_reference": true
+        }
+      }
+    },
+    "30-39": {
+      "n_queries": 1814,
+      "arms": {
+        "binary": {
+          "mean": 0.3869900771775083,
+          "sd": null,
+          "values": [
+            0.3869900771775083
+          ]
+        },
+        "counts": {
+          "mean": 0.34509371554575524,
+          "sd": null,
+          "values": [
+            0.34509371554575524
+          ]
+        }
+      },
+      "vs_reference": {
+        "counts": {
+          "gap_points": -4.189636163175303,
+          "se_points": 0.0,
+          "se_units": null,
+          "pairs_favouring": 0,
+          "pairs_total": 1,
+          "sd_borrowed_from_reference": true
+        }
+      }
+    },
+    "35+": {
+      "n_queries": 1132,
+      "arms": {
+        "binary": {
+          "mean": 0.14664310954063603,
+          "sd": null,
+          "values": [
+            0.14664310954063603
+          ]
+        },
+        "counts": {
+          "mean": 0.14045936395759717,
+          "sd": null,
+          "values": [
+            0.14045936395759717
+          ]
+        }
+      },
+      "vs_reference": {
+        "counts": {
+          "gap_points": -0.6183745583038858,
+          "se_points": 0.0,
+          "se_units": null,
+          "pairs_favouring": 0,
+          "pairs_total": 1,
+          "sd_borrowed_from_reference": true
+        }
+      }
+    },
+    "all": {
+      "n_queries": 2321,
+      "arms": {
+        "binary": {
+          "mean": 0.3145196036191297,
+          "sd": null,
+          "values": [
+            0.3145196036191297
+          ]
+        },
+        "counts": {
+          "mean": 0.2800517018526497,
+          "sd": null,
+          "values": [
+            0.2800517018526497
+          ]
+        }
+      },
+      "vs_reference": {
+        "counts": {
+          "gap_points": -3.446790176647996,
+          "se_points": 0.0,
+          "se_units": null,
+          "pairs_favouring": 0,
+          "pairs_total": 1,
+          "sd_borrowed_from_reference": true
+        }
+      }
+    }
+  }
+}

@@ -39,3 +39,9 @@
 [10-17 09:08:36] === night 5d done, 126 min to spare ===
 [10-17 09:08:58] === night 5e start, 141 min to 11:30 ===
 [10-17 09:08:58] stage 11: count_fp_100k on the large protocol
+[10-17 09:23:05] stage 11 count_fp_100k exit=0
+[10-17 09:23:05] stage 11: small_100k on the large protocol
+[10-17 09:35:46] stage 11 small_100k exit=0
+[10-17 09:35:46] === night 5e done, 115 min to spare ===
+[10-17 09:35:57] === night 5f start, 135 min to 11:50 ===
+[10-17 09:35:57] stage 12: small_1m at T=0.6, k=60, on the large protocol's molecules
