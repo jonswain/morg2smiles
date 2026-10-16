@@ -1216,6 +1216,13 @@ the conditional match rate flat to a tenth of a point (14.9 → 14.5 at 30–34,
 conditional rate in every band (20.5 → 23.3 at 35–39, 21.5 → 22.3 at 40–49,
 19.7 → 23.9 at 50+) with "any right-sized" unchanged at 65.9%.
 
+**That half of this paragraph is wrong, and the 2×2 below replaces it.** The
+mix row and the cooling row come from different models — the mix compared on
+the 100k recipe, cooling on `small_1m`, which is trained on ten times the data
+for two and a half times the steps. The comparison that separates the levers
+has to hold the model fixed, and once stage 10 had scored the same checkpoints
+at both temperatures it could be done properly. It says something different.
+
 ### The stage 10 prediction, revised and re-registered
 
 The prediction written at 05:30 was that the mix and the cooled decoder would
@@ -1294,3 +1301,48 @@ protocol, against the +2.75 and +1.58 measured hot. Whether the small-molecule
 cost also grows with cooling is unmeasured — it needs the common protocol at
 T=0.6 for both mix seeds, which is two more runs and the first thing to queue
 next time.
+
+---
+
+## The 2×2, and a correction to the mechanism
+
+Stage 10 scored `variance_s1` and `size_mix_s1` on the large protocol at
+T=0.6, and both were already scored at T=1.0, so the four cells of
+{baseline, mix} × {hot, cold} exist on identical queries and identical
+checkpoints. That is the comparison the mechanism claim needed, and the one
+made earlier tonight — the mix measured on a 100k model, cooling measured on
+`small_1m` — was not it.
+
+| at 35+ atoms | baseline, T=1.0 | mix, T=1.0 | baseline, T=0.6 | mix, T=0.6 |
+|---|---|---|---|---|
+| right-sized proposals per query | 1.93 | 2.15 | 2.44 | **2.56** |
+| exact preimage, given right size | 10.7% | 10.2% | 10.7% | 11.2% |
+| truncation on a miss | −4.6 | −4.4 | −4.4 | −4.4 |
+| `rec@20` | 0.1885 | 0.2160 | 0.2450 | **0.2778** |
+
+**Both interventions act on the same factor, and the other one barely moves.**
+The count of right-sized proposals goes up 11% with the mix, 26% with cooling
+and 33% with both, while the conditional match rate sits between 10.2% and
+11.2% in all four cells and the truncation between −4.4 and −4.6 atoms. The
+earlier reading that cooling works by improving the match rate is true of
+`small_1m` — where cooling takes it from 19.7% to 23.9% above 50 atoms, on the
+same checkpoint — and false of these 100k models, where it does nothing of the
+kind. Two models in different capability regimes, and the honest thing to say
+is that the mechanism of cooling differs between them, unexplained.
+
+The prediction the earlier paragraph was used to make survives, with a better
+reason behind it. If the conditional match rate is effectively constant, then
+recovery ≈ (right-sized proposals) × (constant), which is *linear* in the
+count — so two interventions that each multiply the count compose
+multiplicatively, whatever else they do. The counts say ×1.11 and ×1.26 against
+a measured ×1.15 and ×1.30 in recovery, and ×1.33 against a measured ×1.47 for
+both together. The composition is real and the account of it is now the simpler
+one: there is one lever, the two interventions both pull it, and the exchange
+rate from pulls to recovery is constant within a band.
+
+Which also sharpens item 2b of the plan. The quantity to attack is the number
+of right-sized molecules in the budget — 2.56 of 20 even in the best cell above
+35 heavy atoms, and 0.80 of 20 above 50 — and a decoder told how big the
+molecule should be is the most direct way to attack it. The counterfactual from
+earlier stands: with twenty right-sized proposals at the measured 11.2%
+conditional rate, recovery above 35 atoms would be 0.90 rather than 0.28.
