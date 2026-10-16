@@ -1,0 +1,96 @@
+{
+  "dump": "results/overnight4/outcomes/variance_s1.jsonl",
+  "k": 20,
+  "bands": {
+    "0-24": {
+      "n_queries": 712,
+      "recovery": 0.7710674157303371,
+      "structure": 0.7626404494382022,
+      "collision_rate_among_hits": 0.01092896174863388,
+      "mean_best_tanimoto_among_misses": 0.6724377353940558,
+      "fraction_of_misses_above_0.9_tanimoto": 0.08588957055214724,
+      "budget_filled_rate": 0.9985955056179775,
+      "mean_fp_hit_rank": 4.402550091074681
+    },
+    "25-29": {
+      "n_queries": 512,
+      "recovery": 0.64453125,
+      "structure": 0.640625,
+      "collision_rate_among_hits": 0.006060606060606061,
+      "mean_best_tanimoto_among_misses": 0.7015099083269737,
+      "fraction_of_misses_above_0.9_tanimoto": 0.07142857142857142,
+      "budget_filled_rate": 1.0,
+      "mean_fp_hit_rank": 5.275757575757575
+    },
+    "30-34": {
+      "n_queries": 373,
+      "recovery": 0.48257372654155495,
+      "structure": 0.46112600536193027,
+      "collision_rate_among_hits": 0.044444444444444446,
+      "mean_best_tanimoto_among_misses": 0.6903017750136429,
+      "fraction_of_misses_above_0.9_tanimoto": 0.07253886010362694,
+      "budget_filled_rate": 1.0,
+      "mean_fp_hit_rank": 6.45
+    },
+    "35-39": {
+      "n_queries": 195,
+      "recovery": 0.2,
+      "structure": 0.18461538461538463,
+      "collision_rate_among_hits": 0.07692307692307693,
+      "mean_best_tanimoto_among_misses": 0.7076049605316651,
+      "fraction_of_misses_above_0.9_tanimoto": 0.12179487179487179,
+      "budget_filled_rate": 1.0,
+      "mean_fp_hit_rank": 6.846153846153846
+    },
+    "40-49": {
+      "n_queries": 123,
+      "recovery": 0.08943089430894309,
+      "structure": 0.06504065040650407,
+      "collision_rate_among_hits": 0.2727272727272727,
+      "mean_best_tanimoto_among_misses": 0.6644825364782754,
+      "fraction_of_misses_above_0.9_tanimoto": 0.08035714285714286,
+      "budget_filled_rate": 1.0,
+      "mean_fp_hit_rank": 7.2727272727272725
+    },
+    "50+": {
+      "n_queries": 41,
+      "recovery": 0.024390243902439025,
+      "structure": 0.0,
+      "collision_rate_among_hits": 1.0,
+      "mean_best_tanimoto_among_misses": 0.5725048206982625,
+      "fraction_of_misses_above_0.9_tanimoto": 0.05,
+      "budget_filled_rate": 1.0,
+      "mean_fp_hit_rank": 9
+    },
+    "30-39": {
+      "n_queries": 568,
+      "recovery": 0.3855633802816901,
+      "structure": 0.36619718309859156,
+      "collision_rate_among_hits": 0.0502283105022831,
+      "mean_best_tanimoto_among_misses": 0.6980361502022144,
+      "fraction_of_misses_above_0.9_tanimoto": 0.09455587392550144,
+      "budget_filled_rate": 1.0,
+      "mean_fp_hit_rank": 6.52054794520548
+    },
+    "35+": {
+      "n_queries": 359,
+      "recovery": 0.14206128133704735,
+      "structure": 0.12256267409470752,
+      "collision_rate_among_hits": 0.13725490196078433,
+      "mean_best_tanimoto_among_misses": 0.6743786063520685,
+      "fraction_of_misses_above_0.9_tanimoto": 0.09740259740259741,
+      "budget_filled_rate": 1.0,
+      "mean_fp_hit_rank": 6.980392156862745
+    },
+    "all": {
+      "n_queries": 1956,
+      "recovery": 0.5674846625766872,
+      "structure": 0.5557259713701431,
+      "collision_rate_among_hits": 0.02072072072072072,
+      "mean_best_tanimoto_among_misses": 0.6834740041593504,
+      "fraction_of_misses_above_0.9_tanimoto": 0.08392434988179669,
+      "budget_filled_rate": 0.9994887525562373,
+      "mean_fp_hit_rank": 5.112612612612613
+    }
+  }
+}

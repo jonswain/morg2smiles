@@ -1,0 +1,77 @@
+{
+  "shard": "data/shards/1m",
+  "splits": "train,valid",
+  "fingerprint": {
+    "radius": 2,
+    "n_bits": 2048,
+    "folded": true
+  },
+  "n_input_smiles": 950967,
+  "n_distinct_molecules": 950967,
+  "n_distinct_fingerprints": 943177,
+  "bands": {
+    "0-24": {
+      "molecules": 334112,
+      "ambiguous": 3392,
+      "ambiguous_rate": 0.01015228426395939,
+      "mean_group_size": 1.019310889761517,
+      "max_group_size": 39
+    },
+    "25-29": {
+      "molecules": 248002,
+      "ambiguous": 2743,
+      "ambiguous_rate": 0.011060394674236498,
+      "mean_group_size": 1.0187901710470078,
+      "max_group_size": 16
+    },
+    "30-34": {
+      "molecules": 186942,
+      "ambiguous": 2342,
+      "ambiguous_rate": 0.012527949845406597,
+      "mean_group_size": 1.023151565726268,
+      "max_group_size": 39
+    },
+    "35-39": {
+      "molecules": 96549,
+      "ambiguous": 1570,
+      "ambiguous_rate": 0.016261173083097703,
+      "mean_group_size": 1.031714466229583,
+      "max_group_size": 39
+    },
+    "40-49": {
+      "molecules": 62456,
+      "ambiguous": 1857,
+      "ambiguous_rate": 0.02973293198411682,
+      "mean_group_size": 1.0635487383117714,
+      "max_group_size": 39
+    },
+    "50-59": {
+      "molecules": 17670,
+      "ambiguous": 1083,
+      "ambiguous_rate": 0.06129032258064516,
+      "mean_group_size": 1.1181097906055462,
+      "max_group_size": 39
+    },
+    "60+": {
+      "molecules": 5236,
+      "ambiguous": 311,
+      "ambiguous_rate": 0.059396485867074106,
+      "mean_group_size": 1.1016042780748663,
+      "max_group_size": 8
+    },
+    "35+": {
+      "molecules": 181911,
+      "ambiguous": 4821,
+      "ambiguous_rate": 0.026501970743935222,
+      "mean_group_size": 1.0530479190373314,
+      "max_group_size": 39
+    },
+    "all": {
+      "molecules": 950967,
+      "ambiguous": 13298,
+      "ambiguous_rate": 0.013983660842069178,
+      "mean_group_size": 1.0263836705164322,
+      "max_group_size": 39
+    }
+  }
+}

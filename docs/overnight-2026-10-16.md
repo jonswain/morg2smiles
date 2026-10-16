@@ -489,3 +489,56 @@ prediction being *the first one*. A result either way is worth more than the
 +2.75 figure on its own, because the project is about to choose what to spend
 an 18-hour full-ChEMBL run on, and "these two gains add" is an assumption that
 would otherwise be made silently.
+
+### Is the collision trend the model's, or the fingerprint's?
+
+Partly the fingerprint's, and that part is measurable without a model at all.
+`scripts/fingerprint_ambiguity.py` groups all 950,967 molecules of the 1M shard
+by folded Morgan r=2/2048 key and counts how many share theirs with at least
+one other molecule:
+
+| band | molecules | share their fingerprint | mean group | largest group |
+|---|---|---|---|---|
+| 0–24 | 334,112 | 1.02% | 1.019 | 39 |
+| 25–29 | 248,002 | 1.11% | 1.019 | 16 |
+| 30–34 | 186,942 | 1.25% | 1.023 | 39 |
+| 35–39 | 96,549 | 1.63% | 1.032 | 39 |
+| 40–49 | 62,456 | 2.97% | 1.064 | 39 |
+| 50–59 | 17,670 | **6.13%** | 1.118 | 39 |
+| 60+ | 5,236 | 5.94% | 1.102 | 8 |
+| all | 950,967 | 1.40% | 1.026 | 39 |
+
+**The representation does lose its grip on large molecules**: a six-fold rise
+in ambiguity from the smallest band to 50–59, in ChEMBL alone, with 943,177
+distinct fingerprints for 950,967 distinct molecules. So the collision trend in
+the dumps is not an artefact of a weak decoder — it is there in the input
+before any model sees it, and it rises with size in the same direction and over
+the same bands.
+
+**What cannot be concluded is the level.** The corpus rate and the model's
+collision rate are different quantities, and the fact that they happen to agree
+below 24 heavy atoms (1.02% against 1.1%) is not evidence of anything. The
+corpus figure is a *lower bound*: it counts twins that exist in these 950k
+molecules, while the decoder draws from all of chemical space, where a 50-atom
+fingerprint has vastly more preimages than ChEMBL happens to contain. The
+honest statement is that ambiguity grows with molecule size in the fingerprint
+itself, by at least this much, and that the model's collisions grow with size
+too.
+
+Two consequences for how this project reports itself:
+
+**`recovery` and `structure_accuracy` must both be quoted above 35 heavy
+atoms.** They differ by 2 points overall and by 12–14% of the hits in the large
+bands, and they answer different questions — "did the model invert this
+fingerprint" against "did it find the molecule". The first is the task; the
+second is what a chemist would ask. Reporting only the first, in a regime where
+one hit in eight is a different molecule, overstates what the model does.
+
+**It makes counts worth re-testing.** Night 3 trained a count-fingerprint arm
+and closed the question on the common protocol: 0.5890 against 0.5890, p = 0.32.
+That protocol is 63% molecules under 30 heavy atoms, where ambiguity is 1% and
+counts have nothing to fix. Counts are the cheapest way to make a fingerprint
+pin a large molecule harder, and the checkpoint already exists, so stage 11
+re-reads it on the large protocol — for recovery by band, and for the collision
+rate among its hits, which is the reading the harder count-match oracle does
+not confound.

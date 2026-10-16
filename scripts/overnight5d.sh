@@ -17,6 +17,11 @@
 # per run, so a run that does not fit before the deadline costs only itself,
 # and the order is interleaved -- one mix seed, one baseline seed, then the
 # rest -- so an early stop still leaves a comparison rather than one arm.
+#
+# `size_mix_t35` is deliberately *not* in this list. Two arms of three and two
+# seeds carry a 0.86-point error bar above 35 heavy atoms, which is what the
+# registered prediction needs; a sixth run would spend 25 minutes on a
+# single-seed arm this comparison does not use.
 set -u
 cd "$(dirname "$0")/.."
 PY=/Users/jonswain/miniforge3/envs/morg2smiles/bin/python
@@ -32,7 +37,7 @@ remaining() { echo $(( DEADLINE_EPOCH - $(date "+%s") )); }
 
 say "=== night 5d start, $(( $(remaining) / 60 )) min to 11:15 ==="
 
-for RUN in size_mix_s1 variance_s1 size_mix_s2 variance_s2 variance_s3 size_mix_t35; do
+for RUN in size_mix_s1 variance_s1 size_mix_s2 variance_s2 variance_s3; do
     if [ ! -f "checkpoints/$RUN/best.pt" ]; then
         say "SKIP stage 10 $RUN: no checkpoint"
         continue
