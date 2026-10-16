@@ -1079,7 +1079,17 @@ training-side route is measured and priced at an exchange rate that gets worse
 as it is pushed. What is left is narrow and concrete.
 
 **1. Generate past k=20 (first, and cheap), because two models of the cliff now
-disagree about it.** Every claim about the brute-force route rests on
+disagree about it.** *(Done — stage 12, at the end of this document. The item
+as written below is kept because it contains the design error: the two
+predictions are computed from the 100k arm's constants while the run it
+specifies is `small_1m`, so the pre-registration it set was void before the GPU
+started. The answer, on `small_1m`'s own numbers, is that neither account is
+right — the deficit is a power law in k with a size-dependent exponent — and
+the three things the next session should take from it are: brute force is a
+real route below 40 heavy atoms and dead above 50; the 100k arm's own k=60
+point is still unmeasured, so the factorisation's prediction has never been
+scored; and the cliff's mechanism is concentration, not cloud width, which
+makes item 2 the only route left.)* Every claim about the brute-force route rests on
 extrapolating the 10 → 20 step of a 20-slot list. One
 `compare_checkpoints.py` run at `--eval-k 100` on 400 fingerprint-unseen
 molecules above 35 heavy atoms, `small_1m` at T=0.6, discriminates between two
@@ -1109,6 +1119,35 @@ discard a true hit: reporting the best 20 of n samples by Tanimoto is
 a different hat, and it is this run that prices it. What the size defect does
 leave open is the train-time version — conditioning the decoder on the size the
 fingerprint implies — which is item 2b below.
+
+**1b. Score the void pre-registration on the model it was written for, and
+test the power law out of sample.** The 100k arm's k=60 point is still
+unmeasured, and because stage 12 fitted the same law to that arm's existing
+k ≤ 20 ladder there is now a sharp prediction to run against. `variance_s1` at
+T=1.0 on the large protocol, `--eval-k 60`, scored at 35+:
+
+| account | predicts rec@60 at 35+ |
+|---|---|
+| independent draws, from the factorisation | 0.47 |
+| the recovery-multiplier extrapolation | 0.28 |
+| **the power law fitted to its own k ≤ 20 rungs** (b = 0.078, r = −0.9999) | **0.232** |
+
+Pre-registered: 0.21–0.26. **Mind the convention** — that table is in
+`miss_anatomy.py`'s first-k-slots units, where this arm reads 0.1634 at k=20
+against the protocol's molecule-budget 0.1885, and conflating the two is
+exactly the slip that voided stage 12's pre-registration. The comparison to
+make is prefix-to-prefix.
+
+Two things ride on it. If the power law transports to a model whose exponent is
+a fifth of `small_1m`'s, it is a property of the decoding process rather than
+of one checkpoint, and every future brute-force price can be read off a k ≤ 20
+ladder for free. And if the independence prediction fails here too — it is
+built from this arm's own factorisation constants, so this is the one place it
+was ever entitled to work — the factorisation is confirmed as arithmetic that
+happens to fit at k=20 rather than a model of the sampling. Note that 0.232
+against 0.28 is about 1.7 SE at the full protocol's n, so the run has to use
+all 2,400 molecules to separate those two; a 600-molecule version can only kill
+independence, which stage 12 has already done elsewhere.
 
 **2. Capacity, with a pre-registered location.** The only surviving
 non-sampling route is changing what the model can represent, and tonight's
