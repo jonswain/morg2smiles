@@ -76,7 +76,8 @@ distribution. It reported the size mix as a flat −1.13 when band by band it is
 of 1.6 points that the 30–34 band contradicts at 2.99; it called fingerprint
 degeneracy rare from an 11,669-molecule corpus where the real figure at scale
 is 1.40%, and 6.13% at 50–59 atoms; and it closed the count-fingerprint
-question at p = 0.32. Tonight's own plan item — the 30–39 band, chosen because
+question at p = 0.32, which turned out to be hiding a four-point *loss* rather
+than the gain that re-opening it was meant to find. Tonight's own plan item — the 30–39 band, chosen because
 night 4's error bar was small there — was the same error a fifth time, and it
 did not clear. Though only half of that was the band's fault: scored at T=0.6
 rather than the T=1.0 night 4 had already superseded, the same pre-registered
@@ -605,7 +606,9 @@ counts have nothing to fix. Counts are the cheapest way to make a fingerprint
 pin a large molecule harder, and the checkpoint already exists, so stage 11
 re-reads it on the large protocol — for recovery by band, and for the collision
 rate among its hits, which is the reading the harder count-match oracle does
-not confound.
+not confound. *(It did, and the answer was no: counts are 4.18 points worse
+there, and the stage 11 section at the end of this document takes this
+reasoning apart.)*
 
 ### What the budget is worth, per band
 
