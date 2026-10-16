@@ -230,24 +230,50 @@ the bigger the molecule. Two independent predictions of that account have held:
 - **Both interventions that work above 35 atoms work by tightening the cloud**,
   and specifically by putting more right-sized molecules in the budget: 1.93
   per query at 35+ heavy atoms, 2.56 with both applied, out of 20. Nothing that
-  only improves ranking has moved the cliff, and the decoder's own size defect
-  is the clearest single target left — it offers 45-atom molecules for 56-atom
-  fingerprints, and only 38% of queries above 50 atoms get even one right-sized
-  candidate out of twenty.
+  only improves ranking has moved the cliff.
 - **The same tightening buys less recovery as molecules grow.** Recovery points
   per point of Tanimoto run 2.2–2.8 at 40–49 heavy atoms and 0.4–0.9 above 50,
   where the stronger training mix bought the largest cloud gain of any band
   (+4.05 points) and the smallest recovery gain (+1.57)
   (`scripts/cloud_quality.py`).
 
-The brute-force route is priced too. Returns per doubling of k rise with size —
-1.14× below 24 heavy atoms, and on three seeds of the large protocol 1.28× at
-30–34, 1.42× at 35–39, 1.59× at 40–49 — so widening the search is *more*
-efficient on exactly the molecules that fail. At that rate **k ≈ 170** would
-lift recovery above 35 heavy atoms to 0.50, and **k ≈ 24,000** would do it
-above 50. Both are lower bounds, since the returns decay with k and these
-factors are read off the 10 → 20 step of a 20-slot list; measuring the curve
-past 20 is the first item of the next session.
+**The brute-force route is measured, not extrapolated, and it runs out at 40
+heavy atoms.** Generating to k=60 on 2,321 large molecules, the recovery
+*deficit* follows a power law in budget — `1 − rec(k) = A·k^−b` with |r| ≥ 0.991
+in every band — whose exponent falls as molecules grow: 0.40 at 30–34 heavy
+atoms against 0.14 above 50. Big molecules start lower on the curve *and* gain
+less per doubling. Inverting the fits (`scripts/budget_curve.py`):
+
+| band | k for 0.90 | k for 0.95 |
+|---|---|---|
+| 30–34 | 41 | 238 |
+| 35–39 | 128 | 768 |
+| 40–49 | 3,080 | 42,917 |
+| 50+ | 1.0 × 10⁷ | 1.2 × 10⁹ |
+
+So k=128 is a few seconds per fingerprint and takes 35–39 to 0.90; above 50
+atoms the route is arithmetic rather than engineering. Independence is ruled
+out by a wide margin — the model's own first-slot rate would have finished 35+
+by k=20 (0.9986 predicted against 0.6890 measured) — and refitting on k ≤ 20 to
+predict k=60 lands within half a point where n is large, which is the one piece
+of evidence that the extrapolated prices quoted before this run were worth
+something.
+
+**The size defect is not the target it looked like, and the cliff is a split in
+the query population.** The clearest-looking lever — the decoder offers 45-atom
+molecules for 56-atom fingerprints, and at 100k parameters only 38% of queries
+above 50 atoms get even one right-sized candidate out of twenty — does not
+survive on the 1M model with a 60-slot budget. There 89.8% of those queries get
+a right-sized proposal, truncation on misses is 5 atoms rather than 11, and the
+exact-preimage rate *given* the right size is flat at 11–13% in every band
+instead of collapsing, so a length prior has nothing left to correct. What
+falls with molecule size is not how many preimages the decoder draws — 1.53 per
+query at 30–34 against 1.31 above 50 — but how evenly they land: above 50 atoms
+52% of queries draw none at all while the ones that succeed draw 2.72 each,
+against a Poisson reference that would put recovery at 0.73 where it measures
+0.48. The population is splitting into fingerprints this conditional can reach
+and ones it cannot, which is why extra budget buys so little: it mostly
+re-finds molecules already found.
 
 **Ensembling is not a route, and that is informative.** The cloud is narrow in
 the same place for every model: the share of one seed's misses that a second
