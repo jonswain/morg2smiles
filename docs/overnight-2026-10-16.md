@@ -665,3 +665,48 @@ favour the mix rather than 4/6. It is still 1.7 SE and still does not clear the
 rule written down in advance. A sign test over six non-independent pairs is not
 a rescue, and the band is still three-fifths molecules the intervention does
 not move.
+
+### Both interventions gain more on structure accuracy than on recovery, for the same reason
+
+Doing the same re-reading to night 4's temperature dumps gives the matching
+result. Cooling `small_1m` from T=1.0 to 0.6, consensus order:
+
+| band | queries | recovery gain | structure gain |
+|---|---|---|---|
+| 0–24 | 712 | +0.42 | +0.28 |
+| 25–29 | 512 | +0.78 | +0.39 |
+| 30–34 | 373 | +1.34 | +0.54 |
+| 35–39 | 195 | +6.67 | **+7.69** |
+| 40–49 | 123 | +8.13 | **+12.19** |
+| 50+ | 41 | +9.76 | +4.88 |
+| 35+ | 359 | +7.53 | **+8.91** |
+| all | 1,956 | +1.99 | +1.94 |
+
+So both of the project's working interventions — one a decode setting, one a
+training mix — are *understated* by the metric the project reports. The
+mechanism is visible directly in the collision rates among each arm's own hits:
+
+| at 35+ heavy atoms | T=1.0 | T=0.6 | T=0.3 |
+|---|---|---|---|
+| recovery | 0.6574 | 0.7354 | 0.7187 |
+| structure accuracy | 0.6156 | 0.7047 | 0.6769 |
+| collisions among hits | 6.4% | **4.2%** | 5.8% |
+| collisions at 40–49 | 9.2% | **3.7%** | 4.9% |
+
+**Cooling roughly halves the share of large-molecule hits that are a different
+preimage.** A hot decoder scores some of its large-molecule recoveries by
+landing on a near-twin; a cooled one lands on the molecule itself. Since
+`recovery` credits both, it gives the hot arm hits the cooled arm is not
+credited extra for, and the gap it reports is smaller than the gap in molecules
+found.
+
+That also separates the two components of the collision rate, which stage 0d
+could not. Ambiguity in the fingerprint is fixed for a given query set — the
+same 1,956 molecules here — so any difference between these three arms is the
+*model's* imprecision, not the representation's. The collision rate among hits
+is therefore readable as a precision measure: 13.0% for a 100k-shard model at
+35+ (stage 0d), 6.4% for `small_1m` at T=1.0, 4.2% for the same checkpoint
+cooled. Better and sharper models collide less, and the floor underneath them
+is the fingerprint's own 2.65% at 35+ — which is a floor for structure
+accuracy, and for the *corpus*; the decoder's floor is higher, since it may
+propose preimages ChEMBL does not contain.

@@ -85,6 +85,7 @@ dist/
 !/results/overnight5/arm_large_structure.json
 !/results/overnight5/band_common_mix_structure.json
 !/results/overnight5/arm_common_mix_structure.json
+!/results/overnight5/band_common_temps_structure.json
 !/results/overnight5/arm_large_mix.json
 !/results/overnight5/arm_large_t06.json
 !/results/overnight5/band_large_t06.json
