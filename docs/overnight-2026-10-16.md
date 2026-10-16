@@ -27,7 +27,52 @@ free, from dumps that already existed
   the anatomy of the cliff, and what it reframes                 04:45 -> 05:20
 ```
 
-HEADLINE TBD
+**Everything that has ever moved large-molecule recovery in this project moves
+it by narrowing the decoder's proposal cloud, and the cloud is narrow in the
+same place for every model trained here.** At every size the decoder proposes
+about twenty molecules roughly 0.65 Tanimoto from the target, and recovery is
+whether that cloud happens to contain an exact preimage — exponentially less
+likely the bigger the molecule. Tonight the account displaced three others and
+then survived two predictions and a test it could have failed:
+
+- Not the budget (the full-k rate is 1.000 in every band), not ranking (a hit's
+  mean rank drifts 4.4 → 8.4 across the whole size range), and not that the
+  model nearly gets there (the cloud's distance recedes from 0.69 to 0.57 while
+  recovery falls from 0.28 to 0.02).
+- Both working interventions tighten the cloud, and in proportion to the
+  exposure each band is given: best Tanimoto on a miss moves with exposure in
+  every band, at seven times its between-seed sd.
+- The same tightening buys less recovery as molecules grow — 2.2 to 2.8
+  recovery points per Tanimoto point at 40–49 heavy atoms, 0.4 to 0.9 above 50,
+  where the stronger training mix bought the largest cloud gain of any band and
+  the smallest recovery gain.
+- And the narrowness is in the learned conditional, not the draw: of one seed's
+  misses above 50 atoms, 1.6% are recovered by either of two other seeds, three
+  differently *trained* models do no better, and at equal spend one model given
+  twenty candidates beats three given six each.
+
+The practical ledger is short. **T=0.6, top_p 1.0, everywhere** — free, +1.99
+points overall and +7.5 above 35 heavy atoms, and the size-conditional version
+of it is dead because cooling never hurts small molecules. **The size-weighted
+training mix is a trade, not a gain**, and the trade gets worse as it is
+pushed: 2.3 small molecules given up per large one gained at threshold 30 ×3,
+4.4 at threshold 35 ×6, and 10.7 for the step between them, with the second
+dose buying nothing the error bar can see above 35 atoms. **Ensembling is not a
+route.** What is left is widening k inside one model — priced at k ≈ 170 for
+0.50 above 35 atoms, on an extrapolation that should now be measured — and
+changing what the model can represent.
+
+Underneath all of it is one measurement error, found four times in one night.
+The common protocol draws 2,000 molecules at random and 63% of them are under
+30 heavy atoms, so it cannot see anything that acts on part of the size
+distribution. It reported the size mix as a flat −1.13 when band by band it is
++4.60 above 35 atoms and −3.11 below 24; it supplied a whole-protocol error bar
+of 1.6 points that the 30–34 band contradicts at 2.99; it called fingerprint
+degeneracy rare from an 11,669-molecule corpus where the real figure at scale
+is 1.40%, and 6.13% at 50–59 atoms; and it closed the count-fingerprint
+question at p = 0.32. Tonight's own plan item — the 30–39 band, chosen because
+night 4's error bar was small there — was the same error a fifth time, and it
+did not clear.
 
 ---
 
@@ -996,3 +1041,64 @@ Every one of these numbers is an extrapolation from the last doubling of a
 (1.85 → 1.59 at 40–49). The only honest way to price the one sampling route
 tonight left standing is to generate past k=20 and look, which is where the
 next session should start.
+
+---
+
+## The plan after tonight
+
+Tonight closed more routes than it opened, which is the useful kind of night.
+Two of the three ways of spending more inference on a hard fingerprint are now
+measured and dead — more models, and splitting a budget across them — and the
+training-side route is measured and priced at an exchange rate that gets worse
+as it is pushed. What is left is narrow and concrete.
+
+**1. Generate past k=20 (first, and cheap).** Every claim about the brute-force
+route rests on extrapolating the 10 → 20 step of a 20-slot list, and the
+factors are visibly decaying inside the measured range. One `compare_checkpoints.py`
+run at `--eval-k 100` on 400 fingerprint-unseen molecules above 35 heavy atoms,
+`small_1m` at T=0.6, settles whether k ≈ 170 reaches 0.50 or whether the curve
+flattens at 0.3. Perhaps 90 minutes. Pre-registered prediction: the factor
+decays, 0.50 is not reached by k=100, and the measured rec@100 at 35+ lands
+between 0.28 and 0.38.
+
+**2. Capacity, with a pre-registered location.** The only surviving
+non-sampling route is changing what the model can represent, and tonight's
+ensemble result argues that the limit is in the learned conditional rather than
+in the sample: every initialisation proposes the same neighbourhood. The 15M
+model deferred twice is now the natural test — 1M shard, 21,117 steps, scored
+on *both* protocols with the band table. Pre-registered: if the limit is
+capacity the gain concentrates above 35 atoms and the 0–24 band moves by less
+than a point; if the gain is flat across bands it is not the size cliff that
+got better and the cliff is in the fingerprint or the data.
+
+**3. Demote the full-ChEMBL run.** It was Weekend 1's deliverable at ~18 h for
+3 epochs / 44,112 steps. Two things argue against it now. At a fixed step
+budget more data has already *hurt* here (`small_full` 0.7347 against
+`small_1m` 0.8927), so the run is really a compute experiment wearing a data
+experiment's clothes; and nothing tonight suggests corpus size touches the size
+cliff, which is where the interesting failure is. If it runs, it should run at
+a step budget scaled to the corpus and be reported per band — not as a headline
+number against models trained on a tenth of the data.
+
+**4. The reverse-direction control (one 3 h run).** Tonight produced one
+quantitative law: the stronger mix's per-band gaps sit on a straight line in
+log₂ exposure at +4.52 points per doubling, r = 0.989. The cheapest way to
+find out whether that is a law or a coincidence of two doses is to run it
+backwards — threshold 30, factor ⅓, which *de*-weights large molecules — and
+check whether the same line predicts the damage. A law that predicts out of
+sample is worth having, since it prices every future re-weighting without
+training anything.
+
+**5. Measurement practice, adopted.** Three rules earned tonight, each by
+being broken first:
+- Report per band. `scripts/arm_table.py` and `scripts/band_analysis.py` exist
+  for this, and the common protocol alone cannot describe anything that acts on
+  part of the size distribution.
+- Pre-register the band **and** the predicted location of the effect. The
+  30–39 metric was chosen on its error bar alone and did not clear, because
+  three fifths of it is molecules that do not respond. An error bar is a
+  necessary condition for choosing a metric and not a sufficient one.
+- Read any size claim on `structure_accuracy` as well as `recovery`. The two
+  part company above 35 atoms, where one recovery in eight is a different
+  preimage, and tonight both working interventions turned out to be *understated*
+  by the metric the project reports.
