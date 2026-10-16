@@ -20,7 +20,7 @@ GPU queue
   stage 10 every arm on the large protocol at T=0.6              07:58 -> 09:08
   stage 11 count fingerprints on the large protocol              09:08 -> 09:36
   stage 12 small_1m at k=60, to measure the budget curve         09:36 -> 10:52
-  stage 13 three arms on the common protocol at T=0.6, the cost  10:52 -> TBD
+  stage 13 three arms on the common protocol at T=0.6, the cost  10:52 -> 11:36
 
 free, from dumps that already existed
   stage 0  the error bar inside each size band                   20:08 -> 20:17
@@ -71,7 +71,11 @@ of it is dead because cooling never hurts small molecules. **The size-weighted
 training mix is a trade, not a gain**, and the trade gets worse the harder it
 is pushed: 2.3 small molecules given up per large one gained at threshold 30
 ×3, 4.4 at threshold 35 ×6, and 10.7 for the step between them, with the
-second dose buying nothing the error bar can see above 35 atoms. **The two
+second dose buying nothing the error bar can see above 35 atoms. **But that
+rate was measured at a temperature the project no longer uses**: at the adopted
+T=0.6 the first dose costs 1.3 small molecules per large one rather than 2.3,
+and its whole-protocol penalty is −0.28 points instead of −1.13 — near enough
+free for a gain of +5.29 above 35 heavy atoms (stage 13). **The two
 compose.** Cooling and the threshold-30 mix stack additively or better in every
 band — the mix is worth +3.28 above 35 heavy atoms at T=0.6 against +2.75 at
 T=1.0 — which is what two factors of a product do, and which is why the
@@ -97,7 +101,9 @@ of 1.6 points that the 30–34 band contradicts at 2.99; it called fingerprint
 degeneracy rare from an 11,669-molecule corpus where the real figure at scale
 is 1.40%, and 6.13% at 50–59 atoms; and it closed the count-fingerprint
 question at p = 0.32, which turned out to be hiding a four-point *loss* rather
-than the gain that re-opening it was meant to find. Tonight's own plan item — the 30–39 band, chosen because
+than the gain that re-opening it was meant to find; and it priced the size
+mix's bill at a temperature the project had already abandoned, which made the
+mix look twice as expensive as it is. Tonight's own plan item — the 30–39 band, chosen because
 night 4's error bar was small there — was the same error a fifth time, and it
 did not clear. Though only half of that was the band's fault: scored at T=0.6
 rather than the T=1.0 night 4 had already superseded, the same pre-registered
@@ -1752,3 +1758,59 @@ between the two models. The 100k arms' exponents at 40–49 sit between 0.040 an
 carry weight. And eight points are not a trend — this is one contrast with a
 seed-level error bar attached, pre-registering a prediction for the 15M run
 rather than reporting a law.
+
+---
+
+## Stage 13 — the mix's bill shrinks when the decoder is cooled
+
+The verdict on the size mix is an exchange rate, and its denominator — what
+small molecules pay — had only ever been measured at T=1.0, where it was −3.11
+points below 24 heavy atoms and −2.90 at 25–29. Stage 13 re-scored the two mix
+seeds and one baseline seed on the common protocol at the adopted T=0.6. The
+registered alternatives were that the cost grows with cooling as the gain did,
+leaving the trade unchanged, or that it does not, making the mix a better deal
+than this document says.
+
+**It does not. The trade improves on both sides.**
+
+| band | n | between-seed sd | gap at T=1.0 | gap at T=0.6 | change |
+|---|---|---|---|---|---|
+| 0–24 | 712 | 0.57 | −3.11 | −2.74 | +0.37 |
+| 25–29 | 512 | 0.23 | −2.90 | **−1.17** | **+1.73** |
+| 30–34 | 373 | 2.99 | −0.45 | +0.27 | +0.71 |
+| 35–39 | 195 | 1.57 | +3.16 | **+7.69** | **+4.53** |
+| 40–49 | 123 | 0.94 | +7.59 | +2.03 | −5.56 |
+| 50+ | 41 | 0.00 | +2.44 | +3.66 | +1.22 |
+
+| | T=1.0 | T=0.6 |
+|---|---|---|
+| small molecules given up | 38.7 | 25.5 |
+| large molecules gained | 16.5 | 20.0 |
+| **exchange rate** | **2.34 given up per one gained** | **1.28** |
+| net, whole protocol | −1.13 points | **−0.28 points** |
+| points per doubling of exposure | +3.91 (r = 0.78) | +3.39 (r = 0.74) |
+
+The robust part of this is the cost side, and it is robust for the reason the
+rest of the night kept insisting on: the cost bands are the ones with large n
+and a small between-seed sd. Below 24 atoms, 712 queries and a sd of 0.57; at
+25–29, 512 queries and a sd of 0.23, against which +1.73 is seven sd. Both
+bands lose less at T=0.6 than at T=1.0, and the whole-protocol penalty falls
+from −1.13 points to −0.28 — the latter indistinguishable from zero against the
+1.6-point whole-protocol threshold this document opened by criticising.
+
+**So at the decode setting this project has adopted, the size-weighted mix is
+very nearly free, and it buys +5.29 points above 35 heavy atoms (+5.15 on
+structure accuracy).** The earlier verdict — a trade at 2.3 small molecules per
+large one — was measured at a temperature the project no longer uses. That is
+the sixth instance of tonight's one measurement error, and the first where the
+stale setting made a result look *worse* than it is rather than better.
+
+Two things not to over-read. The gain's redistribution across the large bands
+(+4.53 at 35–39, −5.56 at 40–49) rests on 195 and 123 queries, where binomial
+noise alone is 3.3 and 3.6 points, and the between-seed sd quoted beside them
+is a *paired* quantity that understates the noise of a single-seed arm on a
+small band. The band-level reshuffle is noise; the aggregate molecule counts,
+which pool all six bands, are not. And the baseline arm here is one seed where
+the T=1.0 comparison had three, so `arm_table.py`'s SE column for this table
+borrows and should be read as a lower bound — the yardstick to use is the
+between-seed sd column above, from the three-seed T=1.0 measurement.

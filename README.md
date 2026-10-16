@@ -438,7 +438,19 @@ baseline seeds, `rec@20` goes **+4.60 points above 35 heavy atoms** and
 **−3.11 below 24**, −2.90 at 25–29, with every one of the six cross-arm pairs
 agreeing in both directions. In molecules that is 38.7 given up for 16.5 gained
 — about 2.3 small molecules per large one — which the common protocol reports
-as a flat −1.13, because 63% of its queries are under 30 heavy atoms. The
+as a flat −1.13, because 63% of its queries are under 30 heavy atoms.
+
+**That exchange rate was measured hot, and it roughly halves when the decoder
+is cooled.** Re-scored at the adopted T=0.6, the same mix gives up 25.5 small
+molecules for 20.0 large ones — **1.3 per one gained** — and its whole-protocol
+penalty falls from −1.13 points to **−0.28**, which is indistinguishable from
+zero, while it buys +5.29 above 35 heavy atoms (+5.15 on structure accuracy).
+The cost bands are where this is most reliable: 712 queries and a between-seed
+sd of 0.57 below 24 atoms, 512 queries and a sd of 0.23 at 25–29, and both
+bands lose less cooled than hot. At the setting this project actually uses, the
+mix is close to free.
+
+The
 common protocol stays the right table for capacity questions, where every band
 moves together, and it cannot describe an intervention that redistributes; see
 `docs/overnight-2026-10-16.md` for the large-molecule protocol it is read on.
