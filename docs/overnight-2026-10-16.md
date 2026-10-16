@@ -400,3 +400,92 @@ the pooled-sampling `generate` stay opt-in and unrecommended: pooling three
 temperatures reaches 0.9279 against 0.9162 for a flat 0.6, which is +1.17
 points for three times the forward passes, and nothing in the project yet
 needs that trade.
+
+---
+
+## Stage 0d — what the cliff is made of
+
+Five nights have measured how far recovery falls with molecule size and none
+has asked what the failure consists of. The dumps answer it for nothing.
+`scripts/miss_anatomy.py` separates four candidate explanations, reading
+`variance_s1` on the large protocol (2,321 queries of 30+ heavy atoms) and on
+the common protocol (1,956 of every size):
+
+| band | queries | rec@20 | struct@20 | collisions among hits | best Tanimoto on a miss | misses ≥ 0.9 | budget full | mean hit rank |
+|---|---|---|---|---|---|---|---|---|
+| 0–24 | 712 | 0.7711 | 0.7626 | 1.1% | 0.672 | 8.6% | 0.999 | 4.4 |
+| 25–29 | 512 | 0.6445 | 0.6406 | 0.6% | 0.702 | 7.1% | 1.000 | 5.3 |
+| 30–34 | 1,189 | 0.4491 | 0.4289 | 4.5% | 0.703 | 8.7% | 1.000 | 6.1 |
+| 35–39 | 625 | 0.2384 | 0.2080 | 12.8% | 0.691 | 8.4% | 1.000 | 7.7 |
+| 40–49 | 380 | 0.0947 | 0.0816 | 13.9% | 0.645 | 7.0% | 1.000 | 8.4 |
+| 50–59 | 95 | 0.0000 | 0.0000 | — | 0.574 | 3.2% | 1.000 | — |
+| 60+ | 32 | 0.0000 | 0.0000 | — | 0.527 | 0.0% | 1.000 | — |
+
+(Rows up to 29 atoms from the common protocol, 30+ from the large one.)
+
+Three of the four explanations die here.
+
+**It is not the budget.** Every band fills its 20 slots for essentially every
+query — 1.000 at every size, on a protocol where `small_1m` manages only 0.639.
+The weak 100k models have no trouble producing 20 distinct valid molecules for a
+60-atom fingerprint. They are simply the wrong 20. "It runs out of guesses" is
+the intuitive story and it is false.
+
+**It is not near-missing.** On queries never matched, the best Tanimoto reached
+anywhere in the 20 is ~0.68 and **flat across every band** from 0–24 to 40–49,
+with the ≥ 0.9 tail at 7–9% throughout. The model is not creeping closer to
+large molecules and failing at the last step; it is the same distance away at
+every size. Whatever changes with size, it is not the model's aim.
+
+**It is not ranking.** The mean rank of a hit drifts from 4.4 to 8.4, which
+says large recoveries use more of the budget, but a hit at rank 8 of 20 is not
+a hit being lost.
+
+**What does change is the fourth thing, and it is the metric's own footing.**
+The fraction of recoveries that are a *different molecule carrying the same
+fingerprint* goes 1.1% → 0.6% → 4.5% → 12.8% → 13.9%. Above 35 heavy atoms
+about one in eight successes is not the query's molecule. `recovery` counts
+those as hits, correctly — the task is inverting a fingerprint, and a different
+preimage is a valid answer — but it means `recovery` and
+`structure_accuracy` are drifting apart exactly where the project's attention
+now is, and that the honest reading of the cliff depends on which one is meant.
+
+So the shape of the failure is: at every size the model proposes a cloud of
+twenty molecules roughly 0.68 Tanimoto from the target; recovery is whether
+that cloud happens to contain an exact preimage. That cloud is as close for a
+60-atom molecule as for a 20-atom one, and exponentially less likely to contain
+an exact hit, because the number of molecules within a Tanimoto radius grows
+with the size of the molecule at its centre. That is a combinatorial account of
+the cliff rather than a capability one, and it predicts something testable:
+what large molecules need is not a model that aims better but one that
+proposes a far narrower cloud — which is precisely what cooling the decoder
+does, and why cooling bought 7–10 points above 35 atoms and nothing below 30.
+The size mix fits the same account from the other side: more exposure to large
+molecules tightens the cloud where it was widest.
+
+The 50–59 and 60+ rows are worth splitting out from the usual 50+ band:
+`variance_s1` recovers **zero of 127** molecules above 50 heavy atoms. The
++1.97 points the size mix showed in the 50+ band earlier is three molecules at
+50–59 out of 95, one of them an exact structure and two of them collisions.
+Nothing above 50 atoms is working yet, and nothing in this project has moved it.
+
+### A prediction, registered before stage 10 ran
+
+The account above — that both working interventions narrow the proposal cloud
+rather than aim it better — makes a falsifiable claim about the experiment that
+was still training when this was written. Stage 10 scores every arm on the
+large protocol at T=0.6 instead of 1.0, which is the first time the mix and the
+cooled decoder are applied together.
+
+* **If both work by narrowing the cloud**, they compete for the same points.
+  The mix's +2.75 above 35 heavy atoms should *shrink* when measured on top of
+  a decoder that has already been cooled — call it under +1.5 — because cooling
+  has already collected much of what tightening the distribution can collect.
+* **If they are independent mechanisms**, the gap should survive at roughly its
+  T=1.0 size, +2.5 to +3.
+
+Written at 05:30 on 2026-10-17, before stage 8 finished training, with the
+prediction being *the first one*. A result either way is worth more than the
++2.75 figure on its own, because the project is about to choose what to spend
+an 18-hour full-ChEMBL run on, and "these two gains add" is an assumption that
+would otherwise be made silently.
