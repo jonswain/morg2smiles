@@ -202,6 +202,38 @@ cliff. What they bound is `structure_accuracy`, and what they undermine is the
 use of `recovery` alone as a description of what the model does to large
 molecules.
 
+### What the size cliff is, as far as it has been measured
+
+Three explanations for it are dead. It is **not the budget** — the full-k rate
+is 1.000 in every size band, so the model is not running out of slots. It is
+**not ranking** — the mean rank of a hit drifts only 4.4 to 8.4 across the
+range. And it is **not that the model nearly gets there** — the best Tanimoto
+on a miss is 0.69 at 35–39 heavy atoms, 0.64 at 40–49 and 0.57 above 50, which
+recedes nothing like as fast as recovery falls (0.28 → 0.10 → 0.02).
+
+What is left is combinatorial. At every size the decoder proposes about twenty
+molecules roughly 0.65 Tanimoto from the target, and recovery asks whether that
+cloud happens to contain an exact preimage — which is exponentially less likely
+the bigger the molecule. Two independent predictions of that account have held:
+
+- **Both interventions that work above 35 atoms work by tightening the cloud.**
+  Cooling the decoder and over-sampling large molecules in training both move
+  the best-Tanimoto-on-a-miss, and neither does anything that aims the cloud
+  better without tightening it. Nothing that only improves ranking has moved
+  the cliff.
+- **The same tightening buys less recovery as molecules grow.** Recovery points
+  per point of Tanimoto run 2.2–2.8 at 40–49 heavy atoms and 0.4–0.9 above 50,
+  where the stronger training mix bought the largest cloud gain of any band
+  (+4.05 points) and the smallest recovery gain (+1.57)
+  (`scripts/cloud_quality.py`).
+
+The brute-force route is priced too. Returns per doubling of k rise with size —
+1.14× below 24 heavy atoms, 1.41× at 35–39, 1.44× at 40–49 — so widening the
+search is *more* efficient on exactly the molecules that fail, and k ≈ 200
+would be needed to lift recovery above 35 atoms from 0.163 to 0.50. That is a
+lower bound, since the returns decay, and nothing in the curve reaches the 50+
+band at all.
+
 ## Architecture
 
 A fingerprint is a **set**, so it is encoded as one. Each set bit becomes a
@@ -341,6 +373,23 @@ as a flat −1.13, because 63% of its queries are under 30 heavy atoms. The
 common protocol stays the right table for capacity questions, where every band
 moves together, and it cannot describe an intervention that redistributes; see
 `docs/overnight-2026-10-16.md` for the large-molecule protocol it is read on.
+
+**And the exposure is already spent.** A second mix pushed harder and higher —
+threshold 35, factor 6, so 58.9% of the training diet comes from 35+ atoms
+against the first mix's 19.3% — moved recovery above 35 atoms by +0.14 points
+over the first mix on the better-powered protocol, a tenth of its error bar,
+and −0.35 on structure accuracy. What it did do is double the bill: the
+exchange rate goes from 2.3 small molecules per large one to **4.4**, and the
+marginal step between the two doses bought 5.5 molecules for 59. Band by band
+the stronger mix's effect is explained by exposure alone — a straight line
+through log₂ exposure fits all six bands at **+4.52 points per doubling,
+r = 0.989** (`scripts/exposure_response.py`) — and a transfer at a constant
+price in points is a losing trade in molecules, because the bands being paid
+from hold 1,597 of the protocol's queries and the bands being bought hold 359.
+No threshold-and-factor escapes that arithmetic. If large molecules become the
+deliverable, the strongest arm measured is the factor-6 mix (+6.13 above 35
+atoms on the common protocol, +2.89 on the large one) and the reporting has to
+be per band; otherwise this line is closed.
 
 The one axis these rows isolate cleanly is **compute**: the first and last rows
 share an identical 90,682-molecule corpus and differ only in step budget.
