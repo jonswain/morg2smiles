@@ -912,3 +912,61 @@ where an arm has one to three hits to compute it from. The cooled-decoder
 comparison reported above is the one to trust on collisions, because it is
 three temperatures of a single checkpoint on a single query set rather than
 six separately trained models.
+
+### More models, or more samples? The misses are shared
+
+The cloud account has a reading that would be good news, and it is wrong. If
+recovery above 35 heavy atoms is a matter of whether twenty draws happen to
+contain an exact preimage, then two models trained from different
+initialisations should be unlucky on *different* molecules, and an ensemble
+should be worth more above 35 atoms than anywhere else. Three baseline seeds
+on the large protocol, `scripts/seed_union.py` (new):
+
+| band | queries | one seed | union of 3 | if independent | all three miss | luck |
+|---|---|---|---|---|---|---|
+| 30–34 | 1,189 | 0.4886 | 0.6182 | 0.8663 | 38.2% | 25.3% |
+| 35–39 | 625 | 0.2757 | 0.4208 | 0.6202 | 57.9% | 20.0% |
+| 40–49 | 380 | 0.1026 | 0.1842 | 0.2777 | 81.6% | 9.1% |
+| 50+ | 127 | 0.0157 | 0.0315 | 0.0467 | **96.9%** | **1.6%** |
+| 35+ | 1,132 | 0.1885 | 0.2977 | 0.4656 | 70.2% | 13.5% |
+
+"Luck" is the share of one seed's misses that one of the other two recovered,
+and it goes the *opposite* way to the prediction: a quarter of the misses are
+seed-specific at 30–34 and 1.6% above 50 atoms. Where the cliff is steepest the
+misses are almost perfectly shared — 96.9% of molecules above 50 heavy atoms
+are missed by all three models, against the 95.3% that would be missed by
+chance alone if each model failed independently, which is to say there is
+essentially nothing left for a second model to find. Structure accuracy says
+the same thing more strongly still: 0.3% luck above 50 atoms.
+
+Splitting a fixed budget settles the spending question without any
+extrapolation. Three models asked for six candidates each spend what one model
+asked for twenty spends:
+
+| band | 1 × 20 | 2 × 10 | 3 × 6 |
+|---|---|---|---|
+| 30–34 | 0.4886 | 0.4903 | 0.4752 |
+| 35–39 | **0.2757** | 0.2640 | 0.2576 |
+| 40–49 | 0.1026 | **0.1092** | 0.0895 |
+| 50+ | 0.0157 | 0.0118 | 0.0079 |
+| 35+ | **0.1885** | 0.1837 | 0.1731 |
+| all 30+ | **0.3422** | 0.3408 | 0.3279 |
+
+**Ensembling independently-seeded models is a wash at best and a loss at
+three ways.** And it is not that these three models are too similar: running
+the same test across three *differently trained* models — a baseline, the
+threshold-30 mix and the threshold-6 mix, which differ in a third of their
+training diet — moves the luck at 35+ from 13.5% to 14.2%, and the equal-spend
+split from 0.1885 to 0.2120, a gain of 0.4 points. Model diversity is not a
+lever here, whether it comes from initialisation or from data.
+
+That refines the cloud account rather than refuting it. The cloud is narrow,
+and it is narrow **in the same place for every model**: the twenty molecules
+one checkpoint proposes for a 55-atom fingerprint are not a lucky or unlucky
+draw from a wide distribution of possible neighbourhoods, they are the
+neighbourhood that this architecture on this data has learned to propose, and a
+differently initialised or differently fed copy proposes the same one. Which
+leaves the two routes already priced tonight — widening k within one model,
+where returns per doubling are 1.41 to 1.44 and k ≈ 200 reaches 0.50 above 35
+atoms, and changing what the model can represent. Spending on more models is
+not a third route.

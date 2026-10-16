@@ -1,0 +1,129 @@
+{
+  "protocol": {
+    "eval_n": 2400,
+    "seed": 0,
+    "budget": "molecules",
+    "eval_k": 20,
+    "max_oversample": 10.0,
+    "temperature": 0.6,
+    "top_p": 1.0,
+    "pool_shard": "data/shards/1m",
+    "split": "valid",
+    "n_fp_unseen": 2321,
+    "fp_config": "morgan r=2 binary folded/2048",
+    "training_union_size": 1989502,
+    "shards_excluded": [
+      "data/shards/100k",
+      "data/shards/1m",
+      "data/shards/full"
+    ],
+    "min_heavy_atoms": 30,
+    "max_heavy_atoms": null
+  },
+  "runs": {
+    "size_mix_s1": {
+      "checkpoint": "checkpoints/size_mix_s1/best.pt",
+      "train_shard": "data/shards/100k",
+      "n_parameters": 7951945,
+      "trained_epoch": 12,
+      "trained_step": 8508,
+      "model_config": {
+        "d_model": 256,
+        "n_heads": 8,
+        "d_ff": 1024,
+        "n_encoder_layers": 4,
+        "n_decoder_layers": 4,
+        "dropout": 0.1,
+        "max_tokens": 128,
+        "vocab_size": 73,
+        "fp_vocab_size": 2048
+      },
+      "report": {
+        "ks": [
+          1,
+          5,
+          20
+        ],
+        "budget": "molecules",
+        "slices": {
+          "all": {
+            "n_queries": 2400,
+            "recovery_at_k": {
+              "1": 0.10041666666666667,
+              "5": 0.2625,
+              "20": 0.4220833333333333
+            },
+            "structure_accuracy_at_k": {
+              "1": 0.08875,
+              "5": 0.2375,
+              "20": 0.3954166666666667
+            },
+            "recovery_at_k_consensus": {
+              "1": 0.21,
+              "5": 0.34791666666666665,
+              "20": 0.4266666666666667
+            },
+            "structure_accuracy_at_k_consensus": {
+              "1": 0.18875,
+              "5": 0.32875,
+              "20": 0.40125
+            },
+            "validity": 0.8151116471727159,
+            "duplicate_rate": 0.30350256304454776,
+            "unique_valid_per_query": 26.864166666666666,
+            "mean_samples_per_query": 56.49166666666667,
+            "mean_candidates_per_query": 52.509166666666665,
+            "mean_scored_per_query": 26.864166666666666,
+            "budget_filled_rate": 0.9641666666666666,
+            "mean_best_tanimoto": 0.8490390569058456,
+            "mean_hit_rank": 6.576785714285714
+          },
+          "fp_unseen": {
+            "n_queries": 2321,
+            "recovery_at_k": {
+              "1": 0.1012494614390349,
+              "5": 0.26238690219732874,
+              "20": 0.42137009909521755
+            },
+            "structure_accuracy_at_k": {
+              "1": 0.09090909090909091,
+              "5": 0.24429125376992675,
+              "20": 0.4024127531236536
+            },
+            "recovery_at_k_consensus": {
+              "1": 0.2111158983196898,
+              "5": 0.34855665661352864,
+              "20": 0.4261094355881086
+            },
+            "structure_accuracy_at_k_consensus": {
+              "1": 0.1943127962085308,
+              "5": 0.33563119345109865,
+              "20": 0.40844463593278757
+            },
+            "validity": 0.8155410550101931,
+            "duplicate_rate": 0.30645729116349135,
+            "unique_valid_per_query": 26.790176647996553,
+            "mean_samples_per_query": 56.64799655320982,
+            "mean_candidates_per_query": 52.62429987074537,
+            "mean_scored_per_query": 26.790176647996553,
+            "budget_filled_rate": 0.9633778543731151,
+            "mean_best_tanimoto": 0.8482789757841254,
+            "mean_hit_rank": 6.588180978762696
+          }
+        },
+        "primary_metric": 0.42137009909521755,
+        "primary_metric_name": "recovery@20 (fp_unseen)",
+        "fp_unseen_fraction": 0.9670833333333333,
+        "elapsed_seconds": 624.0521362090949,
+        "queries_per_second": 3.845832520627501,
+        "candidates_per_second": 201.94146079771622,
+        "generation": {
+          "k": 20,
+          "budget": "molecules",
+          "seed": 0,
+          "max_oversample": 10.0
+        }
+      }
+    }
+  }
+}
