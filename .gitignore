@@ -142,3 +142,4 @@ dist/
 !/results/overnight5/comparison_large_t06_variance_s3.json
 !/results/overnight5/comparison_large_countfp_count_fp_100k.json
 !/results/overnight5/comparison_large_countfp_small_100k.json
+!/results/overnight5/budget_curve_large_k60.json

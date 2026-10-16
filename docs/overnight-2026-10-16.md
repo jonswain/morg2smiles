@@ -19,8 +19,8 @@ GPU queue
   stage 9  score it on both protocols                            07:33 -> 07:58
   stage 10 every arm on the large protocol at T=0.6              07:58 -> 09:08
   stage 11 count fingerprints on the large protocol              09:08 -> 09:36
-  stage 12 small_1m at k=60, to measure the budget curve             TBD
-  stage 13 three arms on the common protocol at T=0.6, the cost      TBD
+  stage 12 small_1m at k=60, to measure the budget curve         09:36 -> 10:52
+  stage 13 three arms on the common protocol at T=0.6, the cost  10:52 -> TBD
 
 free, from dumps that already existed
   stage 0  the error bar inside each size band                   20:08 -> 20:17
@@ -53,6 +53,18 @@ then survived two predictions and a test it could have failed:
   differently *trained* models do no better, and at equal spend one model given
   twenty candidates beats three given six each.
 
+The account holds for the 100k checkpoints every one of those measurements was
+made on. **On the 1M model at a 60-slot budget it is the wrong account**, and
+stage 12 at the end of this document replaces it: there the cloud is the right
+*size* almost always (89.8% of queries above 50 atoms get a right-sized
+proposal, against 37.8% at 100k) and the exact-preimage rate given the right
+size is flat at 11–13% in every band rather than collapsing. What falls with
+molecule size is not how many preimages the decoder draws — 1.53 per query at
+30–34 against 1.31 above 50 — but how evenly they are spread: above 50 atoms
+52% of queries draw none at all while the successful ones draw 2.72 each. The
+population splits into fingerprints the conditional can reach and ones it
+cannot, and extra budget mostly re-finds what it already found.
+
 The practical ledger is short. **T=0.6, top_p 1.0, everywhere** — free, +1.99
 points overall and +7.5 above 35 heavy atoms, and the size-conditional version
 of it is dead because cooling never hurts small molecules. **The size-weighted
@@ -64,9 +76,12 @@ compose.** Cooling and the threshold-30 mix stack additively or better in every
 band — the mix is worth +3.28 above 35 heavy atoms at T=0.6 against +2.75 at
 T=1.0 — which is what two factors of a product do, and which is why the
 night's first prediction about them was wrong. **Ensembling is not a route.**
-What is left is widening k inside one model — priced at k ≈ 170 for 0.50 above
-35 atoms, on an extrapolation that stage 12 is measuring — and changing what
-the model can represent.
+**Widening k inside one model is affordable up to about 40
+heavy atoms and nowhere above it**: stage 12 measured the curve to k=60 instead
+of extrapolating it, and the recovery deficit is a clean power law in budget
+(|r| ≥ 0.991 in every band) whose exponent falls with molecule size, so k=128
+reaches 0.90 at 35–39 and 0.95 above 50 atoms costs 10⁹. What is left is
+changing what the model can represent.
 
 Underneath all of it is one measurement error, found five times in one night.
 The common protocol draws 2,000 molecules at random and 63% of them are under
@@ -1105,7 +1120,14 @@ capacity the gain concentrates above 35 atoms and the 0–24 band moves by less
 than a point; if the gain is flat across bands it is not the size cliff that
 got better and the cliff is in the fingerprint or the data.
 
-**2b. Tell the decoder how big the molecule is.** The size defect is the
+**2b. Tell the decoder how big the molecule is.** *(Retired by stage 12 — see
+the end of this document. On `small_1m` at k=60 the truncation is 5.1 atoms
+rather than 10.7, 89.8% of the 50+ queries get a right-sized proposal, and the
+closest proposal is within 0.2 atoms of the target in every band, so there is
+no size defect left for a size token to fix. The flaw below is a property of a
+100k-parameter checkpoint at a 20-slot budget, not of the problem.)*
+
+The size defect is the
 sharpest single flaw tonight found — 10.7 atoms short above 50 heavy atoms, and
 only 37.8% of those queries get even one right-sized proposal out of twenty —
 and the information is in the input. The cheap version is a size token on the
@@ -1416,3 +1438,155 @@ made before the run and should have weighed more heavily against the
 re-opening. What counts buy is precision in what recovery *means*, which is
 worth having for the degeneracy caveat and is not a route to inverting bigger
 molecules. The question is closed again, for a better reason than p = 0.32.
+
+---
+
+## Stage 12 — the budget curve, measured, and the pre-registration was void
+
+The one route tonight left standing was widening k inside one model, and every
+price quoted for it came from extrapolating the 10 → 20 step of a 20-slot list.
+Stage 12 generated to k=60 on the large protocol's own 2,321 molecules so the
+curve could be read instead of guessed.
+
+**The protocol check passes.** `small_1m` at T=0.6 scored 0.8121 overall on
+these molecules at k=20 with a 20-slot budget; the k=20 prefix of the k=60 dump
+gives 0.8126. The larger budget did not change the protocol underneath it.
+
+**The pre-registered band cannot be scored, because I registered it for a
+different model.** The two accounts in the header — independence at 0.47,
+decaying returns at 0.28, measurement pre-registered at 0.26–0.36 — were built
+from the factorisation constants in the section above: 1.9 right-sized
+proposals per twenty, an exact-preimage rate of 0.107, and a calibration check
+against "the measured 0.1885 at 35+". Those are the **100k** arm's numbers.
+The run is `small_1m`, which was already at 0.6890 at 35+ and k=20 before it
+started. A prediction of 0.26–0.36 for a quantity that began at 0.69 was never
+a prediction about this run. The plan item that specified the stage carried the
+same defect, and the run executed it faithfully; the error is mine and it is in
+the design, not the measurement. No credit either way, and the 100k arm's k=60
+point is still unmeasured.
+
+What the run does settle, it settles on `small_1m`'s own numbers.
+
+### Independence is dead, and not narrowly
+
+```
+   band   rec@1   independent rec@20   measured   independent rec@60   measured
+  35-39  0.3536               0.9998     0.7968               1.0000     0.8656
+  40-49  0.2395               0.9958     0.6342               1.0000     0.7158
+    50+  0.0472               0.6201     0.3228               0.9452     0.4488
+    35+  0.2809               0.9986     0.6890               1.0000     0.7686
+```
+
+If successive draws were independent at the model's own first-slot rate, 35+
+would have been finished at k=20 — 0.9986 against a measured 0.6890, a gap of
+31 points. The decoder re-proposes from a neighbourhood that barely moves as
+the budget grows. That was the direction the pre-registration assumed, and it
+is worth saying that the assumption survives even though the number testing it
+does not.
+
+### The deficit follows a power law, tightly, with a size-dependent exponent
+
+`budget_curve.py` fits `1 − rec(k) = A·k^−b` over the rungs from k=5 up:
+
+| band | n | rec@60 | b | r | b fitted to k≤20 | predicts k=60 | error |
+|---|---|---|---|---|---|---|---|
+| 30–34 | 1,189 | 0.9134 | 0.396 | −0.9992 | 0.399 | 0.9141 | −0.07 |
+| 35–39 | 625 | 0.8656 | 0.387 | −0.9993 | 0.403 | 0.8700 | −0.44 |
+| 40–49 | 380 | 0.7158 | 0.263 | −0.9954 | 0.304 | 0.7406 | −2.48 |
+| 50+ | 127 | 0.4488 | 0.144 | −0.9917 | 0.123 | 0.4120 | **+3.68** |
+| 35+ | 1,132 | 0.7686 | 0.281 | −0.9984 | 0.303 | 0.7788 | −1.02 |
+| all | 2,321 | 0.8427 | 0.317 | −0.9990 | 0.334 | 0.8486 | −0.58 |
+
+Three readings.
+
+*The shape is right.* |r| ≥ 0.991 in every band across eight rungs spanning a
+factor of 60. Nothing in the measured range looks like a floor; the pure power
+law fits the data as well as the data can be fitted.
+
+*The extrapolation method the prices rested on is roughly sound.* Refitting on
+k ≤ 20 only and predicting k=60 lands within half a point in the two bands with
+real n, 2.5 points low at 40–49, and 3.7 points high at 50+ — where n=127 makes
+the SE on the proportion 4.4 points, so that miss is inside noise. A method
+that transports a factor of three in budget to within a point or two is good
+enough to quote prices from, provided the prices are labelled as the lower
+bounds they are.
+
+*The exponent falls with molecule size.* 0.40 at 30–34 against 0.14 above 50
+atoms. Big molecules do not merely start lower on the curve; each doubling of
+the budget buys them proportionally less as well. The cliff steepens with
+spending rather than eroding.
+
+Inverting the fits gives what the route actually costs for this model:
+
+| band | k for 0.90 | k for 0.95 | k for 0.99 |
+|---|---|---|---|
+| 30–34 | 41 | 238 | 13,857 |
+| 35–39 | 128 | 768 | 49,097 |
+| 40–49 | 3,080 | 42,917 | 1.9 × 10⁷ |
+| 50+ | 1.0 × 10⁷ | 1.2 × 10⁹ | 8.8 × 10¹³ |
+| 35+ | 1,177 | 13,819 | 4.2 × 10⁶ |
+
+Up to about 40 heavy atoms, brute force is a real and affordable answer: k=128
+is a few seconds per fingerprint and takes 35–39 to 0.90. From 40 atoms it
+stops being a route and above 50 it stops being arithmetic.
+
+### What the budget buys, and the mechanism this overturns
+
+The cloud account from earlier tonight says the cliff is a shortage of
+right-sized proposals, with the match rate given the right size collapsing to
+near zero above 50 atoms. Neither half of that survives on `small_1m` at k=60:
+
+| band | right-sized proposals/query | any right-sized | match given right size |
+|---|---|---|---|
+| 30–34 | 7.9 | 99.9% | 13.2% |
+| 35–39 | 8.8 | 98.9% | 11.7% |
+| 40–49 | 8.2 | 97.6% | 11.2% |
+| 50+ | 6.3 | 89.8% | 11.0% |
+
+The match rate is **flat** — 13.2% down to 11.0%, where the 100k arm went to
+about zero — and 89.8% of the 50+ queries get at least one right-sized
+proposal, against 37.8% for the 100k arm at k=20. Truncation on misses is −5.1
+atoms at 50+ rather than −10.7, and the single closest proposal is within 0.2
+atoms of the target in every band. **For this model the size defect is
+essentially gone, bought off by budget, and a length prior has nothing left to
+correct.** That retires item 2b, and it also means the earlier factorisation
+described a property of a 100k-parameter checkpoint rather than of the problem.
+
+So where does the cliff come from? Counting exact preimages per query, rather
+than pooling the rate over proposals:
+
+| band | n | rec | preimages/query | if Poisson | none | one | two | 3+ | per hit |
+|---|---|---|---|---|---|---|---|---|---|
+| 30–34 | 1,189 | 0.9285 | 1.532 | 0.7840 | 0.071 | 0.748 | 0.103 | 0.078 | 1.65 |
+| 35–39 | 625 | 0.8912 | 1.459 | 0.7676 | 0.109 | 0.699 | 0.118 | 0.074 | 1.64 |
+| 40–49 | 380 | 0.7579 | 1.395 | 0.7521 | 0.242 | 0.571 | 0.095 | 0.092 | 1.84 |
+| 50+ | 127 | 0.4803 | 1.307 | 0.7294 | 0.520 | 0.315 | 0.047 | 0.118 | **2.72** |
+
+(Recovery here counts a preimage anywhere in the first 60 proposals, so it sits
+a little above the protocol's own numbers; the columns are to be read against
+each other.)
+
+**The number of preimages the model draws barely depends on size. Their
+distribution across queries depends on it enormously.** From 30–34 to 50+ the
+preimages per query fall 15%, from 1.53 to 1.31, while recovery falls 48
+points. What changes is concentration: above 50 atoms 52.0% of queries get
+nothing at all and the ones that succeed get 2.72 preimages each, where at
+30–34 three quarters of queries get exactly one. Poisson — the same preimage
+count scattered independently over the band's queries — would give 0.729 above
+50 atoms against a measured 0.480.
+
+That is a different mechanism from a thin cloud, and it is the one that makes
+the budget curve's small exponent intelligible. The population is splitting
+into fingerprints this decoder can reach and fingerprints it cannot, and the
+split sharpens with size. Extra budget spends most of itself re-finding
+molecules it has already found on the queries it was always going to solve.
+The route out is not more samples from this conditional; it is changing which
+molecules the conditional can reach at all — which is item 2, capacity, and
+tonight has just made it the only item left.
+
+A caveat the numbers themselves demand: a power law with no visible floor and a
+population with unreachable members are in tension, since the second implies an
+asymptote below 1 and the first denies one. k ≤ 60 cannot separate them. The
+honest statement is that the fit is excellent over the measured range, that it
+is a lower bound on cost, and that the concentration result is the reason to
+expect the real curve to bend worse than the fit rather than better.

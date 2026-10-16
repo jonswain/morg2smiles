@@ -45,3 +45,9 @@
 [10-17 09:35:46] === night 5e done, 115 min to spare ===
 [10-17 09:35:57] === night 5f start, 135 min to 11:50 ===
 [10-17 09:35:57] stage 12: small_1m at T=0.6, k=60, on the large protocol's molecules
+[10-17 10:51:25] stage 12 exit=0
+[10-17 10:51:29] stage 12 anatomy exit=0
+[10-17 10:51:42] stage 12 size bias exit=0
+[10-17 10:51:42] === night 5f done, 59 min to spare ===
+[10-17 10:52:12] === night 5g start, 63 min to 11:55 ===
+[10-17 10:52:12] stage 13: size_mix_s1 on the common protocol at T=0.6
