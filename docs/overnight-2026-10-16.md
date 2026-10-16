@@ -1603,9 +1603,40 @@ about zero — and 89.8% of the 50+ queries get at least one right-sized
 proposal, against 37.8% for the 100k arm at k=20. Truncation on misses is −5.1
 atoms at 50+ rather than −10.7, and the single closest proposal is within 0.2
 atoms of the target in every band. **For this model the size defect is
-essentially gone, bought off by budget, and a length prior has nothing left to
-correct.** That retires item 2b, and it also means the earlier factorisation
-described a property of a 100k-parameter checkpoint rather than of the problem.
+essentially gone and a length prior has nothing left to correct.** That retires
+item 2b, and it also means the earlier factorisation described a property of a
+100k-parameter checkpoint rather than of the problem.
+
+*(Written first as "bought off by budget", which the next subsection shows is
+the wrong attribution.)*
+
+#### It was capacity that bought it, and budget dilutes the match rate
+
+The comparison above changes two things at once — 100k → 1M and k=20 → k=60 —
+so it cannot say which did the work. `small_1m`'s own k=20 dump at the same
+temperature separates them:
+
+| at 50+ atoms | right-sized/query | match given right size |
+|---|---|---|
+| `variance_s1` (100k), k=20 | 0.54 | 0.0% |
+| `small_1m` (1M), k=20 | **2.54** | **14.6%** |
+| `small_1m` (1M), k=60 | 6.30 | 11.0% |
+
+**Capacity did it.** At an identical 20-slot budget the bigger model puts 4.7×
+as many right-sized molecules above 50 atoms into the list and converts 14.6%
+of them where the smaller model converts none. Budget then adds right-sized
+proposals — 2.54 to 6.30 — and *lowers* the rate at which they match, 14.6% to
+11.0%, which is precisely the caveat attached to the counterfactual earlier in
+this document: the right-sized proposals a model makes first are the ones it is
+most confident about, so the ones budget buys are worse.
+
+That also qualifies the flatness. At k=20 the match rate does fall with size
+across `small_1m`'s bands — 25.4%, 22.7%, 20.5%, 14.6% — and it is only at k=60
+that the bands converge on 11–13%. The convergence is dilution reaching its
+floor in every band rather than evidence that the rate never depended on size.
+What survives unqualified is the comparison that matters: at equal budget the
+1M model's rate above 50 atoms is 14.6% against the 100k model's zero, so the
+collapse to zero was a property of the small checkpoint.
 
 So where does the cliff come from? Counting exact preimages per query, rather
 than pooling the rate over proposals:
