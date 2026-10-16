@@ -274,10 +274,15 @@ something.
 the query population.** The clearest-looking lever — the decoder offers 45-atom
 molecules for 56-atom fingerprints, and at 100k parameters only 38% of queries
 above 50 atoms get even one right-sized candidate out of twenty — does not
-survive on the 1M model with a 60-slot budget. There 89.8% of those queries get
-a right-sized proposal, truncation on misses is 5 atoms rather than 11, and the
-exact-preimage rate *given* the right size is flat at 11–13% in every band
-instead of collapsing, so a length prior has nothing left to correct. What
+survive on the 1M model. At an identical 20-slot budget it puts 2.54 right-sized
+molecules above 50 atoms into the list against the small model's 0.54 and
+converts 14.6% of them where the small model converts none; at k=60 it gets a
+right-sized proposal for 89.8% of those queries and its truncation on misses is
+5 atoms rather than 11. So a length prior has nothing left to correct, and what
+fixed the size defect was capacity — not a prior, and not budget, which adds
+right-sized proposals while *lowering* the rate at which they match (14.6% to
+11.0%), since the ones a model proposes first are the ones it is most confident
+about. What
 falls with molecule size is not how many preimages the decoder draws — 1.53 per
 query at 30–34 against 1.31 above 50 — but how evenly they land: above 50 atoms
 52% of queries draw none at all while the ones that succeed draw 2.72 each,
