@@ -1073,6 +1073,20 @@ Every one of these numbers is an extrapolation from the last doubling of a
 tonight left standing is to generate past k=20 and look, which is where the
 next session should start.
 
+*(It did, in stage 12, and these four prices are all far too low — not by a
+margin but by a factor. Extrapolating a multiplier on recovery is the wrong
+operation when recovery is small: 1.45× per doubling of a 0.16 recovery barely
+touches the 0.84 deficit, so the method reaches any target it is pointed at
+cheaply. Extrapolating the deficit instead, with the power law that stage 12
+measured on a real k=60 curve and fitted to this arm's own k ≤ 20 rungs at
+r = −0.9999, reaching 0.50 needs **k ≈ 767** at 35–39 against the 92 below,
+**k ≈ 2.4 million** at 40–49 against 272, and **k ≈ 14,900** at 35+ against
+173 — 8×, 9,000× and 85× the prices in this paragraph. The 24,000 quoted for
+50+ cannot be redone, since that band has no non-zero rungs below k=20 to fit.
+Stage 12 also showed which method to trust: on `small_1m`, where both can be
+scored against a measured k=60, the deficit power law predicted 0.779 against
+0.769 measured at 35+ while the multiplier method predicted 0.805.)*
+
 ---
 
 ## The plan after tonight
