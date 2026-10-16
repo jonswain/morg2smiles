@@ -42,6 +42,18 @@ DEFAULT_BANDS = "0-24,25-29,30-34,35-39,40-49,50-59,60+,35+,all"
 @click.option("--n-bits", default=2048, show_default=True)
 @click.option("--radius", default=2, show_default=True)
 @click.option(
+    "--counts/--binary",
+    default=False,
+    show_default=True,
+    help=(
+        "Counts carry how many times each environment occurs, not just whether "
+        "it does. The README calls the difference worth +0.0002 uniquely "
+        "determined molecules, measured on 11,669 of them, where binary "
+        "ambiguity is itself 0.05% -- a corpus too small for either number to "
+        "mean anything about the task."
+    ),
+)
+@click.option(
     "--limit", type=int, default=None, help="Take only this many molecules, for a smoke test."
 )
 @click.option("--bands", default=DEFAULT_BANDS, show_default=True)
@@ -50,16 +62,19 @@ DEFAULT_BANDS = "0-24,25-29,30-34,35-39,40-49,50-59,60+,35+,all"
     type=click.Path(path_type=Path),
     default=Path("results/overnight5/fingerprint_ambiguity.json"),
 )
-def main(shard, splits, n_bits, radius, limit, bands, out) -> None:
+def main(shard, splits, n_bits, radius, counts, limit, bands, out) -> None:
     from scripts.band_analysis import parse_band
 
-    cfg = FPConfig(radius=radius, n_bits=n_bits)
+    cfg = FPConfig(radius=radius, n_bits=n_bits, counts=counts)
     smiles: list[str] = []
     for split in splits.split(","):
         smiles.extend(load_split(shard, split))
     if limit:
         smiles = smiles[:limit]
-    click.echo(f"{len(smiles):,} molecules from {shard} [{splits}], morgan r={radius}/{n_bits}")
+    click.echo(
+        f"{len(smiles):,} molecules from {shard} [{splits}], morgan r={radius}/{n_bits}"
+        f" {'counts' if counts else 'binary'}"
+    )
 
     # Canonicalise first: the same molecule written two ways is not a collision.
     # Molecules are held as hashes of their canonical SMILES rather than the
@@ -122,7 +137,12 @@ def main(shard, splits, n_bits, radius, limit, bands, out) -> None:
             {
                 "shard": shard,
                 "splits": splits,
-                "fingerprint": {"radius": radius, "n_bits": n_bits, "folded": True},
+                "fingerprint": {
+                    "radius": radius,
+                    "n_bits": n_bits,
+                    "counts": counts,
+                    "folded": True,
+                },
                 "n_input_smiles": len(smiles),
                 "n_distinct_molecules": len(size_of),
                 "n_distinct_fingerprints": len(by_key),

@@ -155,21 +155,47 @@ From `scripts/analyse_recoverability.py` on the 10k shard (11,669 molecules):
 Folding to 2048 bits loses 1.46% of atom environments and affects 50% of
 molecules; at 4096 bits that falls to 0.48% and 21%.
 
-Two things follow, and both cut against the intuition that motivated the
-project:
+**That table is measured on 11,669 molecules, and both conclusions drawn from
+it were wrong.** Collisions inside a corpus grow with the corpus, and
+ambiguity is not flat in molecule size. `scripts/fingerprint_ambiguity.py`
+groups whole shards by fingerprint key and reports the share of molecules that
+share theirs with at least one other:
 
-1. **Degeneracy is rare.** At this corpus size the fingerprint very nearly
-   determines the molecule — 99.97% of molecules are the only molecule with
-   their fingerprint. So `recovery@k` and `structure_accuracy@k` should track
-   each other closely, and the difficulty is the hardness of the inverse
-   problem, not ambiguity in the answer.
-2. **Count fingerprints add almost nothing** (+0.0002 uniquely determined), so
-   the extra input channel is unlikely to be worth much. `configs/count_fp.yaml`
-   tests that directly.
+| corpus | all molecules | 35+ heavy atoms | 50–59 heavy atoms |
+|---|---|---|---|
+| 11,669 (the table above) | 0.05% | 0.09% | 0.00% |
+| 100,000 | 0.24% | 0.44% | 0.65% |
+| 300,000 | 0.64% | 1.20% | 2.50% |
+| **950,967 (the 1M shard)** | **1.40%** | **2.65%** | **6.13%** |
 
-Note that collisions make `recovery` *easier*, not harder — a fingerprint with
-many preimages has many ways to be right. Collisions only bound
-`structure_accuracy`.
+So on the corpus the models are actually trained and scored against, ambiguity
+is 30× what the 10k shard suggested, and it rises six-fold across the size
+distribution — 1.02% below 24 heavy atoms to 6.13% at 50–59, with one
+fingerprint in the shard shared by 39 distinct molecules. All of these are
+lower bounds for the decoder, which can propose any molecule and is not limited
+to preimages that happen to be in ChEMBL.
+
+What follows is the opposite of what was written here before:
+
+1. **Degeneracy is rare for small molecules and common for large ones**, which
+   is precisely the regime the project now cares about. `recovery@k` and
+   `structure_accuracy@k` do *not* track each other there: in the dumps, 12.8%
+   of recoveries at 35–39 heavy atoms and 13.9% at 40–49 are a different
+   molecule with the same fingerprint, against 1.1% below 24. Above 35 heavy
+   atoms both metrics have to be quoted, because they answer different
+   questions — "did the model invert this fingerprint" and "did it find the
+   molecule".
+2. **Whether count fingerprints add anything is open again.** The +0.0002 was
+   measured where binary ambiguity is itself 0.05%, so it could not have shown
+   a difference. `count_fp_100k` was then trained and read on the common
+   protocol, which is 63% molecules under 30 heavy atoms — the same mistake a
+   second time. See `docs/overnight-2026-10-16.md`.
+
+Collisions still make `recovery` *easier*, not harder — a fingerprint with many
+preimages has many ways to be right — so they do not explain the recovery
+cliff. What they bound is `structure_accuracy`, and what they undermine is the
+use of `recovery` alone as a description of what the model does to large
+molecules.
 
 ## Architecture
 
@@ -271,6 +297,14 @@ samplings at different temperatures, still within 20 oracle calls, reaches
 table stays at 1.0 so earlier nights remain comparable; `invert` and
 `Morg2Smiles.generate` default to 0.6.
 
+0.6 has since been pushed on and holds. Sweeping down to T=0.3 on a
+large-molecule tuning set, then verifying, gives at most +2 points above 35
+heavy atoms for 14% more sampling and nothing overall, and a size-conditional
+temperature — cold for fingerprints with many set bits, warm otherwise — is
+worth +0.10 ± 0.25 points over a flat 0.6. The reason is that cooling never
+*hurt* small molecules, so there was nothing to condition on. **T=0.6, top_p
+1.0, everywhere.**
+
 **How big a gap counts as a difference.** Three runs identical in everything but
 `train.seed` scored 0.6053, 0.6084 and 0.5941, so single-run `rec@20` carries an
 sd of about 0.75 points; and since every run here is scored on the *same* 1,956
@@ -281,6 +315,27 @@ below. Comparisons that share candidates — two ways of ranking one model's
 samples, say — cancel almost everything and are discriminable well below a
 point, so each gap is tested against its own discordance rather than against
 that single threshold.
+
+**That 1.6 points is a whole-protocol threshold and does not survive slicing.**
+The same three seeds, read inside size bands, give a between-seed sd of 0.23
+points below 29 heavy atoms and **2.99 points at 30–34**, where two runs
+differing only in `train.seed` are 5.63 points apart with p = 0.022. A gap read
+in a band has to be tested against that band's sd, which `scripts/arm_table.py`
+and `scripts/band_analysis.py` report. An error bar belongs to a comparison,
+not to a project, and the slice is part of the comparison.
+
+**What training can do about large molecules, so far.** Over-sampling molecules
+of 30+ heavy atoms threefold during training (`size_weight_threshold`,
+`size_weight_factor`) is the first training-side change here to move the size
+cliff, and it is a trade rather than a gain: measured on two seeds against three
+baseline seeds, `rec@20` goes **+4.60 points above 35 heavy atoms** and
+**−3.11 below 24**, −2.90 at 25–29, with every one of the six cross-arm pairs
+agreeing in both directions. In molecules that is 38.7 given up for 16.5 gained
+— about 2.3 small molecules per large one — which the common protocol reports
+as a flat −1.13, because 63% of its queries are under 30 heavy atoms. The
+common protocol stays the right table for capacity questions, where every band
+moves together, and it cannot describe an intervention that redistributes; see
+`docs/overnight-2026-10-16.md` for the large-molecule protocol it is read on.
 
 The one axis these rows isolate cleanly is **compute**: the first and last rows
 share an identical 90,682-molecule corpus and differ only in step budget.
