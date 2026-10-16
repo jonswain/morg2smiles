@@ -1,0 +1,138 @@
+{
+  "dump": "results/overnight5/outcomes_large_temps/t06.jsonl",
+  "k": 20,
+  "bands": {
+    "30-34": {
+      "n_queries": 1189,
+      "n_misses": 126,
+      "n_hits": 1063,
+      "miss": {
+        "mean_proposal": 32.16531084656085,
+        "mean_bias": 0.2446759259259258,
+        "mean_closest_bias": -0.047619047619047616
+      },
+      "hit": {
+        "mean_proposal": 33.317842605142225,
+        "mean_bias": 1.485293216619178,
+        "mean_closest_bias": 0.0009407337723424271
+      },
+      "right_size": {
+        "valid_per_query": 15.424726661059713,
+        "right_size_per_query": 3.9394449116904964,
+        "share_of_proposals": 0.2553980370774264,
+        "queries_with_any": 0.9840201850294366,
+        "match_rate_among_right_size": 0.25362937660119556
+      }
+    },
+    "35-39": {
+      "n_queries": 625,
+      "n_misses": 104,
+      "n_hits": 521,
+      "miss": {
+        "mean_proposal": 36.86201923076923,
+        "mean_bias": 0.3235576923076924,
+        "mean_closest_bias": -0.009615384615384616
+      },
+      "hit": {
+        "mean_proposal": 37.98890646132851,
+        "mean_bias": 1.4169294939580708,
+        "mean_closest_bias": -0.036468330134357005
+      },
+      "right_size": {
+        "valid_per_query": 17.9296,
+        "right_size_per_query": 4.2416,
+        "share_of_proposals": 0.23656969480635373,
+        "queries_with_any": 0.9744,
+        "match_rate_among_right_size": 0.22708411920030178
+      }
+    },
+    "40-49": {
+      "n_queries": 380,
+      "n_misses": 123,
+      "n_hits": 257,
+      "miss": {
+        "mean_proposal": 42.979268292682924,
+        "mean_bias": -0.923170731707317,
+        "mean_closest_bias": -0.1951219512195122
+      },
+      "hit": {
+        "mean_proposal": 43.436999704049406,
+        "mean_bias": 0.6510074861505694,
+        "mean_closest_bias": 0
+      },
+      "right_size": {
+        "valid_per_query": 19.25,
+        "right_size_per_query": 3.781578947368421,
+        "share_of_proposals": 0.19644565960355434,
+        "queries_with_any": 0.9210526315789473,
+        "match_rate_among_right_size": 0.20528879610299233
+      }
+    },
+    "50+": {
+      "n_queries": 127,
+      "n_misses": 83,
+      "n_hits": 44,
+      "miss": {
+        "mean_proposal": 52.44944540065022,
+        "mean_bias": -4.225253394530503,
+        "mean_closest_bias": -0.5662650602409639
+      },
+      "hit": {
+        "mean_proposal": 52.64643065268065,
+        "mean_bias": -1.853569347319347,
+        "mean_closest_bias": -0.25
+      },
+      "right_size": {
+        "valid_per_query": 19.677165354330707,
+        "right_size_per_query": 2.5354330708661417,
+        "share_of_proposals": 0.1288515406162465,
+        "queries_with_any": 0.7637795275590551,
+        "match_rate_among_right_size": 0.14596273291925466
+      }
+    },
+    "35+": {
+      "n_queries": 1132,
+      "n_misses": 310,
+      "n_hits": 822,
+      "miss": {
+        "mean_proposal": 43.462593445980545,
+        "mean_bias": -1.3890194572452637,
+        "mean_closest_bias": -0.23225806451612904
+      },
+      "hit": {
+        "mean_proposal": 40.476851750621414,
+        "mean_bias": 1.0023991958768856,
+        "mean_closest_bias": -0.0364963503649635
+      },
+      "right_size": {
+        "valid_per_query": 18.568904593639576,
+        "right_size_per_query": 3.895759717314488,
+        "share_of_proposals": 0.2098001902949572,
+        "queries_with_any": 0.9328621908127208,
+        "match_rate_among_right_size": 0.21405895691609977
+      }
+    },
+    "all": {
+      "n_queries": 2321,
+      "n_misses": 436,
+      "n_hits": 1885,
+      "miss": {
+        "mean_proposal": 40.19778241954274,
+        "mean_bias": -0.9168964795398282,
+        "mean_closest_bias": -0.17889908256880735
+      },
+      "hit": {
+        "mean_proposal": 36.439702296168164,
+        "mean_bias": 1.274715558767632,
+        "mean_closest_bias": -0.015384615384615385
+      },
+      "right_size": {
+        "valid_per_query": 16.958207669108145,
+        "right_size_per_query": 3.9181387333046103,
+        "share_of_proposals": 0.23104674796747968,
+        "queries_with_any": 0.959069366652305,
+        "match_rate_among_right_size": 0.23444029030129757
+      }
+    }
+  }
+}

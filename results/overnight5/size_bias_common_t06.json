@@ -1,0 +1,182 @@
+{
+  "dump": "results/overnight5/outcomes_common_temps/t06.jsonl",
+  "k": 20,
+  "bands": {
+    "0-24": {
+      "n_queries": 712,
+      "n_misses": 30,
+      "n_hits": 682,
+      "miss": {
+        "mean_proposal": 23.878333333333334,
+        "mean_bias": 1.6116666666666666,
+        "mean_closest_bias": -0.03333333333333333
+      },
+      "hit": {
+        "mean_proposal": 21.134823386332446,
+        "mean_bias": 1.1436210402913916,
+        "mean_closest_bias": 0
+      },
+      "right_size": {
+        "valid_per_query": 9.589887640449438,
+        "right_size_per_query": 2.946629213483146,
+        "share_of_proposals": 0.30726420620972467,
+        "queries_with_any": 0.9915730337078652,
+        "match_rate_among_right_size": 0.33031458531935176
+      }
+    },
+    "25-29": {
+      "n_queries": 512,
+      "n_misses": 19,
+      "n_hits": 493,
+      "miss": {
+        "mean_proposal": 26.45263157894737,
+        "mean_bias": -0.6000000000000003,
+        "mean_closest_bias": -0.3157894736842105
+      },
+      "hit": {
+        "mean_proposal": 28.22264880583328,
+        "mean_bias": 1.3342106719590408,
+        "mean_closest_bias": 0.010141987829614604
+      },
+      "right_size": {
+        "valid_per_query": 11.99609375,
+        "right_size_per_query": 3.52734375,
+        "share_of_proposals": 0.29404102898078804,
+        "queries_with_any": 0.98828125,
+        "match_rate_among_right_size": 0.27906976744186046
+      }
+    },
+    "30-34": {
+      "n_queries": 373,
+      "n_misses": 37,
+      "n_hits": 336,
+      "miss": {
+        "mean_proposal": 32.36081081081081,
+        "mean_bias": 0.1986486486486486,
+        "mean_closest_bias": -0.21621621621621623
+      },
+      "hit": {
+        "mean_proposal": 33.099956384771936,
+        "mean_bias": 1.335075432390987,
+        "mean_closest_bias": -0.002976190476190476
+      },
+      "right_size": {
+        "valid_per_query": 15.123324396782841,
+        "right_size_per_query": 3.9249329758713136,
+        "share_of_proposals": 0.25952845240205635,
+        "queries_with_any": 0.9731903485254692,
+        "match_rate_among_right_size": 0.24795081967213115
+      }
+    },
+    "35-39": {
+      "n_queries": 195,
+      "n_misses": 25,
+      "n_hits": 170,
+      "miss": {
+        "mean_proposal": 36.188,
+        "mean_bias": -0.8919999999999996,
+        "mean_closest_bias": -0.44
+      },
+      "hit": {
+        "mean_proposal": 37.919573330840635,
+        "mean_bias": 1.307808624958279,
+        "mean_closest_bias": 0
+      },
+      "right_size": {
+        "valid_per_query": 17.54871794871795,
+        "right_size_per_query": 4.4512820512820515,
+        "share_of_proposals": 0.2536528345996493,
+        "queries_with_any": 0.9794871794871794,
+        "match_rate_among_right_size": 0.23271889400921658
+      }
+    },
+    "40-49": {
+      "n_queries": 123,
+      "n_misses": 37,
+      "n_hits": 86,
+      "miss": {
+        "mean_proposal": 42.962162162162166,
+        "mean_bias": -0.6864864864864865,
+        "mean_closest_bias": -0.35135135135135137
+      },
+      "hit": {
+        "mean_proposal": 43.3546852268039,
+        "mean_bias": 0.6802666221527371,
+        "mean_closest_bias": 0
+      },
+      "right_size": {
+        "valid_per_query": 19.308943089430894,
+        "right_size_per_query": 3.861788617886179,
+        "share_of_proposals": 0.2,
+        "queries_with_any": 0.9186991869918699,
+        "match_rate_among_right_size": 0.2231578947368421
+      }
+    },
+    "50+": {
+      "n_queries": 41,
+      "n_misses": 22,
+      "n_hits": 19,
+      "miss": {
+        "mean_proposal": 52.09125874125874,
+        "mean_bias": -5.09055944055944,
+        "mean_closest_bias": -0.4090909090909091
+      },
+      "hit": {
+        "mean_proposal": 51.06954887218045,
+        "mean_bias": -3.2988721804511285,
+        "mean_closest_bias": -0.42105263157894735
+      },
+      "right_size": {
+        "valid_per_query": 19.48780487804878,
+        "right_size_per_query": 2.2439024390243905,
+        "share_of_proposals": 0.1151439299123905,
+        "queries_with_any": 0.6585365853658537,
+        "match_rate_among_right_size": 0.2391304347826087
+      }
+    },
+    "35+": {
+      "n_queries": 359,
+      "n_misses": 84,
+      "n_hits": 275,
+      "miss": {
+        "mean_proposal": 43.336996336996336,
+        "mean_bias": -1.9010989010989008,
+        "mean_closest_bias": -0.39285714285714285
+      },
+      "hit": {
+        "mean_proposal": 40.52782481570717,
+        "mean_bias": 0.793279361161714,
+        "mean_closest_bias": -0.02909090909090909
+      },
+      "right_size": {
+        "valid_per_query": 18.37325905292479,
+        "right_size_per_query": 3.997214484679666,
+        "share_of_proposals": 0.21755609460278957,
+        "queries_with_any": 0.9220055710306406,
+        "match_rate_among_right_size": 0.22996515679442509
+      }
+    },
+    "all": {
+      "n_queries": 1956,
+      "n_misses": 170,
+      "n_hits": 1786,
+      "miss": {
+        "mean_proposal": 35.62710407239819,
+        "mean_bias": -0.6787782805429864,
+        "mean_closest_bias": -0.2823529411764706
+      },
+      "hit": {
+        "mean_proposal": 28.32836090725497,
+        "mean_bias": 1.1783049162135382,
+        "mean_closest_bias": -0.0022396416573348264
+      },
+      "right_size": {
+        "valid_per_query": 12.887014314928425,
+        "right_size_per_query": 3.4780163599182004,
+        "share_of_proposals": 0.269885349307732,
+        "queries_with_any": 0.9744376278118609,
+        "match_rate_among_right_size": 0.2778186094370131
+      }
+    }
+  }
+}
