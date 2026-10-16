@@ -1102,3 +1102,87 @@ being broken first:
   part company above 35 atoms, where one recovery in eight is a different
   preimage, and tonight both working interventions turned out to be *understated*
   by the metric the project reports.
+
+---
+
+## The cliff factorises, and the two interventions act on different factors
+
+*(Written 08:20–08:30, while stage 10's third arm was still generating. The
+revised prediction at the end of this section was committed before any stage 10
+number existed.)*
+
+The cloud account has been treated as one thing. It is two, and separating them
+turns out to matter. `scripts/size_bias.py` (new, dumps only) asks first
+whether the decoder proposes molecules of the right *size*, and then, among the
+proposals that are the right size, how often one is an exact preimage.
+
+The first half is a defect with a direction. For `variance_s1` on the large
+protocol, mean proposal size minus target size, over the queries it missed:
+
+| band | target size | mean proposal | bias | nearest-sized proposal |
+|---|---|---|---|---|
+| 30–34 | 32.1 | 30.5 | −1.5 | −0.0 |
+| 35–39 | 36.6 | 34.0 | −2.6 | −0.1 |
+| 40–49 | 43.4 | 38.3 | −5.0 | −0.3 |
+| 50+ | 56.0 | 45.3 | **−10.7** | −2.0 |
+
+**The decoder truncates, and the shortfall grows with the molecule.** Above 50
+heavy atoms it offers 45-atom molecules for 56-atom fingerprints. It is a skew
+rather than a shift — the best-sized of the twenty proposals is nearly right at
+every size — but the mass is in the wrong place, and the information to do
+better is in the input, since set-bit count predicts heavy atoms at r = 0.83.
+
+The second half is what is left after size:
+
+| band | right-sized proposals per query | any right-sized | exact preimage, given right size |
+|---|---|---|---|
+| 30–34 | 3.7 | 91.3% | 14.9% |
+| 35–39 | 2.6 | 85.1% | 11.7% |
+| 40–49 | 1.3 | 65.3% | 9.1% |
+| 50+ | 0.5 | **37.8%** | **0.0%** |
+
+Both halves collapse, and their product is the cliff: 3.7 × 14.9% = 0.55
+expected preimages per query at 30–34 against a measured recovery of 0.449,
+2.6 × 11.7% = 0.30 against 0.238, 1.3 × 9.1% = 0.12 against 0.095, and zero
+against zero above 50 atoms. (The 0.0% rests on about 64 right-sized proposals
+in that band, so read it as "no hits yet" rather than as a rate.) The
+counterfactual is worth stating even though it is optimistic: if the size skew
+were fixed so that all twenty proposals were the right size and the match rate
+held, recovery would be 1 − (1 − p)²⁰ — 0.92 at 35–39 and 0.85 at 40–49. It
+would not hold, because the right-sized proposals the model makes now are the
+ones it is most confident about. But the factor that is missing is large.
+
+### The two interventions pull different levers
+
+Comparing like with like — the mix against the baseline at T=1.0 on the same
+100k recipe, and one checkpoint of `small_1m` at T=1.0 against T=0.6 on the
+common protocol:
+
+| at 50+ atoms | truncation | any right-sized | preimage given right size |
+|---|---|---|---|
+| baseline, T=1.0 | −10.7 | 37.8% | 14.9% at 30–34 |
+| **+ size mix ×6** | **−8.9** | **48.8%** | 14.5% at 30–34 |
+| `small_1m`, T=1.0 | −6.6 | 65.9% | 19.7% |
+| **+ cooling to T=0.6** | −5.1 | 65.9% | **23.9%** |
+
+**The training mix buys right-sized proposals and does not improve the match
+rate among them; cooling improves the match rate and barely touches the size.**
+Across bands the mix moves "any right-sized" by +11.0 points at 50+ and leaves
+the conditional match rate flat to a tenth of a point (14.9 → 14.5 at 30–34,
+11.7 → 11.5 at 35–39, 9.1 → 8.6 at 40–49), while cooling lifts that same
+conditional rate in every band (20.5 → 23.3 at 35–39, 21.5 → 22.3 at 40–49,
+19.7 → 23.9 at 50+) with "any right-sized" unchanged at 65.9%.
+
+### The stage 10 prediction, revised and re-registered
+
+The prediction written at 05:30 was that the mix and the cooled decoder would
+**compete**, because both "narrow the cloud", and that the mix's +2.75 at 35+
+should therefore fall below +1.5 when both are applied. The factorisation says
+that was wrong about the mechanism: they are not two ways of doing one thing,
+they are the two factors of a product. If so they should stack approximately
+multiplicatively, and the mix's advantage should survive cooling.
+
+Registered, before any stage 10 number exists: **the mix's 35+ recovery gap at
+T=0.6 is at least +2.0 points**, against the earlier prediction of under +1.5.
+If it comes in below +1.5 the factorisation is wrong about their independence,
+and the first prediction was right for the wrong reason.
