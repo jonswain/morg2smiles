@@ -216,11 +216,13 @@ molecules roughly 0.65 Tanimoto from the target, and recovery asks whether that
 cloud happens to contain an exact preimage — which is exponentially less likely
 the bigger the molecule. Two independent predictions of that account have held:
 
-- **Both interventions that work above 35 atoms work by tightening the cloud.**
-  Cooling the decoder and over-sampling large molecules in training both move
-  the best-Tanimoto-on-a-miss, and neither does anything that aims the cloud
-  better without tightening it. Nothing that only improves ranking has moved
-  the cliff.
+- **Both interventions that work above 35 atoms work by tightening the cloud**,
+  and specifically by putting more right-sized molecules in the budget: 1.93
+  per query at 35+ heavy atoms, 2.56 with both applied, out of 20. Nothing that
+  only improves ranking has moved the cliff, and the decoder's own size defect
+  is the clearest single target left — it offers 45-atom molecules for 56-atom
+  fingerprints, and only 38% of queries above 50 atoms get even one right-sized
+  candidate out of twenty.
 - **The same tightening buys less recovery as molecules grow.** Recovery points
   per point of Tanimoto run 2.2–2.8 at 40–49 heavy atoms and 0.4–0.9 above 50,
   where the stronger training mix bought the largest cloud gain of any band
@@ -392,10 +394,14 @@ moves together, and it cannot describe an intervention that redistributes; see
 rather than at T=1.0, the threshold-30 mix is worth **+3.28 points above 35
 heavy atoms** (3.1 SE, 6/6 pairs; +3.56 on structure accuracy) and +2.69 across
 the whole large protocol, against +2.75 and +1.58 measured hot. Band by band
-the two interventions are additive to within noise or better, which is what the
-size factorisation above predicts of two independent factors — the mix supplies
-right-sized proposals, cooling makes a right-sized proposal likelier to be the
-molecule. What the cooled decoder does to the *cost* side is not yet measured.
+the two interventions are additive to within noise or better, and the reason is
+visible in the 2×2 of {baseline, mix} × {hot, cold} on identical checkpoints:
+both raise the number of right-sized molecules in the 20-candidate budget —
+1.93 per query, then 2.15 with the mix, 2.44 with cooling, 2.56 with both —
+while the chance that a right-sized candidate is the preimage stays between
+10.2% and 11.2% in all four cells. A constant conversion rate makes recovery
+linear in that count, so two interventions that each multiply it compose. What
+the cooled decoder does to the *cost* side is not yet measured.
 
 **And the exposure is already spent.** A second mix pushed harder and higher —
 threshold 35, factor 6, so 58.9% of the training diet comes from 35+ atoms
