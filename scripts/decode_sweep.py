@@ -24,12 +24,18 @@ import random
 from pathlib import Path
 
 import click
+from rdkit import Chem
 
 from morg2smiles.data.dataset import _fp_key, load_split
 from morg2smiles.evaluation import generate_outcomes
 from morg2smiles.fingerprints import compute
 from morg2smiles.metrics import evaluate
 from morg2smiles.model import Morg2SmilesModel, select_device
+
+
+def _heavy_atoms(smiles: str) -> int:
+    mol = Chem.MolFromSmiles(smiles)
+    return mol.GetNumHeavyAtoms() if mol is not None else 0
 
 
 @click.command()
@@ -48,6 +54,19 @@ from morg2smiles.model import Morg2SmilesModel, select_device
 )
 @click.option("--seed", default=7, help="Seed for the tuning draw and for sampling.")
 @click.option(
+    "--min-heavy-atoms",
+    type=int,
+    default=None,
+    help=(
+        "Tune on molecules this large only. The decoder's temperature does "
+        "nothing below 30 heavy atoms (0.9579 against 0.9537 at k=20, p=0.61) "
+        "and everything above 35 (+7.5 points), so a sweep over a random draw "
+        "spends nine tenths of its queries where the answer is flat and "
+        "averages the signal away."
+    ),
+)
+@click.option("--max-heavy-atoms", type=int, default=None)
+@click.option(
     "--out", type=click.Path(path_type=Path), default=Path("results/overnight4/decode_sweep.json")
 )
 def main(
@@ -61,6 +80,8 @@ def main(
     protocol_seed,
     protocol_n,
     seed,
+    min_heavy_atoms,
+    max_heavy_atoms,
     out,
 ):
     device = select_device()
@@ -83,8 +104,21 @@ def main(
         f"tuning from the remaining {len(tuning_pool):,}"
     )
 
+    if min_heavy_atoms is not None or max_heavy_atoms is not None:
+        lo = min_heavy_atoms if min_heavy_atoms is not None else 0
+        hi = max_heavy_atoms if max_heavy_atoms is not None else 10**9
+        before = len(tuning_pool)
+        tuning_pool = [s for s in tuning_pool if lo <= _heavy_atoms(s) <= hi]
+        click.echo(
+            f"size-restricted tuning pool: {len(tuning_pool):,} of {before:,} have "
+            f"{lo}-{hi} heavy atoms"
+        )
+
     rng = random.Random(seed)
-    smiles = [tuning_pool[i] for i in sorted(rng.sample(range(len(tuning_pool)), n_queries))]
+    smiles = [
+        tuning_pool[i]
+        for i in sorted(rng.sample(range(len(tuning_pool)), min(n_queries, len(tuning_pool))))
+    ]
 
     click.echo(f"indexing {len(train_molecules):,} training fingerprints ...")
     train_keys = {_fp_key(compute(s, fp_cfg)) for s in train_molecules}
@@ -98,6 +132,8 @@ def main(
         "k": k,
         "tuning_seed": seed,
         "disjoint_from_protocol": {"seed": protocol_seed, "n": protocol_n},
+        "min_heavy_atoms": min_heavy_atoms,
+        "max_heavy_atoms": max_heavy_atoms,
         "grid": {},
     }
     header = (
