@@ -581,3 +581,51 @@ than from runs actually given budget k. Oversampling means a run with k=5 would
 draw fewer samples and land in a different place; these numbers assume the
 prefix of a 20-slot list behaves like a 5-slot run, which is right for
 generation order and not exactly right for anything else.
+
+### What counts actually buy, and what stage 11 can therefore show
+
+The same scan with `--counts` answers the README's "+0.0002" properly, on
+950,967 molecules instead of 11,669:
+
+| band | binary | counts | reduction |
+|---|---|---|---|
+| 0–24 | 1.02% | 0.16% | 6.4× |
+| 25–29 | 1.11% | 0.20% | 5.5× |
+| 30–34 | 1.25% | 0.26% | 4.8× |
+| 35–39 | 1.63% | 0.28% | 5.8× |
+| 40–49 | 2.97% | 0.55% | 5.4× |
+| 50–59 | 6.13% | 1.11% | 5.5× |
+| 60+ | 5.94% | 1.03% | 5.8× |
+| all | 1.40% | 0.25% | 5.6× |
+| largest group | 39 molecules | 5 molecules | |
+
+**Counts carry real information that binary bits throw away** — 5.6× less
+ambiguity, uniformly — which is a very different statement from +0.0002. The
+reduction *factor* is flat across the size distribution, so counts are not
+specifically a large-molecule fix; the absolute gain is largest there only
+because there is more ambiguity to remove (5.0 points at 50–59 against 0.86
+below 24). Counts take a 50-atom molecule back to roughly the ambiguity a
+20-atom molecule has under binary bits.
+
+**This revises what stage 11 should be expected to show, so it is recorded
+before the run.** Ambiguity is not what makes the cliff: at 35–39 heavy atoms
+binary ambiguity is 1.63% while 76% of queries fail, and collisions make
+`recovery` *easier* rather than harder. So the mechanism by which counts could
+help is the **input** side — the encoder gets a multiplicity per bit, and it is
+inverting a less lossy description of the molecule — not collision relief. Two
+predictions follow, and they point opposite ways:
+
+* On **`recovery`**, counts should be neutral or slightly *worse*, mechanically,
+  on two counts: the oracle demands an exact count match, which is a strictly
+  harder target, and 5.6× fewer collisions means 5.6× fewer lucky hits on a
+  different preimage. Night 3's exact parity (0.5890 against 0.5890) is, read
+  this way, already a win for counts that was scored as a null.
+* On **`structure_accuracy` relative to `recovery`** — the collision rate among
+  hits — counts should show a clear drop, because that quantity is what the
+  ambiguity table directly governs. This is the reading the harder oracle does
+  not confound, and it is the one worth looking at first.
+
+If counts also lift recovery above 35 heavy atoms, that is the input-side
+bottleneck showing up where it was always most likely to be visible, and it
+costs a config flag. If they do not, the input is not the constraint and the
+project can stop asking.

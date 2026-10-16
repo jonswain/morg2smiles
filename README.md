@@ -185,11 +185,16 @@ What follows is the opposite of what was written here before:
    atoms both metrics have to be quoted, because they answer different
    questions — "did the model invert this fingerprint" and "did it find the
    molecule".
-2. **Whether count fingerprints add anything is open again.** The +0.0002 was
-   measured where binary ambiguity is itself 0.05%, so it could not have shown
-   a difference. `count_fp_100k` was then trained and read on the common
-   protocol, which is 63% molecules under 30 heavy atoms — the same mistake a
-   second time. See `docs/overnight-2026-10-16.md`.
+2. **Count fingerprints do carry real information**, and the +0.0002 was an
+   artefact of the same 11,669 molecules. On the 1M shard, counts cut ambiguity
+   **5.6×** — 1.40% to 0.25% overall, 6.13% to 1.11% at 50–59 heavy atoms, and
+   the largest group of molecules sharing a fingerprint from 39 to 5. The
+   reduction factor is flat in size, so counts are not specifically a
+   large-molecule fix; they take a 50-atom molecule back to roughly the
+   ambiguity a 20-atom molecule has under binary bits. Whether that reaches
+   recovery is a separate question: `count_fp_100k` was trained and read on the
+   common protocol, which is 63% molecules under 30 heavy atoms — the same
+   mistake a second time. See `docs/overnight-2026-10-16.md`.
 
 Collisions still make `recovery` *easier*, not harder — a fingerprint with many
 preimages has many ways to be right — so they do not explain the recovery

@@ -1,0 +1,78 @@
+{
+  "shard": "data/shards/1m",
+  "splits": "train,valid",
+  "fingerprint": {
+    "radius": 2,
+    "n_bits": 2048,
+    "counts": true,
+    "folded": true
+  },
+  "n_input_smiles": 950967,
+  "n_distinct_molecules": 950967,
+  "n_distinct_fingerprints": 949758,
+  "bands": {
+    "0-24": {
+      "molecules": 334112,
+      "ambiguous": 528,
+      "ambiguous_rate": 0.0015803083995785845,
+      "mean_group_size": 1.0017060147495451,
+      "max_group_size": 5
+    },
+    "25-29": {
+      "molecules": 248002,
+      "ambiguous": 498,
+      "ambiguous_rate": 0.0020080483221909503,
+      "mean_group_size": 1.0021048217353086,
+      "max_group_size": 5
+    },
+    "30-34": {
+      "molecules": 186942,
+      "ambiguous": 480,
+      "ambiguous_rate": 0.0025676413005103187,
+      "mean_group_size": 1.0026639278492795,
+      "max_group_size": 3
+    },
+    "35-39": {
+      "molecules": 96549,
+      "ambiguous": 273,
+      "ambiguous_rate": 0.0028275797781437406,
+      "mean_group_size": 1.0029829413044153,
+      "max_group_size": 3
+    },
+    "40-49": {
+      "molecules": 62456,
+      "ambiguous": 343,
+      "ambiguous_rate": 0.0054918662738567955,
+      "mean_group_size": 1.0059561931599845,
+      "max_group_size": 4
+    },
+    "50-59": {
+      "molecules": 17670,
+      "ambiguous": 196,
+      "ambiguous_rate": 0.011092246745897,
+      "mean_group_size": 1.0125636672325977,
+      "max_group_size": 4
+    },
+    "60+": {
+      "molecules": 5236,
+      "ambiguous": 54,
+      "ambiguous_rate": 0.010313216195569137,
+      "mean_group_size": 1.0114591291061878,
+      "max_group_size": 3
+    },
+    "35+": {
+      "molecules": 181911,
+      "ambiguous": 866,
+      "ambiguous_rate": 0.004760569729153267,
+      "mean_group_size": 1.0051783564490329,
+      "max_group_size": 4
+    },
+    "all": {
+      "molecules": 950967,
+      "ambiguous": 2372,
+      "ambiguous_rate": 0.002494303167197179,
+      "mean_group_size": 1.002662552959251,
+      "max_group_size": 5
+    }
+  }
+}

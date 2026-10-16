@@ -80,6 +80,7 @@ dist/
 !/results/overnight5/miss_anatomy_large_variance_s1.json
 !/results/overnight5/miss_anatomy_large_size_mix_s1.json
 !/results/overnight5/fingerprint_ambiguity.json
+!/results/overnight5/fingerprint_ambiguity_counts.json
 !/results/overnight5/arm_large_mix.json
 !/results/overnight5/arm_large_t06.json
 !/results/overnight5/band_large_t06.json
