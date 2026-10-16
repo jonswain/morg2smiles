@@ -1639,6 +1639,17 @@ The route out is not more samples from this conditional; it is changing which
 molecules the conditional can reach at all — which is item 2, capacity, and
 tonight has just made it the only item left.
 
+This also joins the night's two loose ends into one statement. The ensemble
+result said that of one seed's misses above 50 atoms, 1.6% are recovered by
+either of two other seeds, and 96.9% of that band is missed by all three
+against the 95.3% chance alone would give. The concentration result says each
+seed's successes pile up on a minority of queries. Put together: the reachable
+set is not just small, it is **the same** small set for every seed, and a
+differently initialised copy of the model reaches the same fingerprints. That
+is one mechanism accounting for both measurements, and it is the reason neither
+more samples nor more models is a route — both of them draw again from a
+conditional whose reachable set is fixed by the architecture and the data.
+
 A caveat the numbers themselves demand: a power law with no visible floor and a
 population with unreachable members are in tension, since the second implies an
 asymptote below 1 and the first denies one. k ≤ 60 cannot separate them. The
