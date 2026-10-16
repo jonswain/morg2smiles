@@ -191,10 +191,21 @@ What follows is the opposite of what was written here before:
    the largest group of molecules sharing a fingerprint from 39 to 5. The
    reduction factor is flat in size, so counts are not specifically a
    large-molecule fix; they take a 50-atom molecule back to roughly the
-   ambiguity a 20-atom molecule has under binary bits. Whether that reaches
-   recovery is a separate question: `count_fp_100k` was trained and read on the
-   common protocol, which is 63% molecules under 30 heavy atoms — the same
-   mistake a second time. See `docs/overnight-2026-10-16.md`.
+   ambiguity a 20-atom molecule has under binary bits.
+
+   **It does not reach recovery.** Re-scored on the large-molecule protocol —
+   the common protocol's p = 0.32 null having been read on 63% small molecules
+   — `count_fp_100k` is **4.18 points worse** than its binary twin over 2,321
+   queries above 30 heavy atoms (3.7 SE against the three same-recipe seeds),
+   −6.81 at 30–34, and −1.41 at 35+, which is nothing either way. The null was
+   hiding a loss, not a gain. What counts do deliver is precision in what
+   recovery means: a quarter fewer of their recoveries are a different molecule
+   with the same fingerprint (13.3% → 9.6% at 35+), and their proposals land
+   closer to the target when they fail (0.651 → 0.681, against a between-seed
+   sd of 0.0018). Ambiguity was never what made the size cliff — 1.63% of
+   molecules at 35–39 share a fingerprint against 75% of queries failing there
+   — so the question is closed again, for a better reason than p = 0.32. See
+   `docs/overnight-2026-10-16.md`.
 
 Collisions still make `recovery` *easier*, not harder — a fingerprint with many
 preimages has many ways to be right — so they do not explain the recovery
