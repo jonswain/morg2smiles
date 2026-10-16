@@ -61,3 +61,4 @@ dist/
 !/results/overnight5/band_seed_sd.json
 !/results/overnight5/band_temperatures.json
 !/results/overnight5/driver.log
+!/results/overnight5/size_from_fingerprint.json
