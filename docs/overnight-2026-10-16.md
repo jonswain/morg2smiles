@@ -542,3 +542,42 @@ pin a large molecule harder, and the checkpoint already exists, so stage 11
 re-reads it on the large protocol — for recovery by band, and for the collision
 rate among its hits, which is the reading the harder count-match oracle does
 not confound.
+
+### What the budget is worth, per band
+
+A full budget is not a saturated budget, and the same ranks answer that too.
+`rec@k` per band, `variance_s1`, bands to 29 atoms from the common protocol and
+30+ from the large one:
+
+| band | queries | @1 | @2 | @5 | @10 | @20 | × per doubling (10→20) | hits in slots 11–20 |
+|---|---|---|---|---|---|---|---|---|
+| 0–24 | 712 | 0.2935 | 0.4129 | 0.5730 | 0.6770 | 0.7711 | 1.14 | 12.2% |
+| 25–29 | 512 | 0.1973 | 0.2734 | 0.4277 | 0.5332 | 0.6445 | 1.21 | 17.3% |
+| 30–34 | 1,189 | 0.1001 | 0.1564 | 0.2700 | 0.3524 | 0.4491 | 1.27 | 21.5% |
+| 35–39 | 625 | 0.0288 | 0.0528 | 0.1056 | 0.1696 | 0.2384 | **1.41** | 28.9% |
+| 40–49 | 380 | 0.0079 | 0.0105 | 0.0289 | 0.0658 | 0.0947 | **1.44** | 30.6% |
+| 50–59 | 95 | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 0.0000 | — | — |
+
+**The return on budget rises monotonically with size**, 1.14× per doubling below
+24 heavy atoms to 1.44× at 40–49, and nearly a third of large-molecule hits are
+found in the second half of the budget against an eighth of small-molecule
+hits. That is the combinatorial account's prediction and it holds across five
+bands. It needed the large protocol to see: on the common protocol's 123
+queries at 40–49 the same quantity reads 1.22 and breaks the monotonicity, a
+reminder that this protocol's thin tail has been producing noise all along.
+
+It also prices the obvious route, and the price is bad. At 1.41× per doubling,
+lifting 35+ recovery from 0.163 to 0.50 takes 3.3 doublings — **k ≈ 200**, ten
+times the current budget — and that is a *lower* bound, because each doubling's
+return decays (at 35–39 the ladder gives 1.83× from 5→10 and 1.41× from 10→20).
+So "just sample more" is worth about a factor of ten in compute for perhaps
+half the gap, and nothing at all above 50 heavy atoms, where recovery is 0.0000
+at every k from 1 to 20 and no rate exists to extrapolate. The budget is the
+cheapest knob in the project and it is not the answer.
+
+The honest caveat on this section: it is one checkpoint's ranks, and `rec@k` at
+k < 20 is read off a candidate list generated under a 20-molecule budget rather
+than from runs actually given budget k. Oversampling means a run with k=5 would
+draw fewer samples and land in a different place; these numbers assume the
+prefix of a 20-slot list behaves like a 5-slot run, which is right for
+generation order and not exactly right for anything else.

@@ -10,7 +10,14 @@
       "mean_best_tanimoto_among_misses": 0.7032923631196678,
       "fraction_of_misses_above_0.9_tanimoto": 0.08702290076335878,
       "budget_filled_rate": 1.0,
-      "mean_fp_hit_rank": 6.134831460674158
+      "mean_fp_hit_rank": 6.134831460674158,
+      "recovery_at_k": {
+        "1": 0.10008410428931876,
+        "2": 0.1564339781328848,
+        "5": 0.26997476871320436,
+        "10": 0.3523969722455845,
+        "20": 0.44911690496215306
+      }
     },
     "35-39": {
       "n_queries": 625,
@@ -20,7 +27,14 @@
       "mean_best_tanimoto_among_misses": 0.6913207465863568,
       "fraction_of_misses_above_0.9_tanimoto": 0.08403361344537816,
       "budget_filled_rate": 1.0,
-      "mean_fp_hit_rank": 7.738255033557047
+      "mean_fp_hit_rank": 7.738255033557047,
+      "recovery_at_k": {
+        "1": 0.0288,
+        "2": 0.0528,
+        "5": 0.1056,
+        "10": 0.1696,
+        "20": 0.2384
+      }
     },
     "40-49": {
       "n_queries": 380,
@@ -30,7 +44,14 @@
       "mean_best_tanimoto_among_misses": 0.6446397009218173,
       "fraction_of_misses_above_0.9_tanimoto": 0.06976744186046512,
       "budget_filled_rate": 1.0,
-      "mean_fp_hit_rank": 8.416666666666666
+      "mean_fp_hit_rank": 8.416666666666666,
+      "recovery_at_k": {
+        "1": 0.007894736842105263,
+        "2": 0.010526315789473684,
+        "5": 0.02894736842105263,
+        "10": 0.06578947368421052,
+        "20": 0.09473684210526316
+      }
     },
     "50-59": {
       "n_queries": 95,
@@ -40,7 +61,14 @@
       "mean_best_tanimoto_among_misses": 0.5735808662408545,
       "fraction_of_misses_above_0.9_tanimoto": 0.031578947368421054,
       "budget_filled_rate": 1.0,
-      "mean_fp_hit_rank": NaN
+      "mean_fp_hit_rank": NaN,
+      "recovery_at_k": {
+        "1": 0.0,
+        "2": 0.0,
+        "5": 0.0,
+        "10": 0.0,
+        "20": 0.0
+      }
     },
     "60+": {
       "n_queries": 32,
@@ -50,7 +78,14 @@
       "mean_best_tanimoto_among_misses": 0.527452722183313,
       "fraction_of_misses_above_0.9_tanimoto": 0.0,
       "budget_filled_rate": 1.0,
-      "mean_fp_hit_rank": NaN
+      "mean_fp_hit_rank": NaN,
+      "recovery_at_k": {
+        "1": 0.0,
+        "2": 0.0,
+        "5": 0.0,
+        "10": 0.0,
+        "20": 0.0
+      }
     },
     "35+": {
       "n_queries": 1132,
@@ -60,7 +95,14 @@
       "mean_best_tanimoto_among_misses": 0.6570152079144226,
       "fraction_of_misses_above_0.9_tanimoto": 0.07074973600844774,
       "budget_filled_rate": 1.0,
-      "mean_fp_hit_rank": 7.870270270270271
+      "mean_fp_hit_rank": 7.870270270270271,
+      "recovery_at_k": {
+        "1": 0.018551236749116608,
+        "2": 0.03268551236749117,
+        "5": 0.06802120141342756,
+        "10": 0.1157243816254417,
+        "20": 0.16342756183745583
+      }
     },
     "all": {
       "n_queries": 2321,
@@ -70,7 +112,14 @@
       "mean_best_tanimoto_among_misses": 0.6759362670027095,
       "fraction_of_misses_above_0.9_tanimoto": 0.07740324594257178,
       "budget_filled_rate": 1.0,
-      "mean_fp_hit_rank": 6.581363004172462
+      "mean_fp_hit_rank": 6.581363004172462,
+      "recovery_at_k": {
+        "1": 0.06031882809133994,
+        "2": 0.09607927617406291,
+        "5": 0.17147781128823783,
+        "10": 0.23696682464454977,
+        "20": 0.3097802671262387
+      }
     }
   }
 }

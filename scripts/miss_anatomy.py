@@ -22,6 +22,12 @@ distinct proposals. On the large protocol this is nearly never the reason --
 99.4% of queries fill their budget -- which is worth stating, because "it ran
 out of guesses" is the intuitive explanation and it is wrong.
 
+A full budget is not a saturated one, though, so the second table reports
+recovery against k per band. If recovery is still climbing at k=20 for large
+molecules and flat for small ones, then large molecules are limited by how many
+guesses they get rather than by how good the guesses are, and the budget is the
+cheapest thing in the project to increase.
+
 **Ranking.** For recovered queries, where in the 20 the match sits. If hits
 cluster late, the budget is doing the work and a smaller k would lose them.
 """
@@ -110,11 +116,37 @@ def main(dump: Path, bands: str, k: int, unseen_only: bool, out: Path | None) ->
             "mean_fp_hit_rank": rank,
         }
 
+    # Second table: the shape of recovery against budget, per band. Derived
+    # from the same ranks, so it costs nothing.
+    ladder = [1, 2, 5, 10, 20]
+    ladder = [j for j in ladder if j <= k]
+    header2 = f"{'band':>8}{'n':>7}" + "".join(f"{'@' + str(j):>9}" for j in ladder)
+    header2 += f"{'last half':>11}{'k=10->20':>10}"
+    click.echo("\n" + header2)
+    click.echo("-" * len(header2))
+    for name, lo, hi in specs:
+        band = [q for q in queries if lo <= q["size"] <= hi]
+        if not band:
+            continue
+        n = len(band)
+        curve = {
+            j: sum(q["fp_rank"] is not None and q["fp_rank"] <= j for q in band) / n for j in ladder
+        }
+        row = f"{name:>8}{n:>7,}" + "".join(f"{curve[j]:>9.4f}" for j in ladder)
+        if 20 in curve and 10 in curve:
+            # Of the hits a budget of 20 buys, the share that needed slots 11-20,
+            # and the points the second half of the budget added.
+            share = (curve[20] - curve[10]) / curve[20] if curve[20] else float("nan")
+            row += f"{share:>11.3f}{100 * (curve[20] - curve[10]):>+10.2f}"
+        click.echo(row)
+        table[name]["recovery_at_k"] = curve
+
     click.echo(
         "\nrec/struct: fraction of queries with a fingerprint / exact-structure match in k."
         "\ncollide: of recovered queries, the fraction recovered by a *different* molecule"
         "\n         with the same fingerprint -- the irreducible part of the task."
         "\nmiss tan: mean best Tanimoto on queries never matched; >=0.9 its tail."
+        "\nlast half: of the hits k=20 buys, the share found in slots 11-20."
     )
     if out is not None:
         out.parent.mkdir(parents=True, exist_ok=True)
