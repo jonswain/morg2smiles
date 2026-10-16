@@ -252,7 +252,18 @@ less per doubling. Inverting the fits (`scripts/budget_curve.py`):
 | 50+ | 1.0 × 10⁷ | 1.2 × 10⁹ |
 
 So k=128 is a few seconds per fingerprint and takes 35–39 to 0.90; above 50
-atoms the route is arithmetic rather than engineering. Independence is ruled
+atoms the route is arithmetic rather than engineering.
+
+**The exponent is the one quantity capacity moves.** Fitting the same law to
+every arm measured so far, over the same k ≤ 20 window, the training mix leaves
+the exponent alone — three baseline seeds give 0.078, 0.076, 0.066 above 35
+heavy atoms and three mix arms give 0.081, 0.093, 0.076, against a between-seed
+sd of 0.006 — while moving rec@20 from 0.159 to 0.187. Cooling the decoder
+moves it from 0.078 to 0.094. The 1M model, at the same temperature in the same
+window, sits at **0.303**. Level and slope are separate dials: the training mix
+and the decoder settings move where you sit on the budget curve, and so far
+only capacity bends it. If that holds for the 15M model it makes the
+brute-force route and the capacity route the same route. Independence is ruled
 out by a wide margin — the model's own first-slot rate would have finished 35+
 by k=20 (0.9986 predicted against 0.6890 measured) — and refitting on k ≤ 20 to
 predict k=60 lands within half a point where n is large, which is the one piece

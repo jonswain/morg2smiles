@@ -1159,6 +1159,17 @@ capacity the gain concentrates above 35 atoms and the 0–24 band moves by less
 than a point; if the gain is flat across bands it is not the size cliff that
 got better and the cliff is in the fingerprint or the data.
 
+A second pre-registration, on the quantity the exponent section at the end of
+this document says is the one capacity moves. Score the 15M model with
+`--eval-k 60` on the large protocol at T=0.6 and fit the deficit power law:
+**the exponent at 35+ should land above 0.303**, `small_1m`'s value, since the
+step from 100k to 15M is larger than the step from 100k to 1M that produced
+0.094 → 0.303. If it instead sits near `small_1m`'s, the exponent is set by the
+training corpus — which `small_1m` and the 15M run share — rather than by
+capacity, and the whole reading of that section is wrong in a way one number
+exposes. That ambiguity is the first caveat of the section, and this run
+resolves it for the price of generating to k=60 instead of k=20.
+
 **2b. Tell the decoder how big the molecule is.** *(Retired by stage 12 — see
 the end of this document. On `small_1m` at k=60 the truncation is 5.1 atoms
 rather than 10.7, 89.8% of the 50+ queries get a right-sized proposal, and the
