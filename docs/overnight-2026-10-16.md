@@ -17,8 +17,9 @@ GPU queue
   stage 7  T=0.3 on the common protocol (the cost)               04:22 -> 04:40
   stage 8  size mix at threshold 35, factor 6 (8,508 steps)      04:40 -> 07:33
   stage 9  score it on both protocols                            07:33 -> 07:58
-  stage 10 every arm on the large protocol at T=0.6                 TBD
+  stage 10 every arm on the large protocol at T=0.6              07:58 -> TBD
   stage 11 count fingerprints on the large protocol                 TBD
+  stage 12 small_1m at k=60, to measure the budget curve             TBD
 
 free, from dumps that already existed
   stage 0  the error bar inside each size band                   20:08 -> 20:17

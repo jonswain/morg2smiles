@@ -118,7 +118,9 @@ def main(dump: Path, bands: str, k: int, unseen_only: bool, out: Path | None) ->
 
     # Second table: the shape of recovery against budget, per band. Derived
     # from the same ranks, so it costs nothing.
-    ladder = [1, 2, 5, 10, 20]
+    # Rungs past 20 matter once a run is scored with a bigger budget: the
+    # whole point of generating past k=20 is to see where the curve bends.
+    ladder = [1, 2, 5, 10, 20, 30, 40, 60, 80, 100, 150, 200]
     ladder = [j for j in ladder if j <= k]
     header2 = f"{'band':>8}{'n':>7}" + "".join(f"{'@' + str(j):>9}" for j in ladder)
     header2 += f"{'last half':>11}{'k=10->20':>10}"

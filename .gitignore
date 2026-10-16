@@ -97,6 +97,9 @@ dist/
 !/results/overnight5/miss_anatomy_large_variance_s3.json
 !/results/overnight5/miss_anatomy_large_variance_s2.json
 !/results/overnight5/cloud_quality_large.json
+!/results/overnight5/size_bias_large_k60.json
+!/results/overnight5/miss_anatomy_large_k60.json
+!/results/overnight5/comparison_large_k60.json
 !/results/overnight5/size_bias_common_t06.json
 !/results/overnight5/size_bias_common_t10.json
 !/results/overnight5/size_bias_large_t03.json
