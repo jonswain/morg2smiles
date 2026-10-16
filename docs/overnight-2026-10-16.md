@@ -629,3 +629,39 @@ If counts also lift recovery above 35 heavy atoms, that is the input-side
 bottleneck showing up where it was always most likely to be visible, and it
 costs a config flag. If they do not, the input is not the constraint and the
 project can stop asking.
+
+### The mix result, re-read on structure accuracy
+
+Tonight's collision finding puts a question to tonight's other finding: if one
+recovery in eight above 35 heavy atoms is a different preimage, is the mix's
+gain partly collisions? `band_analysis.py --metric structure` asks for the
+query's own molecule instead, over the same dumps.
+
+| band | queries | recovery gap | structure gap | pairs (structure) |
+|---|---|---|---|---|
+| 30–34 | 1,189 | +0.46 | +0.06 | 3/6 |
+| 35–39 | 625 | +2.51 | **+3.28** | 6/6 |
+| 40–49 | 380 | +3.42 | **+3.46** | 6/6 |
+| 50+ | 127 | +1.97 | +1.05 | 4/6 |
+| 30–39 | 1,814 | +1.17 | +1.17 | 6/6 |
+| 35+ | 1,132 | +2.75 | **+3.09** | 6/6 |
+| all 30+ | 2,321 | +1.58 | +1.54 | 6/6 |
+
+**The gain is not collision-driven — it is larger when the query's own molecule
+is demanded**, +3.09 against +2.75 above 35 heavy atoms, with all six cross-arm
+pairs agreeing. The one band that shrinks is 50+, from +1.97 to +1.05, which is
+exactly what stage 0d predicted: two of the mix's three hits above 50 atoms were
+different preimages, so most of that band's apparent gain was the metric being
+generous. The 50+ claim was already the weakest thing in this write-up and it
+is now weaker.
+
+The cost side is unchanged by the same re-reading — −2.83 at 0–24 and −3.09 at
+25–29 on the common protocol, 0/6 pairs both ways — so the trade is a trade on
+either metric.
+
+One detail in the pre-registered band is worth noting without making anything
+of it: on structure accuracy, 30–39 gives the same +1.17 but now **6/6** pairs
+favour the mix rather than 4/6. It is still 1.7 SE and still does not clear the
+rule written down in advance. A sign test over six non-independent pairs is not
+a rescue, and the band is still three-fifths molecules the intervention does
+not move.

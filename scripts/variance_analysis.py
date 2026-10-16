@@ -56,14 +56,21 @@ def load(path: Path, budget: str) -> list[QueryOutcome]:
     return outcomes
 
 
-def hits(outcomes: list[QueryOutcome], k: int, order: str) -> list[bool]:
-    """Per-query hit at k under one ordering, fingerprint-unseen queries only."""
+def hits(outcomes: list[QueryOutcome], k: int, order: str, metric: str = "recovery") -> list[bool]:
+    """Per-query hit at k under one ordering, fingerprint-unseen queries only.
+
+    ``metric="structure"`` asks for the query's own molecule instead of any
+    molecule with its fingerprint. The two diverge with size -- above 35 heavy
+    atoms about one recovery in eight is a different preimage -- so a claim read
+    on one should be checked on the other before it is believed.
+    """
+    field = "fp_match" if metric == "recovery" else "exact_structure"
     out = []
     for o in outcomes:
         if not o.fp_unseen:
             continue
         scored = o.scored_by_consensus() if order == "consensus" else o.scored()
-        out.append(any(r.fp_match for r in scored[:k]))
+        out.append(any(getattr(r, field) for r in scored[:k]))
     return out
 
 

@@ -70,11 +70,22 @@ def heavy_atoms(smiles: str) -> int:
 @click.option("--k", default=20)
 @click.option("--order", default="consensus", type=click.Choice(["generation", "consensus"]))
 @click.option(
+    "--metric",
+    default="recovery",
+    type=click.Choice(["recovery", "structure"]),
+    help=(
+        "recovery asks for any molecule with the query's fingerprint, structure "
+        "for the query's own. They part company above 35 heavy atoms, where one "
+        "recovery in eight is a different preimage, so a size claim read on one "
+        "is worth re-reading on the other."
+    ),
+)
+@click.option(
     "--out",
     type=click.Path(path_type=Path),
     default=Path("results/overnight5/band_analysis.json"),
 )
-def main(dumps, pattern, bands, budget, k, order, out) -> None:
+def main(dumps, pattern, bands, budget, k, order, metric, out) -> None:
     paths = sorted(dumps.glob(pattern))
     if not paths:
         raise click.ClickException(f"no dumps matching {pattern} in {dumps}")
@@ -87,7 +98,7 @@ def main(dumps, pattern, bands, budget, k, order, out) -> None:
             refs = mine
         elif mine != refs:
             raise click.ClickException(f"{path.stem} was scored on different molecules")
-        runs[path.stem] = hits(outcomes, k, order)
+        runs[path.stem] = hits(outcomes, k, order, metric)
 
     sizes = [heavy_atoms(s) for s in refs]
     names = list(runs)
@@ -99,6 +110,7 @@ def main(dumps, pattern, bands, budget, k, order, out) -> None:
     report = {
         "k": k,
         "order": order,
+        "metric": metric,
         "budget": budget,
         "n_fp_unseen": len(refs),
         "runs": names,
