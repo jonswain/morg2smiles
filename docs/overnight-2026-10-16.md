@@ -20,6 +20,7 @@ GPU queue
   stage 10 every arm on the large protocol at T=0.6              07:58 -> 09:08
   stage 11 count fingerprints on the large protocol                 TBD
   stage 12 small_1m at k=60, to measure the budget curve             TBD
+  stage 13 three arms on the common protocol at T=0.6, the cost      TBD
 
 free, from dumps that already existed
   stage 0  the error bar inside each size band                   20:08 -> 20:17

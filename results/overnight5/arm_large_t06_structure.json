@@ -1,0 +1,243 @@
+{
+  "bands_report": "results/overnight5/band_large_t06_structure.json",
+  "k": 20,
+  "order": "generation",
+  "arms": {
+    "baseline": [
+      "variance_s1",
+      "variance_s2",
+      "variance_s3"
+    ],
+    "mix3x30": [
+      "size_mix_s1",
+      "size_mix_s2"
+    ]
+  },
+  "reference_arm": "baseline",
+  "bands": {
+    "30-34": {
+      "n_queries": 1189,
+      "arms": {
+        "baseline": {
+          "mean": 0.5388281469021586,
+          "sd": 0.007152986163259344,
+          "values": [
+            0.5441547518923465,
+            0.5306980656013457,
+            0.5416316232127838
+          ]
+        },
+        "mix3x30": {
+          "mean": 0.5601345668629101,
+          "sd": 0.013083556926916784,
+          "values": [
+            0.5508830950378469,
+            0.5693860386879731
+          ]
+        }
+      },
+      "vs_reference": {
+        "mix3x30": {
+          "gap_points": 2.1306419960751444,
+          "se_points": 1.0131377067335383,
+          "se_units": 2.1030132250674556,
+          "pairs_favouring": 6,
+          "pairs_total": 6,
+          "sd_borrowed_from_reference": false
+        }
+      }
+    },
+    "35-39": {
+      "n_queries": 625,
+      "arms": {
+        "baseline": {
+          "mean": 0.31733333333333336,
+          "sd": 0.013031244504395328,
+          "values": [
+            0.3232,
+            0.3264,
+            0.3024
+          ]
+        },
+        "mix3x30": {
+          "mean": 0.352,
+          "sd": 0.009050966799187793,
+          "values": [
+            0.3456,
+            0.3584
+          ]
+        }
+      },
+      "vs_reference": {
+        "mix3x30": {
+          "gap_points": 3.4666666666666623,
+          "se_points": 0.9877471561307799,
+          "se_units": 3.5096701065142506,
+          "pairs_favouring": 6,
+          "pairs_total": 6,
+          "sd_borrowed_from_reference": false
+        }
+      }
+    },
+    "40-49": {
+      "n_queries": 380,
+      "arms": {
+        "baseline": {
+          "mean": 0.13157894736842105,
+          "sd": 0.01600726981657426,
+          "values": [
+            0.12368421052631579,
+            0.15,
+            0.12105263157894737
+          ]
+        },
+        "mix3x30": {
+          "mean": 0.17763157894736842,
+          "sd": 0.027912109783679515,
+          "values": [
+            0.15789473684210525,
+            0.19736842105263158
+          ]
+        }
+      },
+      "vs_reference": {
+        "mix3x30": {
+          "gap_points": 4.605263157894737,
+          "se_points": 2.179343552421903,
+          "se_units": 2.1131423509510063,
+          "pairs_favouring": 6,
+          "pairs_total": 6,
+          "sd_borrowed_from_reference": false
+        }
+      }
+    },
+    "50+": {
+      "n_queries": 127,
+      "arms": {
+        "baseline": {
+          "mean": 0.010498687664041995,
+          "sd": 0.004546065111729337,
+          "values": [
+            0.007874015748031496,
+            0.015748031496062992,
+            0.007874015748031496
+          ]
+        },
+        "mix3x30": {
+          "mean": 0.01968503937007874,
+          "sd": 0.0055677699306027366,
+          "values": [
+            0.023622047244094488,
+            0.015748031496062992
+          ]
+        }
+      },
+      "vs_reference": {
+        "mix3x30": {
+          "gap_points": 0.9186351706036745,
+          "se_points": 0.4731694587223083,
+          "se_units": 1.9414506867883017,
+          "pairs_favouring": 5,
+          "pairs_total": 6,
+          "sd_borrowed_from_reference": false
+        }
+      }
+    },
+    "30-39": {
+      "n_queries": 1814,
+      "arms": {
+        "baseline": {
+          "mean": 0.4625137816979052,
+          "sd": 0.004805842275127547,
+          "values": [
+            0.46802646085997796,
+            0.46030871003307605,
+            0.4592061742006615
+          ]
+        },
+        "mix3x30": {
+          "mean": 0.4884233737596472,
+          "sd": 0.01169415845402228,
+          "values": [
+            0.480154355016538,
+            0.4966923925027563
+          ]
+        }
+      },
+      "vs_reference": {
+        "mix3x30": {
+          "gap_points": 2.5909592061741984,
+          "se_points": 0.8722120019335403,
+          "se_units": 2.970561286052586,
+          "pairs_favouring": 6,
+          "pairs_total": 6,
+          "sd_borrowed_from_reference": false
+        }
+      }
+    },
+    "35+": {
+      "n_queries": 1132,
+      "arms": {
+        "baseline": {
+          "mean": 0.22055359246171968,
+          "sd": 0.011928521260617843,
+          "values": [
+            0.22084805653710246,
+            0.23233215547703182,
+            0.20848056537102475
+          ]
+        },
+        "mix3x30": {
+          "mean": 0.25618374558303886,
+          "sd": 0.013742357938254457,
+          "values": [
+            0.24646643109540636,
+            0.2659010600706714
+          ]
+        }
+      },
+      "vs_reference": {
+        "mix3x30": {
+          "gap_points": 3.5630153121319177,
+          "se_points": 1.191033475627602,
+          "se_units": 2.991532467426598,
+          "pairs_favouring": 6,
+          "pairs_total": 6,
+          "sd_borrowed_from_reference": false
+        }
+      }
+    },
+    "all": {
+      "n_queries": 2321,
+      "arms": {
+        "baseline": {
+          "mean": 0.38359902340944996,
+          "sd": 0.003909423406237611,
+          "values": [
+            0.3864713485566566,
+            0.3851788022404136,
+            0.3791469194312796
+          ]
+        },
+        "mix3x30": {
+          "mean": 0.4118914261094356,
+          "sd": 0.013404867889792352,
+          "values": [
+            0.4024127531236536,
+            0.42137009909521755
+          ]
+        }
+      },
+      "vs_reference": {
+        "mix3x30": {
+          "gap_points": 2.8292402699985617,
+          "se_points": 0.9743704225180785,
+          "se_units": 2.9036598449765325,
+          "pairs_favouring": 6,
+          "pairs_total": 6,
+          "sd_borrowed_from_reference": false
+        }
+      }
+    }
+  }
+}
