@@ -80,8 +80,13 @@ night's first prediction about them was wrong. **Ensembling is not a route.**
 heavy atoms and nowhere above it**: stage 12 measured the curve to k=60 instead
 of extrapolating it, and the recovery deficit is a clean power law in budget
 (|r| ≥ 0.991 in every band) whose exponent falls with molecule size, so k=128
-reaches 0.90 at 35–39 and 0.95 above 50 atoms costs 10⁹. What is left is
-changing what the model can represent.
+reaches 0.90 at 35–39 and 0.95 above 50 atoms costs 10⁹. **And that exponent is
+the one quantity capacity moves** — the training mix does not touch it (0.073
+against 0.083 at 35+, on a between-seed sd of 0.006) while moving the level,
+cooling nudges it to 0.094, and the 1M model sits at 0.303 in the same window
+at the same temperature. Level and slope are separate dials; only capacity has
+bent the curve. What is left is changing what the model can represent, which
+may be the same thing as affording the budget.
 
 Underneath all of it is one measurement error, found five times in one night.
 The common protocol draws 2,000 molecules at random and 63% of them are under
