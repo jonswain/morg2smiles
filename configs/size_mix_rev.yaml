@@ -1,0 +1,63 @@
+# The reverse-direction control: does the exposure law predict out of sample?
+#
+# Night 5 produced one quantitative law. Over six size bands, the gap a
+# size-weighted mix opens against its baseline sits on a straight line in log2
+# exposure -- +3.9 points per doubling at T=1.0 (r = 0.78), +3.4 at T=0.6
+# (r = 0.74) -- so re-weighting looks like a transfer priced by a single
+# exchange rate rather than a gain. That line was fitted to two doses, both of
+# which *up*-weight large molecules, and a line through two same-signed doses
+# is not much of a law.
+#
+# This runs it backwards. Threshold 30 with factor 1/3 *de*-weights the 30+
+# molecules by exactly the reciprocal of size_mix_s1's factor 3, so every band
+# sits at the reciprocal exposure: the bands that gained now pay and the bands
+# that paid now gain, at log2 exposure of the same magnitude and the opposite
+# sign.
+#
+# PRE-REGISTERED. The fitted line is signed, so it predicts the damage without
+# refitting: the 0-24 band, which lost 2.74 points at 0.56x exposure under the
+# mix, should *gain* about that much at 1.78x here, and the 35-39 band, which
+# gained 7.69 at 1.69x, should lose comparably at 0.59x. Quantitatively: each
+# band's gap should land within 2 points of minus its mirror-dose gap, and the
+# fitted points-per-doubling should come back within 1.5 points of +3.4 with
+# the same sign. A law that predicts out of sample prices every future
+# re-weighting without training anything; a law that does not is two doses and
+# a ruler.
+#
+# Schedule-identical to configs/size_mix_s1.yaml in every other respect --
+# same seed, same 8,508 steps, same 100k shard -- so the comparison is to that
+# run's baseline arm with no other variable moving.
+shard_dir: data/shards/100k
+out_dir: checkpoints/size_mix_rev
+
+fingerprint:
+  radius: 2
+  n_bits: 2048
+  counts: false
+  folded: true
+
+model:
+  d_model: 256
+  n_heads: 8
+  d_ff: 1024
+  n_encoder_layers: 4
+  n_decoder_layers: 4
+  dropout: 0.1
+  max_tokens: 128
+
+train:
+  seed: 1
+  epochs: 12
+  batch_size: 128
+  lr: 0.0005
+  warmup_steps: 300
+  randomize_smiles: true
+  eval_every_steps: 2127
+  eval_n: 500
+  eval_k: 20
+  valid_loss_n: 2000
+  patience: 0
+  max_steps: 8508
+  max_hours: 3.6
+  size_weight_threshold: 30
+  size_weight_factor: 0.3333333333333333
