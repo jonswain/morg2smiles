@@ -1,0 +1,129 @@
+{
+  "protocol": {
+    "eval_n": 2400,
+    "seed": 0,
+    "budget": "molecules",
+    "eval_k": 60,
+    "max_oversample": 12.0,
+    "temperature": 0.6,
+    "top_p": 1.0,
+    "pool_shard": "data/shards/1m",
+    "split": "valid",
+    "n_fp_unseen": 2321,
+    "fp_config": "morgan r=2 binary folded/2048",
+    "training_union_size": 1989502,
+    "shards_excluded": [
+      "data/shards/100k",
+      "data/shards/1m",
+      "data/shards/full"
+    ],
+    "min_heavy_atoms": 30,
+    "max_heavy_atoms": null
+  },
+  "runs": {
+    "small_100k_long": {
+      "checkpoint": "checkpoints/small_100k_long/best.pt",
+      "train_shard": "data/shards/100k",
+      "n_parameters": 7951945,
+      "trained_epoch": 30,
+      "trained_step": 21117,
+      "model_config": {
+        "d_model": 256,
+        "n_heads": 8,
+        "d_ff": 1024,
+        "n_encoder_layers": 4,
+        "n_decoder_layers": 4,
+        "dropout": 0.1,
+        "max_tokens": 128,
+        "vocab_size": 73,
+        "fp_vocab_size": 2048
+      },
+      "report": {
+        "ks": [
+          1,
+          5,
+          20
+        ],
+        "budget": "molecules",
+        "slices": {
+          "all": {
+            "n_queries": 2400,
+            "recovery_at_k": {
+              "1": 0.3233333333333333,
+              "5": 0.5941666666666666,
+              "20": 0.7404166666666666
+            },
+            "structure_accuracy_at_k": {
+              "1": 0.27958333333333335,
+              "5": 0.55625,
+              "20": 0.71375
+            },
+            "recovery_at_k_consensus": {
+              "1": 0.5470833333333334,
+              "5": 0.7075,
+              "20": 0.7695833333333333
+            },
+            "structure_accuracy_at_k_consensus": {
+              "1": 0.4925,
+              "5": 0.6845833333333333,
+              "20": 0.7495833333333334
+            },
+            "validity": 0.8976323656703933,
+            "duplicate_rate": 0.6924577571847337,
+            "unique_valid_per_query": 58.765,
+            "mean_samples_per_query": 394.875,
+            "mean_candidates_per_query": 286.4145833333333,
+            "mean_scored_per_query": 58.765,
+            "budget_filled_rate": 0.8829166666666667,
+            "mean_best_tanimoto": 0.9551979932046303,
+            "mean_hit_rank": 6.108094262295082
+          },
+          "fp_unseen": {
+            "n_queries": 2321,
+            "recovery_at_k": {
+              "1": 0.3252908229211547,
+              "5": 0.5954330030159414,
+              "20": 0.7414907367514002
+            },
+            "structure_accuracy_at_k": {
+              "1": 0.2886686772942697,
+              "5": 0.5678586816027574,
+              "20": 0.7246876346402413
+            },
+            "recovery_at_k_consensus": {
+              "1": 0.5497630331753555,
+              "5": 0.7117621714778113,
+              "20": 0.7712193020249892
+            },
+            "structure_accuracy_at_k_consensus": {
+              "1": 0.5066781559672555,
+              "5": 0.6971133132270573,
+              "20": 0.7595863851788023
+            },
+            "validity": 0.8975671371957424,
+            "duplicate_rate": 0.6949148737473511,
+            "unique_valid_per_query": 58.34080137871607,
+            "mean_samples_per_query": 398.026712623869,
+            "mean_candidates_per_query": 287.8862559241706,
+            "mean_scored_per_query": 58.34080137871607,
+            "budget_filled_rate": 0.8802240413614821,
+            "mean_best_tanimoto": 0.9550010812040758,
+            "mean_hit_rank": 5.99840848806366
+          }
+        },
+        "primary_metric": 0.7414907367514002,
+        "primary_metric_name": "recovery@20 (fp_unseen)",
+        "fp_unseen_fraction": 0.9670833333333333,
+        "elapsed_seconds": 3356.149062291952,
+        "queries_per_second": 0.7151053053528597,
+        "candidates_per_second": 204.8165880720954,
+        "generation": {
+          "k": 60,
+          "budget": "molecules",
+          "seed": 0,
+          "max_oversample": 12.0
+        }
+      }
+    }
+  }
+}

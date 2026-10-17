@@ -1,0 +1,20 @@
+[10-17 20:55:09] === block 1 start, git 7c1abe0, 290 min to 01:45 ===
+[10-17 20:55:09] s100k_8k_t06: variance_s1 at T=0.6, k=60, large protocol
+[10-17 21:30:46] s100k_8k_t06 score exit=0
+[10-17 21:30:49] s100k_8k_t06 anatomy exit=0
+[10-17 21:31:17] s100k_8k_t06 curve exit=0
+[10-17 21:31:17] s100k_21k_t06: small_100k_long at T=0.6, k=60, large protocol
+[10-17 22:31:07] s100k_21k_t06 score exit=0
+[10-17 22:31:11] s100k_21k_t06 anatomy exit=0
+[10-17 22:31:38] s100k_21k_t06 curve exit=0
+[10-17 22:31:38] s1m_8k_t06: small_1m_matched at T=0.6, k=60, large protocol
+[10-17 23:09:53] s1m_8k_t06 score exit=0
+[10-17 23:09:56] s1m_8k_t06 anatomy exit=0
+[10-17 23:10:24] s1m_8k_t06 curve exit=0
+[10-17 23:10:24] s100k_8k_t10: variance_s1 at T=1.0, k=60, large protocol
+[10-17 23:42:21] s100k_8k_t10 score exit=0
+[10-17 23:42:24] s100k_8k_t10 anatomy exit=0
+[10-17 23:42:39] s100k_8k_t10 curve exit=1
+[10-17 23:42:39] === block 1 done, 122 min to spare ===
+[10-17 23:42:40] === block 2 start, 1098 min to 18:00 ===
+[10-17 23:42:40] stage 5: medium_1m_full, 15.1M params, 1M shard, up to 21,117 steps / 16 h

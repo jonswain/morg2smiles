@@ -92,6 +92,13 @@ at the same temperature. Level and slope are separate dials; only capacity has
 bent the curve. What is left is changing what the model can represent, which
 may be the same thing as affording the budget.
 
+> **Corrected the following night.** The two cells behind "capacity" are the
+> same architecture to within 0.1% of their parameter counts, so that sentence
+> names a variable that never moved; and with four cells instead of two the
+> exponent turns out to track the recovery level at a fixed ratio rather than
+> being a second dial. The dial is training length. See
+> [the weekend document](overnight-2026-10-17.md), block 1.
+
 Underneath all of it is one measurement error, found five times in one night.
 The common protocol draws 2,000 molecules at random and 63% of them are under
 30 heavy atoms, so it cannot see anything that acts on part of the size
@@ -1195,6 +1202,16 @@ capacity, and the whole reading of that section is wrong in a way one number
 exposes. That ambiguity is the first caveat of the section, and this run
 resolves it for the price of generating to k=60 instead of k=20.
 
+> **Registered as written, but its reasoning was already dead when it ran.**
+> The "step from 100k to 1M" was not a capacity step, so there is no trend for
+> the 15M model to continue. The prediction above 0.303 stands as registered
+> and is scored as registered; what changed is that a null can no longer be
+> read as a capacity negative, because at 21,117 steps nothing here is
+> converged and the larger model is further from its own asymptote at a matched
+> step count. A matched-step comparison of the two training traces is added as
+> the reading that survives either way — see
+> [the weekend document](overnight-2026-10-17.md), block 1.
+
 **2b. Tell the decoder how big the molecule is.** *(Retired by stage 12 — see
 the end of this document. On `small_1m` at k=60 the truncation is 5.1 atoms
 rather than 10.7, 89.8% of the 50+ queries get a right-sized proposal, and the
@@ -1632,6 +1649,15 @@ the wrong attribution.)*
 
 #### It was capacity that bought it, and budget dilutes the match rate
 
+> **It was training length.** Same mislabel as the exponent section: the two
+> checkpoints compared here are the same architecture. Scoring all four cells
+> of the corpus × length grid at k=20 above 50 heavy atoms, right-sized
+> proposals per query go 0.58 → 2.17 on 2.5× the steps at a fixed corpus and
+> 0.58 → 0.73 on 10× the corpus at fixed steps, with the match rate among them
+> 1.4% → 14.6% against 1.4% → 7.5%. The "budget dilutes the match rate" half of
+> the heading is unaffected. See
+> [the weekend document](overnight-2026-10-17.md), block 1.
+
 The comparison above changes two things at once — 100k → 1M and k=20 → k=60 —
 so it cannot say which did the work. `small_1m`'s own k=20 dump at the same
 temperature separates them:
@@ -1710,6 +1736,17 @@ expect the real curve to bend worse than the fit rather than better.
 
 ### The exponent is a property of capacity, not of the training mix
 
+> **Wrong on both counts, corrected in
+> [the weekend document](overnight-2026-10-17.md).** It is not capacity: the
+> `variance_s1` and `small_1m` cells are 7,951,945 and 7,962,225 parameters,
+> the same architecture, so the contrast below holds corpus *and* training
+> length against nothing. Filling in the missing two cells makes training
+> length the dial by 4:1 over corpus. And it is not "a property" separate from
+> the recovery level: across five runs spanning threefold in the exponent, the
+> exponent divided by rec@60 sits between 0.334 and 0.366. The section is left
+> standing because the measurement in it is sound and only the attribution is
+> wrong.
+
 The fit costs nothing on a dump that already exists, so it can be run on every
 arm scored tonight. Fitting `1 − rec(k) = A·k^−b` on the k = 5…20 rungs of the
 large protocol, the exponent at 35+ heavy atoms:
@@ -1738,7 +1775,10 @@ rest of tonight said about it in different units: it is a transfer, and
 transfers change where you are on a curve, not the curve. **Cooling moves it
 slightly**, 0.078 → 0.094 at 35+, consistent with cooling and the mix being two
 factors of one product. **Capacity moves it threefold**, 0.094 → 0.303 at the
-same temperature in the same window.
+same temperature in the same window. *(That last step is not capacity. In the
+same window the four-cell grid reads 0.090 / 0.238 / 0.123 / 0.303 for
+100k·8.5k / 100k·21k / 1M·8.5k / 1M·21k steps: of the 0.213 step, training
+length carries 0.164 and the corpus 0.049.)*
 
 That is the sharpest argument this document has for item 2, and it is a
 different argument from the one item 2 was written with. A tenfold bigger model
@@ -1753,7 +1793,9 @@ helps everything.
 Three caveats, in descending order of how much they ought to worry the reader.
 The `small_1m` cell differs from the rest in training corpus as well as
 capacity (1M molecules against 100k), so "capacity" here means the whole step
-between the two models. The 100k arms' exponents at 40–49 sit between 0.040 and
+between the two models. *(Understated: the two models have the same
+architecture, so the step contains no capacity at all. Measured the next night,
+the step is four parts training length to one part corpus.)* The 100k arms' exponents at 40–49 sit between 0.040 and
 0.063, where a single hit moves the fit, so only the 30–34 and 35–39 columns
 carry weight. And eight points are not a trend — this is one contrast with a
 seed-level error bar attached, pre-registering a prediction for the 15M run

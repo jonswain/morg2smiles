@@ -71,16 +71,27 @@ def _fit_deficit(
 
 
 def _budget_for(fit: tuple[float, float, float], target: float) -> float | None:
-    """The k at which the fitted law reaches `target` recovery."""
+    """The k at which the fitted law reaches `target` recovery.
+
+    `None` when the fitted deficit does not fall at all, and `math.inf` when it
+    falls so slowly that the budget overflows a float: an exponent of 0.003,
+    which is what a saturated band looks like, asks for 10^700 molecules for
+    0.99 and `math.exp` raises rather than returning a number.
+    """
     slope, intercept, _ = fit
     if slope >= -1e-9:
         return None
-    return math.exp((math.log(1 - target) - intercept) / slope)
+    log_k = (math.log(1 - target) - intercept) / slope
+    if log_k > 709.0:  # math.exp overflows just above this
+        return math.inf
+    return math.exp(log_k)
 
 
 def _fmt_k(k: float | None) -> str:
     if k is None:
         return "--"
+    if math.isinf(k):
+        return ">1e308"
     if k > 1e12:
         return f"{k:>.1e}"
     return f"{k:,.0f}"
@@ -175,7 +186,11 @@ def main(anatomy, dump, k, budget, min_fit_k, extrapolate_from, targets, bands, 
         if fits[spec] is None:
             continue
         needed = {f"{t:g}": _budget_for(fits[spec], t) for t in targets}
-        out_report["bands"][spec]["budget_for"] = needed
+        # json has no literal for infinity; within a band that has a fit at all,
+        # a null here means the budget overflowed a float, not that it is unknown.
+        out_report["bands"][spec]["budget_for"] = {
+            t: None if v is not None and math.isinf(v) else v for t, v in needed.items()
+        }
         click.echo(f"{spec:>7}" + "".join(f"{_fmt_k(needed[f'{t:g}']):>16}" for t in targets))
     click.echo(
         "\nExtrapolations, all of them, and lower bounds on the cost: they assume "

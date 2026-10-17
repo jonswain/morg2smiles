@@ -254,35 +254,64 @@ less per doubling. Inverting the fits (`scripts/budget_curve.py`):
 So k=128 is a few seconds per fingerprint and takes 35–39 to 0.90; above 50
 atoms the route is arithmetic rather than engineering.
 
-**The exponent is the one quantity capacity moves.** Fitting the same law to
-every arm measured so far, over the same k ≤ 20 window, the training mix leaves
-the exponent alone — three baseline seeds give 0.078, 0.076, 0.066 above 35
-heavy atoms and three mix arms give 0.081, 0.093, 0.076, against a between-seed
-sd of 0.006 — while moving rec@20 from 0.159 to 0.187. Cooling the decoder
-moves it from 0.078 to 0.094. The 1M model, at the same temperature in the same
-window, sits at **0.303**. Level and slope are separate dials: the training mix
-and the decoder settings move where you sit on the budget curve, and so far
-only capacity bends it. If that holds for the 15M model it makes the
-brute-force route and the capacity route the same route. Independence is ruled
-out by a wide margin — the model's own first-slot rate would have finished 35+
-by k=20 (0.9986 predicted against 0.6890 measured) — and refitting on k ≤ 20 to
-predict k=60 lands within half a point where n is large, which is the one piece
-of evidence that the extrapolated prices quoted before this run were worth
-something.
+**What moves the exponent is training length, and the exponent is not a
+separate dial.** Four checkpoints of the *same* 7.95M-parameter architecture,
+crossing corpus against training length and scored identically to k=60, give
+the exponent at 35+ heavy atoms:
+
+| | 8,508 steps | 21,117 steps |
+|---|---|---|
+| **100k molecules** | 0.104 | 0.229 |
+| **900k molecules** | 0.122 | 0.281 |
+
+Averaged over the two rows and two columns, 2.5× the training steps is worth
++0.142 and 10× the corpus +0.036 — a 4:1 split, the same ordering in every
+size band, and 5:1 on recovery itself. These models were under-trained, not
+corpus-limited. The exponent also carries no information the recovery level
+does not: across those four cells plus a temperature change, spanning
+threefold in the exponent, `b ÷ rec@60` stays between 0.334 and 0.366. "Level
+and slope as separate dials" was the wrong frame, and an earlier version of
+this section attributed the step to capacity, which never varied between the
+two checkpoints it compared.
+
+One part of that claim survives under the right label. The fit's other
+parameter, `A`, is the deficit extrapolated back to k=1, so `A` = 1 means
+nothing is ever found in a single try — and above 50 heavy atoms `A` is 1.00 to
+1.02 in all four cells. There the exponent is the only quantity that can move,
+and training length is what moves it. Below 35 atoms `A` falls from 0.98 to
+0.44 and carries half the gain.
+
+Independence is ruled out by a wide margin — the model's own first-slot rate
+would have finished 35+ by k=20 (0.9986 predicted against 0.6890 measured) —
+and refitting on k ≤ 20 to predict k=60 lands within half a point where n is
+large. On the 100k arm, generated to k=60 for the first time, the law fitted to
+its own k ≤ 20 rungs predicted 0.232 at 35+ against 0.249 measured, where
+independence said 0.47. That is the evidence that the extrapolated prices are
+lower bounds rather than fiction.
 
 **The size defect is not the target it looked like, and the cliff is a split in
 the query population.** The clearest-looking lever — the decoder offers 45-atom
-molecules for 56-atom fingerprints, and at 100k parameters only 38% of queries
-above 50 atoms get even one right-sized candidate out of twenty — does not
-survive on the 1M model. At an identical 20-slot budget it puts 2.54 right-sized
-molecules above 50 atoms into the list against the small model's 0.54 and
-converts 14.6% of them where the small model converts none; at k=60 it gets a
-right-sized proposal for 89.8% of those queries and its truncation on misses is
-5 atoms rather than 11. So a length prior has nothing left to correct, and what
-fixed the size defect was capacity — not a prior, and not budget, which adds
-right-sized proposals while *lowering* the rate at which they match (14.6% to
-11.0%), since the ones a model proposes first are the ones it is most confident
-about. What
+molecules for 56-atom fingerprints, and on the 100k-molecule arm only 42% of
+queries above 50 atoms get even one right-sized candidate out of twenty — does
+not survive longer training. Across the four matched-architecture cells, at an
+identical 20-slot budget above 50 heavy atoms:
+
+| | right-sized per query | queries with any | of those, match |
+|---|---|---|---|
+| 100k molecules, 8,508 steps | 0.58 | 42.5% | 1.4% |
+| 100k molecules, 21,117 steps | 2.17 | 71.7% | 14.6% |
+| 900k molecules, 8,508 steps | 0.73 | 40.2% | 7.5% |
+| 900k molecules, 21,117 steps | 2.54 | 76.4% | 14.6% |
+
+Read the second row against the third. Training 2.5× longer on the *same* 100k
+molecules closes 81% of the gap in right-sized proposals and essentially all of
+the gap in match rate, while 10× the corpus at a fixed step count closes 8% of
+it and leaves the truncation on misses slightly *worse* (−10.3 atoms against
+−9.7). The decoder learns the length conditional late in training, and neither a
+length prior nor more data is what fixes it. Budget is not what fixes it either:
+going to k=60 adds right-sized proposals while *lowering* the rate at which they
+match (14.6% to 11.0%), since the ones a model proposes first are the ones it is
+most confident about. What
 falls with molecule size is not how many preimages the decoder draws — 1.53 per
 query at 30–34 against 1.31 above 50 — but how evenly they land: above 50 atoms
 52% of queries draw none at all while the ones that succeed draw 2.72 each,

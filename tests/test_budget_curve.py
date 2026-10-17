@@ -118,6 +118,14 @@ class TestBudgetFor:
         assert _budget_for((0.0, math.log(0.5), 0.0), 0.9) is None
         assert _budget_for((0.2, math.log(0.5), 1.0), 0.9) is None
 
+    def test_a_near_flat_deficit_overflows_to_infinity_rather_than_raising(self):
+        # The T=1.0 50+ band fitted b=0.003, which asks for e^1500 molecules to
+        # reach 0.99. math.exp raises there; the budget is reported as infinite.
+        fit = (-0.003, math.log(0.98), -0.75)
+        assert math.isinf(_budget_for(fit, 0.99))
+        # The same fit still returns a number where the budget is representable.
+        assert _budget_for(fit, 0.05) == pytest.approx((0.95 / 0.98) ** (-1 / 0.003))
+
 
 class TestExtrapolation:
     def test_a_perfect_power_law_extrapolates_without_error(self, tmp_path):
