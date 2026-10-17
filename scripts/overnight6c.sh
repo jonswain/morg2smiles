@@ -140,4 +140,28 @@ if fits 16200 "stage 8"; then
     fi
 fi
 
+# ---- stage 9: a third point on the corpus axis ----------------------------
+# Only worth anything if block 1 says the corpus is the dial, but it is 75
+# minutes and it turns a two-point axis into three at matched steps:
+# 90,682 (variance_s1), 900,917 (small_1m_matched) and 1,881,996 molecules
+# (small_full), all at 8,508 steps and all 8M parameters.
+if fits 5400 "stage 9"; then
+    say "stage 9: small_full at T=0.6, k=60, large protocol"
+    $PY -u scripts/compare_checkpoints.py --no-baseline --only small_full \
+        --eval-n 2400 --min-heavy-atoms 30 --eval-k 60 \
+        --temperature 0.6 --top-p 1.0 --max-oversample 12 \
+        --out "$LOGS/comparison_k60_s188m_8k_t06.json" \
+        --dump-outcomes "$LOGS/outcomes_exponent_2x2" \
+        > "$LOGS/stage9_score.log" 2>&1
+    say "stage 9 exit=$?"
+    mv "$LOGS/outcomes_exponent_2x2/small_full.jsonl" \
+       "$LOGS/outcomes_exponent_2x2/s188m_8k_t06.jsonl" 2>/dev/null
+    $PY -u scripts/miss_anatomy.py --dump "$LOGS/outcomes_exponent_2x2/s188m_8k_t06.jsonl" \
+        --k 60 --out "$LOGS/miss_anatomy_s188m_8k_t06.json" > "$LOGS/stage9_anatomy.log" 2>&1
+    $PY -u scripts/budget_curve.py --anatomy "$LOGS/miss_anatomy_s188m_8k_t06.json" \
+        --dump "$LOGS/outcomes_exponent_2x2/s188m_8k_t06.jsonl" --k 60 \
+        --out "$LOGS/budget_curve_s188m_8k_t06.json" > "$LOGS/stage9_curve.log" 2>&1
+    say "stage 9 analyses exit=$?"
+fi
+
 say "=== blocks 3-5 done, $(( $(remaining) / 60 )) min to spare ==="
