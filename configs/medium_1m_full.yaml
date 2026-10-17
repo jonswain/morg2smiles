@@ -1,0 +1,58 @@
+# The capacity arm, full length -- the item deferred three times.
+#
+# `medium_1m` (this architecture) has only ever run as a 1.75 h stub that
+# stopped at step 2,500, which is why the capacity question is still open. This
+# config runs it to `small_1m`'s own endpoint so the comparison is clean on
+# every axis but the one under test:
+#
+#     small_1m          7.96M params, 1M shard, 21,117 steps
+#     medium_1m_full   15.12M params, 1M shard, 21,117 steps
+#
+# Same corpus, same step budget, same fingerprint, same decode settings when
+# scored. That matters more than usual here: the claim this run is meant to
+# test was first made by comparing `variance_s1` against `small_1m` and calling
+# the difference capacity, when those two models have the *same* architecture
+# and differ in corpus and training length. One variable at a time, or the
+# number means nothing.
+#
+# A separate out_dir, so the stub's record survives as the measurement that
+# priced this run.
+#
+# Cost: the stub measured 2.62 s/step (6,541 s for 2,500 steps), so 21,117
+# steps is 15.4 h plus evaluations. max_hours is the real brake and is set
+# below the step budget on purpose -- a truncated run still answers both
+# pre-registered questions, provided the step it reached is reported beside
+# every number rather than being compared to small_1m as if matched.
+shard_dir: data/shards/1m
+out_dir: checkpoints/medium_1m_full
+
+fingerprint:
+  radius: 2
+  n_bits: 2048
+  counts: false
+  folded: true
+
+model:
+  d_model: 320
+  n_heads: 8
+  d_ff: 1280
+  n_encoder_layers: 5
+  n_decoder_layers: 5
+  dropout: 0.1
+  max_tokens: 128
+
+train:
+  epochs: 3
+  batch_size: 128
+  lr: 0.00045
+  warmup_steps: 400
+  randomize_smiles: true
+  max_steps: 21117
+  # 14 evaluation points, as small_1m had, rather than the stub's 42: at ~2 min
+  # each the stub's interval would spend 1.4 h of this run on evaluation.
+  eval_every_steps: 1500
+  eval_n: 500
+  eval_k: 20
+  valid_loss_n: 2000
+  patience: 0
+  max_hours: 16.0
