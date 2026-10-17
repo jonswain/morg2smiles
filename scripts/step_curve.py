@@ -141,6 +141,17 @@ def break_even(
 @click.option("--bands", default="30-34,35-39,40-49,50+,35+,all")
 @click.option("--at-k", default="20,60", help="The fixed k values at which the pair is read.")
 @click.option(
+    "--trace-window",
+    default=None,
+    help=(
+        "lo,hi -- fit each trace only over this step interval. Because the step "
+        "law accelerates, a run's global exponent depends on the range it covers, "
+        "so comparing two runs that stopped at different steps requires pinning "
+        "the window. Runs sharing a shard also share the validation draw, which "
+        "makes the restricted exponents directly comparable."
+    ),
+)
+@click.option(
     "--extrapolate-from",
     default=0.5,
     show_default=True,
@@ -168,6 +179,7 @@ def break_even(
 def main(
     runs,
     checkpoints,
+    trace_window,
     pair,
     pair_steps,
     bands,
@@ -184,13 +196,23 @@ def main(
     report: dict = {"traces": {}, "pair": {}, "break_even": {}}
 
     names = [s.strip() for s in runs.split(",") if s.strip()]
+    window = None
+    if trace_window is not None:
+        lo, hi = (int(s.strip()) for s in trace_window.split(","))
+        window = (lo, hi)
+        report["trace_window"] = {"lo": lo, "hi": hi}
     click.echo("the deficit against training steps, from each run's own history")
-    click.echo("(scored on 500 molecules of that run's own shard, not the holdout protocol)\n")
+    click.echo("(scored on 500 molecules of that run's own shard, not the holdout protocol)")
+    if window is not None:
+        click.echo(f"(restricted to steps {window[0]:,}..{window[1]:,})")
+    click.echo("")
     header = f"{'run':>18}{'pts':>5}{'steps':>18}{'rec@20':>8}{'c':>8}{'r':>9}{'early c':>9}{'error':>9}"
     click.echo(header)
     click.echo("-" * len(header))
     for name in names:
         trace = read_trace(name, checkpoints)
+        if window is not None:
+            trace = [p for p in trace if window[0] <= p[0] <= window[1]]
         fit = fit_trace(trace)
         if fit is None:
             click.echo(f"{name:>18}{len(trace):>5}  too few usable points")

@@ -177,6 +177,31 @@ class TestCli:
         assert entry["extrapolated"]["exponent"] < entry["exponent"]
         assert entry["extrapolated"]["error_points"] < 0
 
+    def test_a_trace_window_restricts_the_fit(self, tmp_path):
+        """Two runs of different lengths are only comparable over one window."""
+        # A planted trace whose exponent rises with step, as the real ones do.
+        history(
+            tmp_path,
+            "r",
+            [
+                (s, 1 - 20.0 * s ** -(0.5 + 0.00002 * s))
+                for s in (1500, 3000, 4500, 6000, 12000, 21000)
+            ],
+        )
+        out_all, out_win = tmp_path / "a.json", tmp_path / "w.json"
+        for out, extra in ((out_all, []), (out_win, ["--trace-window", "6000,21000"])):
+            result = CliRunner().invoke(
+                step_curve,
+                ["--runs", "r", "--checkpoints", str(tmp_path), "--out", str(out), *extra],
+            )
+            assert result.exit_code == 0, result.output
+        whole = json.loads(out_all.read_text())["traces"]["r"]
+        windowed = json.loads(out_win.read_text())["traces"]["r"]
+        assert windowed["first_step"] == 6000
+        assert windowed["n_points"] < whole["n_points"]
+        # The late window sees the steeper part of an accelerating curve.
+        assert windowed["exponent"] > whole["exponent"]
+
     def test_pair_and_break_even_tables(self, tmp_path):
         history(tmp_path, "r", planted(0.8, 50.0))
         short = anatomy(

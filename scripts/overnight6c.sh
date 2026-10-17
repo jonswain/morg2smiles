@@ -4,7 +4,7 @@
 # against one hard deadline rather than in time slots: whatever does not fit
 # is skipped, cheapest-and-sharpest first.
 #
-#  5b matched-step trace against small_1m          seconds (reads history.json)
+#  5b matched-step trace, and the step exponent    seconds (reads history.json)
 #  6  score medium_1m_full on both protocols        ~3 h   (the capacity arm)
 #  7  size_mix_t35 on the common protocol at T=0.6  ~20 min
 #  8  the reverse-direction mix, and score it       ~3.7 h
@@ -56,7 +56,17 @@ if [ -f checkpoints/medium_1m_full/history.json ]; then
     say "stage 5b: matched-step trace, medium_1m_full against small_1m"
     $PY -u scripts/matched_steps.py medium_1m_full small_1m \
         > "$LOGS/stage5b_matched_steps.md" 2>&1
-    say "stage 5b exit=$?"
+    say "stage 5b matched steps exit=$?"
+    # Does capacity change the step exponent? Both runs evaluate on the same
+    # shard's validation split, so a window pinned to the interval the 8M pair
+    # was measured over makes the two exponents directly comparable. The window
+    # matters because the step law accelerates: an unwindowed exponent would
+    # mostly report how far each run happened to get.
+    $PY -u scripts/step_curve.py --runs medium_1m_full,small_1m,small_100k_long \
+        --trace-window 8508,21117 \
+        --out "$LOGS/step_curve_capacity.json" \
+        > "$LOGS/stage5b_step_curve.log" 2>&1
+    say "stage 5b step curve exit=$?"
 else
     say "SKIP stage 5b: checkpoints/medium_1m_full/history.json does not exist"
 fi

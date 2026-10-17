@@ -268,6 +268,27 @@ have been measured over, training steps are about three times more efficient per
 doubling than inference budget, the crossover for this hardware sits near ten
 thousand queries, and nobody has measured what either law does past it.
 
+Two independent routes to the same quantity agree, which is worth recording
+because almost nothing else in this project has a second measurement. The
+matched-pair exponent above comes from two checkpoints scored on 2,321 holdout
+molecules; restricting each run's own 500-molecule training trace to the same
+8,508–21,117 window gives 0.934 for `small_1m` and 0.789 for `small_100k_long`,
+against the pair's 1.062 and 0.817 on the "all" band. Different evaluation sets,
+different draws, the same numbers to within a tenth, and the same ordering
+between the two corpora.
+
+**Pre-registered for block 2, and free.** That windowed trace exponent is the
+one way to ask whether capacity changes the step law, because `small_1m` and
+`medium_1m_full` train on the same shard and evaluate on the same validation
+draw every 1,500 steps. Pinning the window to 8,508–21,117 makes their
+exponents comparable without any extrapolation, and the window is necessary
+rather than tidy: on an accelerating curve an unwindowed exponent mostly reports
+how far each run happened to get. Registered: if capacity is a separate dial
+from training length, the 15.1M model's windowed exponent should exceed
+`small_1m`'s 0.934; if the two lie together, then capacity buys a level and
+training length owns the slope. Wired into block 3 as part of stage 5b, where it
+costs nothing.
+
 ### A bug this exposed
 
 `budget_curve.py` crashed on the fourth run with `OverflowError: math range

@@ -166,3 +166,4 @@ dist/
 !/results/overnight6/size_bias_s1m_8k_t06.json
 !/results/overnight6/step_curve_1m.json
 !/results/overnight6/step_curve_100k.json
+!/results/overnight6/step_curve_capacity.json
