@@ -63,7 +63,13 @@ def protocol(rec: dict) -> tuple:
     return (
         valid.get("budget", "legacy-string-budget"),
         tuple(valid.get("ks", ())),
-        slice_.get("mean_samples_per_query"),
+        # Presence of the top-up, not the sample count. The count was a usable
+        # proxy only while every model saturated the old fixed draw at exactly
+        # 40 strings; under the top-up it varies from eval to eval within one
+        # run, because a more confident model repeats itself more and needs more
+        # draws to fill the same list, so reading it as a protocol change made
+        # this guard refuse every post-top-up run on its own.
+        "budget_filled_rate" in slice_,
     )
 
 
@@ -134,8 +140,8 @@ def main(names: list[str]) -> None:
         lines = "\n".join(f"  {n}: {s}" for n, s in signatures.items())
         raise SystemExit(
             "these runs were not scored the same way, so their numbers are not\n"
-            "comparable at any step. Signature is (budget, ks, n_queries, "
-            "samples/query):\n" + lines + "\n"
+            "comparable at any step. Signature is (budget, ks, "
+            "tops-up-to-k-molecules):\n" + lines + "\n"
             "Use scripts/compare_checkpoints.py, which re-scores every "
             "checkpoint under one protocol."
         )

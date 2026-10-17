@@ -61,6 +61,40 @@ def _ols(xs: list[float], ys: list[float]) -> tuple[float, float, float] | None:
     return slope, my - slope * mx, sxy / math.sqrt(sxx * syy)
 
 
+def trace_protocol(name: str, root: Path = Path("checkpoints")) -> tuple:
+    """A signature of how a run's in-training evaluation was scored.
+
+    Two runs' traces are only comparable if this matches. It changed mid-project
+    on 2026-10-14: before then an evaluation drew a fixed 40 strings per query
+    and scored rec@20 over however many distinct molecules that yielded --
+    13.5 of 20 by the end of `small_1m` -- and after it the sampler tops up
+    until it has 20 distinct molecules, which is a strictly larger budget and
+    scores several points higher on identical weights. Comparing across that
+    boundary reads a budget change as capacity or data, which is the error this
+    whole file exists to price.
+
+    The top-up is detected by `budget_filled_rate`, a field added with it. The
+    sample count itself cannot be used: under the top-up it legitimately varies
+    from eval to eval, because a more confident model repeats itself more and
+    needs more draws to fill the same list.
+    """
+    path = root / name / "history.json"
+    sigs = set()
+    for row in json.loads(path.read_text()):
+        valid = row.get("valid") or {}
+        sl = valid.get("slices", {}).get("fp_unseen") or valid.get("slices", {}).get("all") or {}
+        sigs.add(
+            (
+                valid.get("budget", "legacy-string-budget"),
+                tuple(valid.get("ks", ())),
+                "budget_filled_rate" in sl,
+            )
+        )
+    if len(sigs) > 1:
+        raise SystemExit(f"{name}: evaluation protocol changed mid-run: {sorted(map(str, sigs))}")
+    return sigs.pop() if sigs else ()
+
+
 def read_trace(name: str, root: Path = Path("checkpoints")) -> list[tuple[int, float]]:
     """(step, rec@20) from a run's history, dropping unusable points.
 
@@ -206,9 +240,13 @@ def main(
     if window is not None:
         click.echo(f"(restricted to steps {window[0]:,}..{window[1]:,})")
     click.echo("")
-    header = f"{'run':>18}{'pts':>5}{'steps':>18}{'rec@20':>8}{'c':>8}{'r':>9}{'early c':>9}{'error':>9}"
+    header = (
+        f"{'run':>18}{'pts':>5}{'steps':>18}{'rec@20':>8}{'c':>8}{'r':>9}"
+        f"{'early c':>9}{'error':>9}{'tops up':>9}"
+    )
     click.echo(header)
     click.echo("-" * len(header))
+    protocols = {name: trace_protocol(name, checkpoints) for name in names}
     for name in names:
         trace = read_trace(name, checkpoints)
         if window is not None:
@@ -232,16 +270,33 @@ def main(
             tail = f"{ec:>9.3f}{err:>+9.2f}"
         else:
             tail = f"{'--':>9}{'--':>9}"
+        entry["protocol"] = [str(x) for x in protocols[name]]
         report["traces"][name] = entry
+        tops_up = protocols[name][2] if len(protocols[name]) > 2 else None
         click.echo(
             f"{name:>18}{len(trace):>5}{f'{trace[0][0]:,}..{trace[-1][0]:,}':>18}"
-            f"{trace[-1][1]:>8.4f}{c:>8.3f}{r:>9.4f}{tail}"
+            f"{trace[-1][1]:>8.4f}{c:>8.3f}{r:>9.4f}{tail}{str(tops_up):>9}"
         )
     click.echo(
         "\n'early c' refits on the first half of the run and 'error' scores that fit against "
         "the last point. A negative error with a smaller early exponent is a curve that "
         "accelerates in log-log space, so the exponent is a local slope, not a law."
     )
+
+    distinct = {protocols[n] for n in names if protocols[n]}
+    report["comparable"] = len(distinct) <= 1
+    if len(distinct) > 1:
+        report["protocols"] = {n: [str(x) for x in protocols[n]] for n in names}
+        _write(out, report)
+        raise SystemExit(
+            "\nThese traces are NOT comparable with each other: the in-training evaluation "
+            "protocol differs between them (see the 'tops up' column). Each run's own "
+            "exponent and extrapolation check above is still valid, because a run is "
+            "internally consistent; the comparison between columns is not, and a budget "
+            "difference between them would read as capacity or data. Use "
+            "compare_checkpoints.py, which re-scores every checkpoint itself under one "
+            "deliberate protocol."
+        )
 
     if pair is None:
         _write(out, report)

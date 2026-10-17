@@ -289,6 +289,31 @@ from training length, the 15.1M model's windowed exponent should exceed
 training length owns the slope. Wired into block 3 as part of stage 5b, where it
 costs nothing.
 
+> **Void, and not resolvable from anything on disk.** The two runs do not share
+> a validation protocol, and the sentence above asserting that they do was never
+> checked. The in-training evaluation changed on 2026-10-14 (`6c585e5`, "Top up
+> evaluation sampling until k distinct candidates"): before it, an evaluation
+> drew a fixed 40 strings per query and scored rec@20 over whatever distinct
+> molecules that produced — **13.5 of 20** by the end of `small_1m` — and after
+> it the sampler tops up until it has 20, reaching 18.4 on `medium_1m_full` at
+> 128 draws per query. The newer run is scored with a 37% larger list, so its
+> faster-falling deficit is partly a budget difference. It measured 1.143
+> against `small_1m`'s 0.934, and that is not a comparison.
+>
+> `matched_steps.py` refused to print its half of stage 5b for exactly this
+> reason and exited 1; `step_curve.py` had no such guard and printed anyway, so
+> it has one now, with the same signature and the same refusal. Neither needed
+> a result to catch this — the guard was written on night 2, after the same
+> class of error, and only one of the two scripts had it.
+>
+> No other checkpoint is post-top-up: `medium_1m` at 2,500 steps is on the old
+> protocol too, so a step exponent at 15.1M capacity cannot be built from
+> existing artefacts at all. The question needs a second 15.1M checkpoint at a
+> different step count, scored by `compare_checkpoints.py` rather than from a
+> trace. It is not answered this weekend, and the capacity pre-registration
+> that *is* answerable — the level, on the holdout protocol, both models in one
+> call with identical settings — is what stage 6 is measuring.
+
 ### A bug this exposed
 
 `budget_curve.py` crashed on the fourth run with `OverflowError: math range

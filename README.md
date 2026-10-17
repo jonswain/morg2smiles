@@ -296,11 +296,17 @@ training once. At 1.337 s/step and 0.016 s/slot/query on this hardware, cutting
 the deficit by a quarter is cheaper to buy with budget below ~18,000 queries
 and with training above it; for halving it, the crossover is ~9,000. So the
 brute-force route is the right answer for a 2,000-query benchmark and the wrong
-answer at scale. One caveat the script prints rather than hides: unlike the
-budget law, the step law is *not* straight in log-log — fitting a trace's first
-half underpredicts its last point by 2.6 to 4.3 points and the exponent climbs
-as range is added — so the step exponent is a local slope, and every number here
-is computed inside the measured interval.
+answer at scale.
+
+Two caveats the script prints rather than hides. Unlike the budget law, the step
+law is *not* straight in log-log — fitting a trace's first half underpredicts
+its last point by 2.6 to 4.3 points and the exponent climbs as range is added —
+so the step exponent is a local slope, and every number here is computed inside
+the measured interval. And whether *capacity* moves this exponent is not known:
+it would need two checkpoints of one size at different step counts scored under
+one protocol, and the in-training traces cannot stand in, because the
+evaluation protocol changed partway through the project and only the newest run
+is on the far side of it.
 
 Independence is ruled out by a wide margin — the model's own first-slot rate
 would have finished 35+ by k=20 (0.9986 predicted against 0.6890 measured) —

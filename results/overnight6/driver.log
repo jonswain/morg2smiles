@@ -18,3 +18,11 @@
 [10-17 23:42:39] === block 1 done, 122 min to spare ===
 [10-17 23:42:40] === block 2 start, 1098 min to 18:00 ===
 [10-17 23:42:40] stage 5: medium_1m_full, 15.1M params, 1M shard, up to 21,117 steps / 16 h
+[10-18 11:15:04] stage 5 exit=0
+[10-18 11:15:04] stage 5 stopped at: epoch 3 step 21117 / step budget of 21117 reached / 11.2 h
+[10-18 11:15:04] === block 2 done, 405 min to spare ===
+[10-18 11:15:04] === blocks 3-5 start, 1155 min to Mon 06:30 ===
+[10-18 11:15:04] stage 5b: matched-step trace, medium_1m_full against small_1m
+[10-18 11:15:04] stage 5b matched steps exit=1
+[10-18 11:15:04] stage 5b step curve exit=0
+[10-18 11:15:04] stage 6: medium_1m_full and small_1m on the common protocol at T=0.6

@@ -1,0 +1,67 @@
+{
+  "traces": {
+    "medium_1m_full": {
+      "n_points": 10,
+      "first_step": 9000,
+      "last_step": 21117,
+      "rec_at_last": 0.9107505070993914,
+      "exponent": 1.1430987143278137,
+      "correlation": -0.957732626511164,
+      "protocol": [
+        "molecules",
+        "(1, 5, 20)",
+        "True"
+      ]
+    },
+    "small_1m": {
+      "n_points": 10,
+      "first_step": 9000,
+      "last_step": 21117,
+      "rec_at_last": 0.8742393509127789,
+      "exponent": 0.9339580678322444,
+      "correlation": -0.9468904251297907,
+      "protocol": [
+        "molecules",
+        "(1, 5, 20)",
+        "False"
+      ]
+    },
+    "small_100k_long": {
+      "n_points": 10,
+      "first_step": 9000,
+      "last_step": 21117,
+      "rec_at_last": 0.8256513026052105,
+      "exponent": 0.7894821932491838,
+      "correlation": -0.9875199470990924,
+      "protocol": [
+        "molecules",
+        "(1, 5, 20)",
+        "False"
+      ]
+    }
+  },
+  "pair": {},
+  "break_even": {},
+  "trace_window": {
+    "lo": 8508,
+    "hi": 21117
+  },
+  "comparable": false,
+  "protocols": {
+    "medium_1m_full": [
+      "molecules",
+      "(1, 5, 20)",
+      "True"
+    ],
+    "small_1m": [
+      "molecules",
+      "(1, 5, 20)",
+      "False"
+    ],
+    "small_100k_long": [
+      "molecules",
+      "(1, 5, 20)",
+      "False"
+    ]
+  }
+}

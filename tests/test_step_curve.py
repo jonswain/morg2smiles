@@ -21,7 +21,7 @@ import math
 import pytest
 from click.testing import CliRunner
 
-from scripts.step_curve import break_even, fit_trace, pair_exponent, read_trace
+from scripts.step_curve import break_even, fit_trace, pair_exponent, read_trace, trace_protocol
 from scripts.step_curve import main as step_curve
 
 
@@ -95,6 +95,70 @@ class TestReadTrace:
             )
         )
         assert read_trace("r", tmp_path) == [(1500, 0.3)]
+
+
+class TestTraceProtocol:
+    def _write(self, tmp_path, name, rows):
+        d = tmp_path / name
+        d.mkdir(parents=True, exist_ok=True)
+        (d / "history.json").write_text(json.dumps(rows))
+
+    def _row(self, step, rec, *, tops_up):
+        sl = {"recovery_at_k": {"20": rec}}
+        if tops_up:
+            sl["budget_filled_rate"] = 0.9
+        return {"step": step, "valid": {"budget": "molecules", "ks": [1, 5, 20],
+                                        "slices": {"fp_unseen": sl}}}
+
+    def test_the_top_up_is_part_of_the_signature(self, tmp_path):
+        self._write(tmp_path, "old", [self._row(1500, 0.3, tops_up=False)])
+        self._write(tmp_path, "new", [self._row(1500, 0.3, tops_up=True)])
+        assert trace_protocol("old", tmp_path) != trace_protocol("new", tmp_path)
+
+    def test_a_varying_sample_count_is_not_a_protocol_change(self, tmp_path):
+        """Under the top-up the draw count varies within one run, legitimately."""
+        rows = [self._row(1500, 0.3, tops_up=True), self._row(3000, 0.5, tops_up=True)]
+        rows[0]["valid"]["slices"]["fp_unseen"]["mean_samples_per_query"] = 92.3
+        rows[1]["valid"]["slices"]["fp_unseen"]["mean_samples_per_query"] = 128.4
+        self._write(tmp_path, "r", rows)
+        assert trace_protocol("r", tmp_path)  # does not raise
+
+    def test_a_real_mid_run_change_is_refused(self, tmp_path):
+        self._write(
+            tmp_path, "r",
+            [self._row(1500, 0.3, tops_up=False), self._row(3000, 0.5, tops_up=True)],
+        )
+        with pytest.raises(SystemExit, match="protocol changed mid-run"):
+            trace_protocol("r", tmp_path)
+
+    def test_the_cli_refuses_to_compare_across_the_boundary(self, tmp_path):
+        """The error this guard exists for: a budget change read as capacity."""
+        self._write(tmp_path, "old", [self._row(s, 1 - 50.0 * s**-0.8, tops_up=False)
+                                      for s in (1500, 3000, 6000, 12000, 21000)])
+        self._write(tmp_path, "new", [self._row(s, 1 - 50.0 * s**-1.1, tops_up=True)
+                                      for s in (1500, 3000, 6000, 12000, 21000)])
+        out = tmp_path / "o.json"
+        result = CliRunner().invoke(
+            step_curve,
+            ["--runs", "new,old", "--checkpoints", str(tmp_path), "--out", str(out)],
+        )
+        assert result.exit_code == 1
+        assert "NOT comparable" in result.output
+        # Each run's own fit is still reported, because a run is self-consistent.
+        report = json.loads(out.read_text())
+        assert report["comparable"] is False
+        assert report["traces"]["old"]["exponent"] == pytest.approx(0.8)
+        assert report["traces"]["new"]["exponent"] == pytest.approx(1.1)
+
+    def test_one_protocol_compares_cleanly(self, tmp_path):
+        self._write(tmp_path, "a", [self._row(s, 1 - 50.0 * s**-0.8, tops_up=True)
+                                    for s in (1500, 3000, 6000, 12000, 21000)])
+        self._write(tmp_path, "b", [self._row(s, 1 - 50.0 * s**-1.1, tops_up=True)
+                                    for s in (1500, 3000, 6000, 12000, 21000)])
+        result = CliRunner().invoke(
+            step_curve, ["--runs", "a,b", "--checkpoints", str(tmp_path)]
+        )
+        assert result.exit_code == 0, result.output
 
 
 class TestFitTrace:
