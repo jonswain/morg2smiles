@@ -231,3 +231,14 @@ capacity pays per step regardless of where either run stopped.** If the traces
 lie on top of each other, capacity is not paying at this budget. That
 comparison does not depend on either run having converged, which is the defect
 in the endpoint comparison that block 1 just exposed.
+
+The tool for it already existed: `scripts/matched_steps.py`, written on night 2
+after an endpoint comparison credited 10× the data with a gain that 2.5× the
+steps had produced — the same error, two weeks earlier, in the same project.
+Its one standing caveat is that each run is scored against the validation split
+of its own shard, which for this pair does not apply: `small_1m` and
+`medium_1m_full` share `data/shards/1m` and evaluate on it every 1,500 steps,
+so the columns are matched on data and cadence and the only variable between
+them is the parameter count. It is wired into the block 3 driver as stage 5b,
+ahead of the scoring, because it costs nothing and runs even if block 2 is
+truncated.

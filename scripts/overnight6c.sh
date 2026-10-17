@@ -4,11 +4,13 @@
 # against one hard deadline rather than in time slots: whatever does not fit
 # is skipped, cheapest-and-sharpest first.
 #
+#  5b matched-step trace against small_1m          seconds (reads history.json)
 #  6  score medium_1m_full on both protocols        ~3 h   (the capacity arm)
 #  7  size_mix_t35 on the common protocol at T=0.6  ~20 min
 #  8  the reverse-direction mix, and score it       ~3.7 h
 #
-# Stage 6 is what block 2 was for, so it goes first. Stage 7 is twenty minutes
+# Stage 5b is free and is the reading block 1 showed we need, so it goes first.
+# Stage 6 is what block 2 was for, so it goes next. Stage 7 is twenty minutes
 # for a number the project has been quoting wrong: night 5 found the first
 # dose's exchange rate roughly halves when the decoder is cooled (2.34 small
 # molecules per large one at T=1.0, 1.28 at T=0.6), and the second dose's 4.4
@@ -36,6 +38,28 @@ fits() {
 }
 
 say "=== blocks 3-5 start, $(( $(remaining) / 60 )) min to Mon 06:30 ==="
+
+# ---- stage 5b: the matched-step trace ------------------------------------
+# Pre-registered after block 1, which showed that nothing here is converged at
+# 21,117 steps: 2.5x the steps still buys +0.34 rec@20. So a flat endpoint
+# comparison between a 7.95M and a 15.1M model at a matched step count cannot
+# tell "capacity does not pay" from "the bigger model is further from its own
+# asymptote at the same step". The two training traces can. Both runs use
+# data/shards/1m and evaluate on its valid split every 1,500 steps, so for this
+# one pair matched_steps.py's usual caveat -- each run scored on its own shard
+# -- does not apply, and the only variable left between the columns is the
+# parameter count. Registered: medium_1m_full above small_1m at every matched
+# step and still rising at the last, or capacity is not paying at this budget.
+# Costs nothing: it reads two history.json files. Runs even if block 2 was
+# truncated, since a partial trace is still a trace.
+if [ -f checkpoints/medium_1m_full/history.json ]; then
+    say "stage 5b: matched-step trace, medium_1m_full against small_1m"
+    $PY -u scripts/matched_steps.py medium_1m_full small_1m \
+        > "$LOGS/stage5b_matched_steps.md" 2>&1
+    say "stage 5b exit=$?"
+else
+    say "SKIP stage 5b: checkpoints/medium_1m_full/history.json does not exist"
+fi
 
 # ---- stage 6: the capacity arm -------------------------------------------
 if [ ! -f checkpoints/medium_1m_full/best.pt ]; then
