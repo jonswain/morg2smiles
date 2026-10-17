@@ -195,6 +195,79 @@ was fitted on k ≤ 20 and held to k=60 on an arm it had never seen is the
 strongest evidence so far that the extrapolated prices are lower bounds rather
 than fiction.
 
+### The third route, priced in the same currency as the other two
+
+Block 1 was a correction, but it leaves a question the project has never asked.
+If training length is the dial, how does its price compare with the one
+`budget_curve.py` measured? Both are answerable from files already on disk, so
+this cost no GPU time at all: `scripts/step_curve.py`.
+
+The deficit turns out to follow a power law in training steps too, and the
+exponent can be measured on exactly the same queries as the budget exponent, by
+taking the two checkpoints that differ only in step count and reading the
+deficit at one fixed k:
+
+    c = log(D at 8,508 steps / D at 21,117 steps) / log(21,117 / 8,508)
+
+Same architecture, same shard, same protocol, same k — so `b` and `c` are
+commensurable. Reading both at k=20 on the 1M-corpus pair:
+
+| band | b (budget) | c (steps) | c / b |
+|---|---|---|---|
+| 30–34 | 0.396 | 1.294 | 3.27 |
+| 35–39 | 0.387 | 1.240 | 3.20 |
+| 40–49 | 0.263 | 0.893 | 3.39 |
+| 50+ | 0.144 | 0.366 | 2.54 |
+| 35+ | 0.281 | 0.937 | 3.33 |
+| all | 0.317 | 1.062 | 3.35 |
+
+The 100k pair gives 2.86, 3.10, 2.92, 3.08, 3.13, 3.03 for the same bands. So
+across two corpora and every size band, **a doubling of training steps cuts the
+recovery deficit about 3.1 times as far as a doubling of inference budget**, and
+the ratio is flat in molecule size even though both exponents fall by a factor
+of three across the bands. Above 50 atoms, where the budget exponent is nearly
+dead at 0.09–0.14, the step exponent is still 0.28–0.37.
+
+That is not yet a recommendation, because the two are not the same kind of
+spend: budget is charged on every query forever, training once. Cutting the
+deficit by a factor f needs `f^(−1/b)` times the budget or `f^(−1/c)` times the
+steps, so there is a query count above which the longer run is cheaper. With
+training at 1.337 s/step (`small_1m`: 7.84 h for 21,117 steps) and generation at
+0.016 s/slot/query (`small_1m_matched`: 2,298 s for 2,400 queries × 60 slots),
+starting from 21,117 steps and k=20:
+
+| band | queries, for a ×0.75 cut | for a ×0.5 cut |
+|---|---|---|
+| 35–39 | 20,900 | 13,300 |
+| 40–49 | 16,900 | 8,000 |
+| 50+ | 16,600 | 4,100 |
+| 35+ | 17,900 | 9,000 |
+
+**Below roughly ten thousand queries, buy budget; above it, train longer.** The
+deeper the cut, the more the longer run wins, which is `c > b` restated. This
+project's own protocols are 2,000 and 2,400 queries, an order of magnitude below
+the crossover — so every "the brute-force route is affordable" statement in the
+README is correct *for a benchmark*, and would be the wrong advice for anyone
+actually inverting fingerprints at scale.
+
+**And the step law is the weaker of the two, which the script reports rather
+than hides.** The budget deficit is straight in log-log to |r| ≥ 0.991 over a
+twelvefold range of k, and fitting it to k ≤ 20 predicts k=60 within a few
+points. The step deficit is not straight. Fitting a 15-point trace to its first
+half and predicting its last point *underestimates* recovery by 4.33 points on
+`small_1m` and 2.64 on `small_100k_long`, with the fitted exponent climbing from
+0.568 to 0.805 as more of the range is included. A curve accelerating in log-log
+space cannot continue — recovery is bounded by 1 — so `c` is a local slope at
+the top of the measured range and nothing more. Every number above is computed
+inside the measured interval for that reason; the temptation to ask what 80,000
+steps would buy is exactly the extrapolation that cost this project its
+brute-force prices two days ago, and it is declined.
+
+The honest summary is narrower than the table looks: within the range both laws
+have been measured over, training steps are about three times more efficient per
+doubling than inference budget, the crossover for this hardware sits near ten
+thousand queries, and nobody has measured what either law does past it.
+
 ### A bug this exposed
 
 `budget_curve.py` crashed on the fourth run with `OverflowError: math range

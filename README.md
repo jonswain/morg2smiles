@@ -281,6 +281,27 @@ nothing is ever found in a single try — and above 50 heavy atoms `A` is 1.00 t
 and training length is what moves it. Below 35 atoms `A` falls from 0.98 to
 0.44 and carries half the gain.
 
+**Training steps are about three times more efficient per doubling than
+inference budget, and the crossover is near ten thousand queries.** The deficit
+also follows a power law in training steps, and its exponent can be read on
+exactly the same queries at the same k by taking two checkpoints that differ
+only in step count (`scripts/step_curve.py`). At k=20 on the 1M-corpus pair the
+step exponent runs 1.29 / 1.24 / 0.89 / 0.37 across the size bands against the
+budget exponent's 0.40 / 0.39 / 0.26 / 0.14 — a ratio of 2.5 to 3.4, flat in
+molecule size, and reproduced on the 100k pair at 2.9 to 3.1. Above 50 atoms,
+where budget is nearly dead at b = 0.14, steps still move at 0.37.
+
+The two are not the same kind of spend: budget is charged per query forever,
+training once. At 1.337 s/step and 0.016 s/slot/query on this hardware, cutting
+the deficit by a quarter is cheaper to buy with budget below ~18,000 queries
+and with training above it; for halving it, the crossover is ~9,000. So the
+brute-force route is the right answer for a 2,000-query benchmark and the wrong
+answer at scale. One caveat the script prints rather than hides: unlike the
+budget law, the step law is *not* straight in log-log — fitting a trace's first
+half underpredicts its last point by 2.6 to 4.3 points and the exponent climbs
+as range is added — so the step exponent is a local slope, and every number here
+is computed inside the measured interval.
+
 Independence is ruled out by a wide margin — the model's own first-slot rate
 would have finished 35+ by k=20 (0.9986 predicted against 0.6890 measured) —
 and refitting on k ≤ 20 to predict k=60 lands within half a point where n is
