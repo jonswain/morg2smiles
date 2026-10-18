@@ -369,9 +369,9 @@ is why the *undertrained* row is the informative one. And a first pass on the
 30+ protocol's 127 queries at 50+ reported **no measurable gain** (6 up, 4
 down, p = 0.75); the powered protocol shows a real one, so that sentence is
 withdrawn. A single-digit discordant-pair count is not evidence of absence.
-What is genuinely unresolved is 60+, at +1.48 points [−0.49, +3.94] on 203
-queries — recorded as underpowered, not as a null, and unanswerable from this
-pool, which holds only 243 such molecules.
+60+ stays unresolved at +1.48 points [−0.49, +3.94] on 203 queries — recorded
+as underpowered, not as a null, and unanswerable from this data: the largest
+clean pool holds 308 molecules at 60+ and none at all above 64.
 
 On these large molecules capacity separates the two failure modes cleanly:
 exact-structure accuracy at 50+ nearly triples (0.0190 → 0.0538, p = 1e-7) and
@@ -428,6 +428,17 @@ large. On the 100k arm, generated to k=60 for the first time, the law fitted to
 its own k ≤ 20 rungs predicted 0.232 at 35+ against 0.249 measured, where
 independence said 0.47. That is the evidence that the extrapolated prices are
 lower bounds rather than fiction.
+
+**Every size statement below is bounded at 64 heavy atoms.** Preprocessing
+filters the corpus to 3–64 heavy atoms (`max_heavy_atoms`, default 64 in
+`src/morg2smiles/data/prepare.py`), so "50+" throughout this README means
+50–64, and the deepest band the data can reach holds 0.54% of it — 308
+molecules at 60+ across the largest clean validation pool, with nothing above
+64 anywhere. This bounds what the "capability ceiling on large molecules"
+finding can mean: it is a ceiling measured inside a window that stops just
+past 60 atoms, and the project has no evidence about drug-sized molecules
+beyond it. It also closes the 60+ question raised below as unanswerable from
+this data rather than merely unmeasured.
 
 **The size defect is not the target it looked like, and the cliff is a split in
 the query population.** The clearest-looking lever — the decoder offers 45-atom
@@ -849,7 +860,8 @@ Open questions, in rough order of expected value:
    0.8962, so almost every valid candidate is a correct one and the failures are
    not syntax errors. Of 206 misses, **2** are fingerprint collisions: the input
    nearly always determines the answer and the model cannot reach it. Recovery
-   falls from 0.981 below 15 heavy atoms to 0.366 at 50–69, and from 0.953 with
+   falls from 0.981 below 15 heavy atoms to 0.366 at 50–64 (the corpus ceiling;
+   nothing in it exceeds 64 heavy atoms), and from 0.953 with
    no stereocentres to 0.355 with five or more. Three independently seeded runs
    then agreed on which molecules are impossible — 80% of the evaluation set is
    unanimous, and the median miss is 34 heavy atoms against 24 for the

@@ -1188,3 +1188,31 @@ project on roughly 130 queries and both have been overturned by enlarging the
 sample — the earlier one was the count-fingerprint question at p = 0.32. The
 operational lesson is cheap and I keep relearning it: a discordant-pair count
 in single digits is not evidence of absence, however good the p-value looks.
+
+### The 60+ question is unanswerable, and the reason is a default flag
+
+Stage 11 left 60+ open and said it needed a larger clean pool rather than a
+larger sample. Checking whether such a pool exists answered the question a
+different way: it does not, and it cannot.
+
+| clean pool | total | 50+ | 60+ | 65+ |
+| --- | --- | --- | --- | --- |
+| `data/shards/1m` valid | 45,528 | 1,068 | 243 | **0** |
+| `data/shards/full` valid | 59,846 | 1,421 | 308 | **0** |
+
+Nothing above 64 heavy atoms exists anywhere in the corpus, because
+`src/morg2smiles/data/prepare.py:68` sets `max_heavy_atoms: int = 64` and the
+shards were all built with the default. The largest pool available offers 308
+molecules at 60+ against stage 11's 203 — a 1.5-fold power increase on an
+effect that needed roughly fourfold — so the 60+ row stays underpowered no
+matter how the draw is done. The question is closed as unanswerable from this
+data.
+
+That flag deserves more prominence than it has had. **Every size claim in this
+project lives inside a 3–64 atom window**, which was not stated in the README
+or in any of these night logs until now. "50+" has always meant 50–64. The
+headline finding that this is "a capability ceiling on large molecules, not an
+information limit" is true of molecules up to 64 heavy atoms and says nothing
+about anything larger — and a good deal of medicinal chemistry sits above that
+line. Raising the cap is a `prepare.py` re-run plus retraining, so it is not a
+cheap experiment, but it is now a known boundary rather than an invisible one.
