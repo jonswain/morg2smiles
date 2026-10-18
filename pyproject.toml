@@ -32,6 +32,11 @@ packages = ["src/morg2smiles"]
 testpaths = ["tests"]
 addopts = "-q"
 markers = ["slow: tests that need a prepared dataset shard"]
+# Several tests import the analysis entry points from `scripts/`, which is not
+# a package and is not installed, so the repo root has to be importable. `src`
+# is listed too so `pytest` works in a checkout with no editable install; with
+# one, it resolves to the same files.
+pythonpath = ["src", "."]
 
 [tool.ruff]
 line-length = 100
