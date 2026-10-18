@@ -1056,3 +1056,45 @@ Worth noting which cells moved the range: `small_full` and `medium_1m_8k`, at
 0.321 and 0.320, are the two newest and the two most undertrained, and they sit
 below the 0.334–0.366 band that six cells supported. That is a widening, not a
 trend; the ratio is not monotone in recovery across the eight.
+
+## Stage 11 — registering a powered test of the 50+ null, before it runs
+
+The strongest new claim of stage 10 is also its weakest-powered: "above about
+50 heavy atoms, doubling the parameters buys no measurable recovery" rests on
+127 queries and a 6-up/4-down discordant split. That is enough to reject the
+uniform cut's 18-point prediction and nowhere near enough to measure what the
+true gain is. It should not sit in the README at that power when the fix costs
+no training at all.
+
+The clean pool holds **1,068** molecules at 50+ heavy atoms, against the 127
+the 30+ protocol happened to draw. So the test is `compare_checkpoints.py` with
+`--min-heavy-atoms 50 --eval-n 1000 --eval-k 60` at T=0.6 on the two 8,508-step
+checkpoints — the pair where the null was found, and the pair with the power,
+because its 50+ deficit is 0.937 rather than the 21,117-step pair's 0.551.
+
+This is a **new protocol**: a different query set from the 30+ large protocol,
+so its absolute numbers are not comparable with any table above. What it
+measures is a paired difference between two models on identical queries, which
+needs no such comparability.
+
+**Pre-registered, 02:40 Monday, before the run starts.** From the 127-query
+read, `small_1m_matched` should land near 0.063 and `medium_1m_8k` near 0.079,
+and the paired difference near **+1.6 points**. With about 1,000 queries the
+discordant count should be roughly 48 up and 32 down, which puts the SE of the
+paired difference near 1.0 point.
+
+- **CONFIRMED** if the paired difference is **below +5.0 points**. That rejects
+  the uniform cut's +18.0-point prediction at 50+ by a wide margin and makes
+  the stage-10 finding safe to state: the multiplicative description of
+  capacity holds over 30–49 heavy atoms and fails above 50.
+- **FALSIFIED** if the difference is **above +5.0 points**, which would mean the
+  n=127 null was a sampling accident, the uniform cut survives at 50+ after
+  all, and stage 10's withdrawal of "uniform across 32 cells" was itself
+  premature and has to be un-withdrawn.
+
+A secondary question is registered with an explicit expectation of failure:
+whether the gain at 50+ is distinguishable from **zero**. At the predicted
+effect size and n it probably is not — the registered CI straddles zero — so
+the honest output is an interval on a small positive number, not a second null.
+Recording that in advance so that an inconclusive result cannot be presented
+afterwards as evidence for zero.
