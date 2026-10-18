@@ -322,11 +322,15 @@ Two caveats the script prints rather than hides. Unlike the budget law, the step
 law is *not* straight in log-log — fitting a trace's first half underpredicts
 its last point by 2.6 to 4.3 points and the exponent climbs as range is added —
 so the step exponent is a local slope, and every number here is computed inside
-the measured interval. And whether *capacity* moves this exponent is not known:
-it would need two checkpoints of one size at different step counts scored under
-one protocol, and the in-training traces cannot stand in, because the
-evaluation protocol changed partway through the project and only the newest run
-is on the far side of it.
+the measured interval. Whether *capacity* moves this exponent needs two
+checkpoints of one size at different step counts scored under one protocol; the
+in-training traces cannot stand in, because the evaluation protocol changed
+partway through the project and only the newest runs are on the far side of it.
+That pair is `medium_1m_8k` against `medium_1m_full`, pre-registered in
+`configs/medium_1m_8k.yaml` with its prediction fixed in advance: a constant
+factor cannot change a slope, so if capacity's gain is the flat 17% deficit cut
+measured below, the 15.1M row's step exponent comes back equal to the 8.0M
+row's 1.226.
 
 Independence is ruled out by a wide margin — the model's own first-slot rate
 would have finished 35+ by k=20 (0.9986 predicted against 0.6890 measured) —
@@ -541,8 +545,7 @@ both raise the number of right-sized molecules in the 20-candidate budget —
 1.93 per query, then 2.15 with the mix, 2.44 with cooling, 2.56 with both —
 while the chance that a right-sized candidate is the preimage stays between
 10.2% and 11.2% in all four cells. A constant conversion rate makes recovery
-linear in that count, so two interventions that each multiply it compose. What
-the cooled decoder does to the *cost* side is not yet measured.
+linear in that count, so two interventions that each multiply it compose.
 
 **And the exposure is already spent.** A second mix pushed harder and higher —
 threshold 35, factor 6, so 58.9% of the training diet comes from 35+ atoms
@@ -556,6 +559,19 @@ through log₂ exposure fits all six bands at **+4.52 points per doubling,
 r = 0.989** (`scripts/exposure_response.py`) — and a transfer at a constant
 price in points is a losing trade in molecules, because the bands being paid
 from hold 1,597 of the protocol's queries and the bands being bought hold 359.
+
+**Cooled, each dose is cheaper and the second dose is worth less.** Both doses
+have now been re-scored at the adopted T=0.6: the first dose's bill falls from
+2.3 small molecules per large one to 1.3, the second's from 4.4 to **3.5** —
+and the marginal step between them goes the other way, from 10.7 to **25.2**
+given up per one gained, buying 2.0 molecules for 50.5. Cooling and the first
+dose are substitutes rather than complements at the margin, because both work
+by raising the count of right-sized candidates in the budget, so once the
+decoder is cold the first dose has already collected most of what re-weighting
+can collect. The cooled exposure lines are +3.39 points per doubling for the
+first dose (r = 0.742) and +4.21 for the second (r = 0.988); the first dose's
+poor fit is entirely the 30–34 band, which gains +0.27 points at the same 1.69×
+exposure that buys 35–39 its +7.69.
 No threshold-and-factor escapes that arithmetic. If large molecules become the
 deliverable, the strongest arm measured is the factor-6 mix (+6.13 above 35
 atoms on the common protocol, +2.89 on the large one) and the reporting has to
@@ -705,8 +721,12 @@ Open questions, in rough order of expected value:
    locked together by `steps × batch = corpus × passes`. Until that runs, every
    extrapolation to PubChem scale from this repo is withdrawn — both night 1's
    0.993 and the 0.949 that briefly replaced it.
-3. **A full-length 15M run.** The capacity arm was cut to 1.75 h by the deadline
-   and is unanswered. Now known to be affordable at ~5.2 h per epoch.
+3. ~~**A full-length 15M run.**~~ **Done.** `medium_1m_full` trained to
+   `small_1m`'s own 21,117 steps on the same shard in 11.2 h, and capacity is
+   worth a flat 17% cut in the recovery deficit — the same fraction in every
+   size band and at every budget — which is +5.63 points at rec@1 and +1.33 at
+   rec@20. What remains open is whether that fraction holds at a second step
+   count, which is item 5.
 4. **The remaining 10%, now inspected.** Validity is 0.921 and `recovery@20` is
    0.8962, so almost every valid candidate is a correct one and the failures are
    not syntax errors. Of 206 misses, **2** are fingerprint collisions: the input
@@ -717,6 +737,22 @@ Open questions, in rough order of expected value:
    unanimous, and the median miss is 34 heavy atoms against 24 for the
    unanimously solved. **It is a capability ceiling on large molecules, not an
    information limit**, which is what the full-ChEMBL run is aimed at.
+5. **Is capacity's 17% a property of the step, or of where the 8M run
+   stopped?** Nothing here is converged at 21,117 steps, so a 15.1M model at a
+   matched step count is further from its own asymptote than an 8.0M one, and
+   the measured cut is a lower bound of unknown tightness. The test is the
+   fourth cell of a capacity × steps 2×2 — `medium_1m_8k`, 15.1M parameters at
+   8,508 steps — since a constant factor cannot change a slope. Pre-registered
+   in `configs/medium_1m_8k.yaml` and the one item here that costs a single
+   training run.
+6. **Does a second architecture beat a second seed?** One fifth of what either
+   capacity arm misses, the other one finds, and splitting a fixed 60 molecules
+   of budget across the two beats spending all 60 on the better of them in five
+   of six size bands. This is **not** controlled: the comparable same-model
+   seed unions were measured at k=20 on the 100k models, where recovery is near
+   0.35, and the luck share depends strongly on the recovery level. The control
+   is two seeds of `small_1m` at k=60, which is 11 h of training and does not
+   exist.
 
 ## Development
 

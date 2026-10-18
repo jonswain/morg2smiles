@@ -591,3 +591,47 @@ scales: **a 17% cut in the shortfall, uniform in size and budget, bought with
 Against the prices in block 1's third-route table, that is a poor trade per
 unit of compute and a good one per unit of budget — and it is the only
 intervention so far that does anything at k=1.
+
+## Stage 7 — the second dose's bill, cooled
+
+Twenty minutes for a number the project has been quoting from the wrong
+measurement. Night 5 found that the first size-mix dose's exchange rate roughly
+halves when the decoder is cooled to the adopted T=0.6 — 2.3 small molecules
+given up per large one gained at T=1.0, 1.3 cooled — but the second dose's 4.4
+was never re-measured, so every statement about the second dose's cost has been
+a hot number sitting in a cooled table. `size_mix_t35` scored on the common
+protocol at T=0.6 closes that, and the four-arm exposure table is re-fitted
+with it.
+
+| dose | exposure | bill, T=1.0 | bill, T=0.6 | pts/doubling, T=0.6 | r | net over 1,956 |
+|---|---|---|---|---|---|---|
+| `mix3x30` (×3, 30+) | 1.69× | 2.3 | **1.3** | +3.39 | 0.742 | −0.28 |
+| `mix6x35` (×6, 35+) | 3.06× | 4.4 | **3.5** | +4.21 | 0.988 | −2.76 |
+| marginal, dose 1 → 2 | | 10.7 | **25.2** | | | −2.48 |
+
+"Bill" is small molecules given up per large molecule gained. Both doses get
+cheaper cooled, as the first one did — and **the marginal step between them
+gets more than twice as expensive**, from 10.7 to 25.2 molecules given up per
+one gained. Cooled, the second dose buys 2.0 molecules for 50.5.
+
+That combination is not a contradiction and it is the most useful thing in the
+stage. Cooling and the first dose buy overlapping things: both work by raising
+the number of right-sized candidates in the budget, which night 5 measured
+directly (1.93 per query at baseline, 2.15 with the mix, 2.44 cooled, 2.56 with
+both). Once the decoder is cold, the first dose has already collected most of
+what re-weighting can collect, so the second dose is paying full price for a
+remainder that has shrunk. **Each dose is cheaper and the second dose is worth
+less — the interventions are substitutes at the margin, not complements**, even
+though night 5 showed them additive in points band by band.
+
+The exposure line is also better behaved at the second dose than the first:
+r = 0.988 against 0.742, and the two doses' slopes bracket the +3.4 the law was
+fitted at. The first dose's poor fit is the 30–34 band, which sits at 1.69×
+exposure and moves +0.27 points — an exposure increase that bought nothing,
+while 35–39 at the same exposure bought +7.69. That is the one point in this
+table that the single-exchange-rate story does not explain, and it is the band
+the reverse-direction control in stage 8 puts the most weight on.
+
+Stage 8's pre-registration is unchanged by this, because it was written against
+the T=0.6 dose-1 column, which night 5 had already measured and stage 7 did not
+touch.

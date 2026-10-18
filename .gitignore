@@ -183,3 +183,11 @@ dist/
 !/results/overnight6/comparison_k60_cap8k.json
 !/results/overnight6/miss_anatomy_cap8k.json
 !/results/overnight6/budget_curve_cap8k.json
+!/results/overnight6/comparison_common_t06_t35.json
+!/results/overnight6/band_common_t06_doses.json
+!/results/overnight6/band_common_t06_doses_structure.json
+!/results/overnight6/exposure_response_common_t06_doses.json
+!/results/overnight6/comparison_common_t06_rev.json
+!/results/overnight6/comparison_k60_s188m_8k_t06.json
+!/results/overnight6/miss_anatomy_s188m_8k_t06.json
+!/results/overnight6/budget_curve_s188m_8k_t06.json
