@@ -266,9 +266,8 @@ the exponent at 35+ heavy atoms:
 
 Averaged over the two rows and two columns, 2.5× the training steps is worth
 +0.142 and 10× the corpus +0.036 — a 4:1 split, the same ordering in every
-size band, and 5:1 on recovery itself. These models were under-trained, not
-corpus-limited. The exponent also carries no information the recovery level
-does not: across those four cells plus a temperature change, spanning
+size band, and 5:1 on recovery itself. The exponent also carries no information
+the recovery level does not: across those four cells plus a temperature change, spanning
 threefold in the exponent, `b ÷ rec@60` stays between 0.334 and 0.366. "Level
 and slope as separate dials" was the wrong frame, and an earlier version of
 this section attributed the step to capacity, which never varied between the
@@ -280,6 +279,27 @@ exponent at 35+ rises from 0.303 to 0.343, and `b ÷ rec@60` goes with it, from
 0.366 to 0.380 — a move smaller than the spread of that ratio across the other
 five runs. Six runs now, three interventions, and not one of them has changed
 the shape of the budget curve. They slide a model along it.
+
+**The corpus axis is convex, so that 4:1 is a figure for one segment of it.** A
+third point — `small_full`, 1,881,996 molecules at the same 8,508 steps and the
+same architecture — does not lie on the line through the other two. Per
+doubling of corpus, 90.7k → 900.9k is worth **+1.37 points** of rec@60 and
+900.9k → 1.88M is worth **+11.47**, a segment 8.4× steeper, and in deficit
+terms a 2.7% cut per doubling against 24.1%. Against training length's +23.55
+points per doubling, the ratio therefore goes from 17:1 on the segment measured
+first to **2.1:1** past 900k molecules. Training length is still the better
+buy; "under-trained, not corpus-limited" was read off the flat part of a convex
+curve and is withdrawn as stated.
+
+This is not a composition artefact — the three shards were sampled and are the
+same distribution, with 30+ shares of 38.81%, 38.70% and 38.82% and mean heavy
+atoms of 28.24, 28.27 and 28.30. It is also not identified as a *corpus* effect,
+because at a fixed step count `steps × batch = corpus × passes` forces the
+repetition rate down as the corpus grows — 12.01 passes, then 1.21, then 0.58 —
+and the steepening coincides with crossing one epoch. What the three points do
+establish without disambiguating that: **at a fixed 8,508 steps, 1.88M distinct
+molecules seen 0.58 times each beats 90,682 molecules seen twelve times each by
+16.7 points of rec@60.** At fixed compute, prefer more molecules to more passes.
 
 **What capacity buys is a constant fraction of the shortfall, the same
 fraction at every molecule size and every budget.** Doubling the parameters to
@@ -746,7 +766,13 @@ Open questions, in rough order of expected value:
    **epochs**, since at constant steps corpus size and repetition rate are
    locked together by `steps × batch = corpus × passes`. Until that runs, every
    extrapolation to PubChem scale from this repo is withdrawn — both night 1's
-   0.993 and the 0.949 that briefly replaced it.
+   0.993 and the 0.949 that briefly replaced it. **Now the most valuable open
+   question here**, not a footnote: the corpus axis turns out to be convex
+   (+1.37 then +11.47 points per doubling), the steepening coincides exactly
+   with the repetition rate crossing one pass, and nothing measured so far can
+   say which of the two is doing the work. Points per doubling of corpus — the
+   number anyone would want to quote — is not identified by the three points
+   that exist.
 3. ~~**A full-length 15M run.**~~ **Done.** `medium_1m_full` trained to
    `small_1m`'s own 21,117 steps on the same shard in 11.2 h, and capacity is
    worth a flat 17% cut in the recovery deficit — the same fraction in every

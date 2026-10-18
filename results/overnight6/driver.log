@@ -40,3 +40,7 @@
 [10-18 17:01:44] stage 8: scoring size_mix_rev on the common protocol at T=0.6
 [10-18 17:15:38] stage 8 scoring exit=0
 [10-18 17:15:38] stage 9: small_full at T=0.6, k=60, large protocol
+[10-18 18:11:15] stage 9 exit=0
+[10-18 18:11:34] stage 9 analyses exit=0
+[10-18 18:11:34] === blocks 3-5 done, 738 min to spare ===
+[10-18 18:11:34] stage 10: medium_1m_8k, 15.1M params, 1M shard, 8,508 steps

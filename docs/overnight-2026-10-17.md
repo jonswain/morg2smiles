@@ -755,3 +755,77 @@ common protocol cannot describe a redistributive intervention. Here are two
 interventions it cannot tell apart, moving in opposite directions. (Structure
 accuracy does separate them, 0.6115 against 0.6166 — a reminder that the two
 metrics are not interchangeable even when recovery coincides.)
+
+## Stage 9 — the corpus axis is convex, which revises block 1
+
+The third point on the corpus axis: `small_full`, 1,881,996 molecules, the same
+8M architecture and the same 8,508 steps as the other two, scored at T=0.6 and
+k=60 on the large protocol. Block 1 read the corpus axis off two points. The
+third one does not lie on the line between them.
+
+| molecules | epochs | rec@60, all | 35+ | b, all | b, 35+ |
+|---|---|---|---|---|---|
+| 90,682 | 12.01 | 0.4752 | 0.3101 | 0.157 | 0.104 |
+| 900,917 | 1.21 | 0.5205 | 0.3613 | 0.178 | 0.122 |
+| **1,881,996** | **0.58** | **0.6424** | **0.4982** | **0.216** | **0.160** |
+
+Per doubling of corpus, at matched steps and matched parameters:
+
+| segment | × | doublings | points | per doubling | deficit cut/doubling |
+|---|---|---|---|---|---|
+| 90.7k → 900.9k | 9.93× | 3.31 | +4.52 | **+1.37** | 2.7% |
+| 900.9k → 1.88M | 2.09× | 1.06 | +12.19 | **+11.47** | 24.1% |
+
+**The second segment is 8.4 times steeper than the first.** It is not a
+points-scale artefact — in deficit terms the cut per doubling goes from 2.7% to
+24.1%, a factor of nine — and it is not a composition artefact either. The
+three shards were sampled and measured: the 30+ share is 38.81%, 38.70% and
+38.82%, the 35+ share 19.08%, 18.92% and 18.95%, and mean heavy atoms 28.24,
+28.27 and 28.30. The bigger shards are not quietly better size mixes. They are
+the same distribution, more of it.
+
+### What this does to block 1's headline
+
+Block 1 concluded that training length beats corpus and that these models were
+under-trained rather than corpus-limited. Scored per doubling on the same
+numbers:
+
+| | per doubling | steps : corpus |
+|---|---|---|
+| steps, averaged over both corpus rows | +23.55 | — |
+| corpus, 90.7k → 900.9k | +1.37 | **17.2 : 1** |
+| corpus, 900.9k → 1.88M | +11.47 | **2.1 : 1** |
+
+**The ordering survives and the margin does not.** Training length is still the
+better buy, but at 17:1 only on the corpus segment block 1 happened to measure;
+past 900k molecules it is 2:1. Block 1's "these models were under-trained, not
+corpus-limited" was read off the flat part of a convex curve, and said without
+knowing the curve was convex. The honest version is that both axes pay, steps
+pay more, and the corpus axis was measured where it pays least.
+
+One asymmetry in that comparison: the corpus slopes are measured only at 8,508
+steps, and the steps slope is averaged over corpora that both sit on the flat
+segment. Whether the corpus axis is still this steep at 21,117 steps is not
+measured — there is no full-shard long run — so 2.1:1 is a figure for short
+training.
+
+### The confound that cannot be removed at constant steps
+
+The epochs column is the whole difficulty. At a fixed step count, `steps ×
+batch = corpus × passes`, so a larger corpus is necessarily a lower repetition
+rate: 12.01 passes, then 1.21, then 0.58. The steepening coincides with
+crossing one epoch — `small_full` never sees a molecule twice.
+
+Two readings, and nothing here separates them. Either diversity is what pays
+and repetition is nearly worthless, so the gain accelerates as repetition falls
+toward zero; or something specific happens at and below a single pass. Both
+predict exactly what was measured. This is open question 2 in the README, and
+stage 9 has made it the most valuable unanswered question in the project rather
+than a methodological footnote: the quantity everyone would want to quote from
+this table — points per doubling of corpus — is not identified by it.
+
+What stage 9 does establish, without needing that disambiguation, is narrower
+and solid: **at a fixed compute budget of 8,508 steps, spending it on 1.88M
+distinct molecules seen 0.58 times each beats spending it on 90,682 molecules
+seen twelve times each by 16.7 points of rec@60**, and the exponent rises with
+it, 0.157 → 0.216. At fixed compute, prefer more molecules to more passes.
