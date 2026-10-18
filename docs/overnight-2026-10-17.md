@@ -1260,3 +1260,81 @@ has answered: whether T=0.3 beats T=0.6 at 50+ for either model by more than
 the 1.6-point threshold this repo applies to training comparisons. If it does,
 **"T=0.6, top_p 1.0, everywhere"** is wrong as a universal and needs the size
 restriction the pooled sweep could not see.
+
+## Stage 12 — the decode handicap does not exist, and my registration was mis-specified
+
+Same 893 queries at 50+, same seed, T=0.3 instead of 0.6, both 8,508-step
+checkpoints. Paired query by query against stage 11.
+
+**Cooling does nothing at 50+, for either model, at any budget.** In the
+protocol's own molecules-budget convention:
+
+| | T=0.6 | T=0.3 | change | 95% CI | discordant | p |
+| --- | --- | --- | --- | --- | --- | --- |
+| 8.0M, k=20 | 0.0302 | 0.0269 | −0.34 | [−1.23, +0.56] | 6 up / 9 dn | 0.61 |
+| 8.0M, k=60 | 0.0571 | 0.0582 | +0.11 | [−1.23, +1.46] | 20 up / 19 dn | 1.0 |
+| 15.1M, k=20 | 0.0582 | 0.0717 | +1.34 | [−0.11, +2.80] | 27 up / 15 dn | 0.088 |
+| 15.1M, k=60 | 0.1019 | 0.1064 | +0.45 | [−1.01, +1.90] | 23 up / 19 dn | 0.64 |
+
+The single largest effect is +1.34 points, which is below the 1.6-point
+threshold this repo applies to its own training comparisons, and it is on the
+larger model — the opposite of what was registered.
+
+So **the decode-handicap hypothesis is refuted**, and stage 11's +3.70 points
+at 50+ is not an artefact of sampling at 0.6. The project's "T=0.6, top_p 1.0,
+everywhere" now survives a test in the regime most likely to break it: the
+worst-validity band in the corpus, measured on 893 queries rather than the 127
+the pooled 35+ verdict rested on. The large-molecule sweep's pick of T=0.3 does
+not replicate.
+
+### Why validity was the wrong thing to worry about
+
+Cooling does exactly what it is supposed to do, and it cancels out:
+
+| T | model | validity | distinct/query | rec@60 |
+| --- | --- | --- | --- | --- |
+| 0.6 | 8.0M | 0.616 | 84.0 | 0.0571 |
+| 0.3 | 8.0M | 0.682 | 80.7 | 0.0582 |
+| 0.6 | 15.1M | 0.720 | 86.2 | 0.1019 |
+| 0.3 | 15.1M | 0.748 | 80.1 | 0.1064 |
+
+Validity rises by 6.6 and 2.8 points; distinct molecules per query fall by 3.3
+and 6.1. Recovery nets zero. **Validity is not the binding constraint at 50+**
+— the invalid strings cooling removes are replaced by valid wrong answers, not
+by right ones. That kills the mechanism stage 11's structure-accuracy result
+suggested: capacity's near-tripling of exact structures at 50+ is not "invalid
+strings becoming valid ones", because making strings valid by cooling buys
+nothing. Capacity is finding different molecules, not better-formed versions of
+the same ones.
+
+### The registration fired FALSIFIED HIGH, and that reading is not trustworthy
+
+Scored literally: the capacity gain at T=0.3 is +4.70 points against +3.70 at
+T=0.6 (raw-slot convention), so the ratio fell from 0.961 to 0.951 and the
+registered **falsified-high** branch is the one that fired. That reading should
+not be believed, and the fault is in the registration, not the data. The
+difference-in-differences is **+1.01 points [−0.90, +2.91]** — indistinguishable
+from zero. I wrote three branches separated by point estimates on a quantity
+whose paired SE is about 1.7 points, so two of the three branches were inside
+the noise before the run started. A well-posed version would have registered
+the *interval*: "confirmed if the difference-in-differences CI contains zero".
+
+Under that correction the answer is the null, which is also the useful answer:
+capacity's advantage at 50+ is the same size at both temperatures.
+
+Both of the registered mechanisms are gone. Cooling does not help the 8.0M
+model more (it helps it not at all, and the 15.1M marginally), and the +3.70 is
+not a decode artefact. What stands is stage 11's result, now with one
+alternative explanation eliminated.
+
+### One convention note, since two numbers for one quantity appear above
+
+Stage 11 reported capacity's 50+ gain as **+3.70** points and this section also
+quotes **+4.48** for the same comparison. Both are correct: +3.70 counts a hit
+within the first 60 raw proposal slots (the `miss_anatomy` convention, used
+throughout the 2x2 so the four cells stay comparable), and +4.48 counts a hit
+within the first 60 *distinct valid* molecules, which is the protocol's actual
+`--budget molecules` semantics and what `compare_checkpoints.py` prints. The
+registered +5.0 threshold is cleared in either convention. This is the third
+recovery convention collision this project has logged; the rule remains to read
+columns against each other and never across tools.

@@ -373,11 +373,14 @@ withdrawn. A single-digit discordant-pair count is not evidence of absence.
 as underpowered, not as a null, and unanswerable from this data: the largest
 clean pool holds 308 molecules at 60+ and none at all above 64.
 
-On these large molecules capacity separates the two failure modes cleanly:
-exact-structure accuracy at 50+ nearly triples (0.0190 → 0.0538, p = 1e-7) and
-validity rises from 0.616 to 0.720, so the structure gain of +3.47 points is
-almost the whole of the +3.70 recovery gain. The 8.0M model is emitting invalid
-and near-miss strings where the 15.1M model emits right answers.
+On these large molecules exact-structure accuracy at 50+ nearly triples (0.0190
+→ 0.0538, p = 1e-7) and validity rises from 0.616 to 0.720, so the structure
+gain of +3.47 points is almost the whole of the +3.70 recovery gain. That is
+*not* explained by the larger model emitting fewer invalid strings: cooling the
+smaller model raises its validity by 6.6 points and buys no recovery at all, so
+capacity is finding different molecules rather than better-formed versions of
+the same ones. The 50+ gain is also unchanged by temperature —
+difference-in-differences +1.01 points [−0.90, +2.91] between T=0.6 and T=0.3.
 
 One part of that claim survives under the right label. The fit's other
 parameter, `A`, is the deficit extrapolated back to k=1, so `A` = 1 means
@@ -590,6 +593,17 @@ temperature — cold for fingerprints with many set bits, warm otherwise — is
 worth +0.10 ± 0.25 points over a flat 0.6. The reason is that cooling never
 *hurt* small molecules, so there was nothing to condition on. **T=0.6, top_p
 1.0, everywhere.**
+
+That verdict has now been tested where it was most likely to fail. At 50–64
+heavy atoms — the worst-validity regime in the corpus — on 893 queries rather
+than the 127 the pooled 35+ figure rested on, cooling to T=0.3 moves recovery
+by **−0.34 to +1.34 points** depending on model and budget, every interval
+straddling zero and the largest effect below this repo's own 1.6-point
+threshold. The mechanism is a cancellation: validity rises 6.6 points for the
+8.0M model and 2.8 for the 15.1M, while distinct molecules per query fall 3.3
+and 6.1. **Validity is not the binding constraint on large molecules** —
+cooling replaces invalid strings with valid wrong answers, not with right
+ones.
 
 **How big a gap counts as a difference.** Three runs identical in everything but
 `train.seed` scored 0.6053, 0.6084 and 0.5941, so single-run `rec@20` carries an
