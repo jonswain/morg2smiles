@@ -1177,6 +1177,13 @@ structure, not a collision. Validity on these molecules rises from 0.616 to
 near-miss strings and the 15.1M model is producing right answers; this is the
 one place in the project where the two failure modes are clearly separated.
 
+> **Corrected by stage 12.** The last sentence invites a causal reading — that
+> capacity wins at 50+ by emitting fewer invalid strings — and that reading is
+> wrong. Cooling the 8.0M model to T=0.3 raises its validity by 6.6 points and
+> buys no recovery at all, so validity is not the binding constraint here. The
+> correlation stands; the mechanism does not. Capacity finds different
+> molecules, not better-formed versions of the same ones.
+
 ### What this costs the stage-10 story
 
 Nothing in the confirmed registration, and one sentence of the headline. The
