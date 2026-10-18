@@ -274,11 +274,23 @@ this section attributed the step to capacity, which never varied between the
 two checkpoints it compared.
 
 Capacity has since been measured properly, with a 15.1M-parameter model trained
-on the same shard for the same 21,117 steps, and it behaves the same way: the
-exponent at 35+ rises from 0.303 to 0.343, and `b ÷ rec@60` goes with it, from
-0.366 to 0.380 — a move smaller than the spread of that ratio across the other
-five runs. Six runs now, three interventions, and not one of them has changed
-the shape of the budget curve. They slide a model along it.
+on the same shard for the same 21,117 steps, and it behaves the same way. Stated
+in one convention throughout — full-range `b` over `rec@60`, at 35+ — the ratio
+goes from 0.366 to 0.380 when capacity doubles, a move smaller than the spread
+across the other cells. Eight cells now, four interventions (corpus, steps,
+capacity, temperature), spanning 0.249 to 0.870 in recovery and 2.9-fold in the
+exponent, and `b ÷ rec@60` stays between **0.320 and 0.380** with no monotone
+trend in recovery. Not one intervention has changed the shape of the budget
+curve; they slide a model along it.
+
+The two cells added last — `small_full` and `medium_1m_8k`, both undertrained —
+sit at the bottom of that range at 0.321 and 0.320, which widens it from the
+0.334–0.366 quoted here earlier. Also corrected: an earlier version of this
+paragraph put the `k ≤ 20` refit exponents (0.303 rising to 0.343) in the same
+sentence as a ratio built from the full-range ones, which is the precise
+column-mixing this repo warns about elsewhere. In the `k ≤ 20` convention the
+same two cells read 0.395 and 0.427, and the eight-cell range is 0.290–0.427 —
+the conclusion is unchanged either way, but the numbers are not interchangeable.
 
 **The corpus axis is convex, so that 4:1 is a figure for one segment of it.** A
 third point — `small_full`, 1,881,996 molecules at the same 8,508 steps and the
@@ -318,18 +330,35 @@ almost nobody's. Separability is an assumption, supported by g′ holding to 9%
 across the two rows; measuring f′ directly still needs the constant-epochs
 sweep.
 
-**What capacity buys is a constant fraction of the shortfall, the same
-fraction at every molecule size and every budget.** Doubling the parameters to
-15.1M at matched steps and shard is worth +1.33 points of rec@20 overall and
-+5.63 at rec@1, and the cleanest description of it is a single number: across
-four size bands and eight budgets from k=1 to k=60, the larger model's deficit
-divided by the smaller's lands between 0.76 and 0.96 in all 32 cells, with no
-trend in size or budget. **A flat 17% cut fits all nine bands of the common
-protocol to within 1.6 SE.** The point gains therefore look concentrated in big
-molecules — +7.32 at 40–49 against +1.40 at 0–24 — purely because the deficit
-is larger there; the size cliff is not what improved. The larger model also
-proposes *fewer* distinct molecules per query (13.6 against 14.7) while
-proposing more valid ones, so none of this gain is coverage.
+**What capacity buys is a constant fraction of the shortfall — between 30 and
+49 heavy atoms, at any training length, and nothing at all above 50.** Doubling
+the parameters to 15.1M at matched steps and shard cuts the recovery deficit by
+a fraction that is stable to within the noise across four size bands, eight
+budgets from k=1 to k=60, and a 2.48-fold change in training length: the larger
+model's deficit divided by the smaller's is 0.808 [0.778, 0.837] at 8,508 steps
+and 0.825 [0.766, 0.888] at 21,117, every band-level difference between the two
+straddling zero. The gain is ordering, not reach — the larger model proposes
+*fewer* distinct molecules per query at both step counts (13.6 against 14.7 at
+21,117 steps, 20.69 against 22.22 at 8,508) while proposing more valid ones.
+
+**So "capacity is worth N points" is a statement about the baseline, not about
+capacity.** The same two architectures at the same temperature on the same
+protocol are worth +1.33 points of rec@20 at 21,117 steps and **+7.11 points at
+8,508** — a 5.3-fold difference in the headline from a multiplicative cut that
+moves from 0.847 to 0.776. Point gains likewise look concentrated in large
+molecules purely because the deficit is larger there; the size cliff is not
+what improved.
+
+Where the multiplicative description *fails* is the one place a 2x2 could
+detect it. Fit one pooled ratio to the undertrained row and 30–34, 35–39 and
+40–49 come in within 1.6 SE, while 50+ misses by 16.4 points at z = −6.9: at
+that size the 15.1M model recovers 6 molecules the 8.0M model missed and loses
+4 it had (p = 0.75). The 21,117-step row cannot see this — there the predicted
+gain is 9.6 points against a 4.4-point SE, so the law and a flat null are
+indistinguishable. A multiplicative claim is hardest to satisfy where the
+deficit is biggest, which is why the *worse* row is the informative one. An
+earlier version of this section called the cut uniform across all 32 cells;
+that is withdrawn, and the 30–49 restriction is the honest statement.
 
 One part of that claim survives under the right label. The fit's other
 parameter, `A`, is the deficit extrapolated back to k=1, so `A` = 1 means
@@ -359,15 +388,19 @@ Two caveats the script prints rather than hides. Unlike the budget law, the step
 law is *not* straight in log-log — fitting a trace's first half underpredicts
 its last point by 2.6 to 4.3 points and the exponent climbs as range is added —
 so the step exponent is a local slope, and every number here is computed inside
-the measured interval. Whether *capacity* moves this exponent needs two
-checkpoints of one size at different step counts scored under one protocol; the
-in-training traces cannot stand in, because the evaluation protocol changed
-partway through the project and only the newest runs are on the far side of it.
-That pair is `medium_1m_8k` against `medium_1m_full`, pre-registered in
-`configs/medium_1m_8k.yaml` with its prediction fixed in advance: a constant
-factor cannot change a slope, so if capacity's gain is the flat 17% deficit cut
-measured below, the 15.1M row's step exponent comes back equal to the 8.0M
-row's 1.226.
+the measured interval. *Capacity* does not move this exponent. Measuring that
+needed two checkpoints of one size at different step counts scored under one
+protocol, because the in-training traces cannot stand in — the evaluation
+protocol changed partway through the project and only the newest runs are on
+the far side of it. That pair is `medium_1m_8k` against `medium_1m_full`,
+pre-registered in `configs/medium_1m_8k.yaml`, and the 15.1M row comes back at
+1.204 against the 8.0M row's 1.226 (1.103 against 1.117 at 35+), inside the
+registered 0.10. The registration called this a test of "a constant factor
+cannot change a slope" and it is better described as a restatement: if the
+deficit ratio is constant in steps — which the same four cells establish
+directly — then the two rows' exponents are algebraically equal, since both are
+built from those same deficits. It is a consistency check, not a second
+finding.
 
 Independence is ruled out by a wide margin — the model's own first-slot rate
 would have finished 35+ by k=20 (0.9986 predicted against 0.6890 measured) —
@@ -790,10 +823,9 @@ Open questions, in rough order of expected value:
    segments and on separability holding better than the 9% it was checked to.
 3. ~~**A full-length 15M run.**~~ **Done.** `medium_1m_full` trained to
    `small_1m`'s own 21,117 steps on the same shard in 11.2 h, and capacity is
-   worth a flat 17% cut in the recovery deficit — the same fraction in every
-   size band and at every budget — which is +5.63 points at rec@1 and +1.33 at
-   rec@20. What remains open is whether that fraction holds at a second step
-   count, which is item 5.
+   worth a cut of roughly a fifth of the recovery deficit between 30 and 49
+   heavy atoms, which was +5.63 points at rec@1 and +1.33 at rec@20 there.
+   Whether that fraction holds at a second step count was item 5, and it does.
 4. **The remaining 10%, now inspected.** Validity is 0.921 and `recovery@20` is
    0.8962, so almost every valid candidate is a correct one and the failures are
    not syntax errors. Of 206 misses, **2** are fingerprint collisions: the input
@@ -804,14 +836,21 @@ Open questions, in rough order of expected value:
    unanimous, and the median miss is 34 heavy atoms against 24 for the
    unanimously solved. **It is a capability ceiling on large molecules, not an
    information limit**, which is what the full-ChEMBL run is aimed at.
-5. **Is capacity's 17% a property of the step, or of where the 8M run
-   stopped?** Nothing here is converged at 21,117 steps, so a 15.1M model at a
-   matched step count is further from its own asymptote than an 8.0M one, and
-   the measured cut is a lower bound of unknown tightness. The test is the
-   fourth cell of a capacity × steps 2×2 — `medium_1m_8k`, 15.1M parameters at
-   8,508 steps — since a constant factor cannot change a slope. Pre-registered
-   in `configs/medium_1m_8k.yaml` and the one item here that costs a single
-   training run.
+5. ~~**Is capacity's cut a property of the step, or of where the 8M run
+   stopped?**~~ **Done, and it is neither.** The fourth cell of the capacity ×
+   steps 2×2 — `medium_1m_8k`, 15.1M parameters at 8,508 steps, pre-registered
+   in `configs/medium_1m_8k.yaml` — came in at rec@60 0.6127 against a
+   registered 0.6045. The deficit ratio is 0.808 [0.778, 0.837] there against
+   0.825 [0.766, 0.888] at 21,117 steps, with every band-level difference
+   straddling zero, so the cut does not depend on training length and the
+   21,117-step figure was not a lower bound. The mechanism registered on top of
+   the prediction — that capacity should pay more where there is more
+   repetition to exploit — was falsified with the sign reversed. What the cell
+   did overturn was the claim of uniformity across size: at 50+ heavy atoms
+   capacity buys nothing measurable (p = 0.75), which only the undertrained row
+   has the power to show. What is still open is the reverse asymmetry: nothing
+   has tested whether the *steps* exponent depends on capacity in a regime
+   where the two models are not both far from their asymptotes.
 6. **Does a second architecture beat a second seed?** One fifth of what either
    capacity arm misses, the other one finds, and splitting a fixed 60 molecules
    of budget across the two beats spending all 60 on the better of them in five

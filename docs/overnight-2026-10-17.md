@@ -910,3 +910,149 @@ The uniform-cut null predicts no such dependence. So the three branches now
 have mechanisms attached rather than only directions, and the registration is
 unchanged: ratio 0.76–0.96 confirms, below 0.76 falsifies low, above 0.96
 falsifies high. Pre-registered 18:30 Sunday; training ends about 22:45.
+
+## Stage 10 — the 2x2 closes: capacity cuts a fixed fraction, and points are the wrong unit
+
+`medium_1m_8k` reached its 8,508-step budget at 00:26 Monday and scored clean.
+The cell it fills was the whole point of the stage: the capacity-versus-steps
+number from night 5 had to be voided because the two runs were scored under
+different eval protocols, and this replaces it with four cells measured under
+one protocol by `compare_checkpoints.py`, so nothing depends on either run's
+training history.
+
+Large protocol, k=60, T=0.6, 2,321 fingerprint-unseen queries common to all
+four cells:
+
+| rec@60 (all) | 8,508 steps | 21,117 steps |
+| --- | --- | --- |
+| 8.0M | 0.5205 | 0.8427 |
+| 15.1M | **0.6127** | 0.8703 |
+| deficit ratio | **0.808** | 0.825 |
+
+The registration predicted 0.6045. Measured 0.6127, high by 0.82 points on a
+quantity whose binomial SE is about one point. **CONFIRMED**, and the 35+
+clause too: predicted 0.4564, measured 0.4629.
+
+The second clause also passes — the step exponent comes back 1.204 against the
+8.0M row's 1.226, and 1.103 against 1.117 at 35+, both inside the registered
+0.10. It should be recorded that this is not independent evidence. If the
+deficit ratio is constant in steps, then `c` is *algebraically* identical
+between the two rows, because `c` is built from the same two deficits whose
+ratio clause 1 already tested. Two clauses, one fact. The same criticism night
+5's write-up made of the b-divided-by-rec confirmation applies here to my own
+registration.
+
+### The registered mechanism is falsified, and decisively
+
+The third reading, put on record at 18:30 before the number existed, predicted
+that capacity should pay *more* where there is more repetition to exploit — so
+the ratio at 8,508 steps (1.21 passes) should come out above the 0.825 measured
+at 21,117 steps (3.00 passes). It came out **below**, at 0.808, and a paired
+bootstrap over queries puts that at [0.778, 0.837], which excludes 0.96 and
+excludes 0.825's point value as well. The sign is wrong and the magnitude is
+small.
+
+So "part of what extra parameters buy is a better fit to molecules already
+seen" earns no support here. What the four cells say instead is that the
+deficit ratio does not depend on training length at all:
+
+| band | n | ratio @ 8,508 | ratio @ 21,117 | difference (paired) |
+| --- | --- | --- | --- | --- |
+| all | 2,321 | 0.808 [0.778, 0.837] | 0.825 [0.766, 0.888] | −0.017 [−0.088, +0.048] |
+| 30–34 | 1,189 | 0.746 [0.690, 0.802] | 0.757 [0.650, 0.874] | −0.011 [−0.140, +0.110] |
+| 35–39 | 625 | 0.777 [0.716, 0.836] | 0.845 [0.701, 1.024] | −0.069 [−0.255, +0.091] |
+| 40–49 | 380 | 0.853 [0.807, 0.898] | 0.815 [0.705, 0.932] | +0.038 [−0.087, +0.160] |
+| 50+ | 127 | 0.983 [0.933, 1.035] | 0.914 [0.816, 1.015] | +0.069 [−0.042, +0.179] |
+
+Every difference straddles zero. Across a 2.48-fold change in training length
+and a 2.5-fold change in repetition regime, the fraction of the recovery
+deficit that capacity removes is the same number.
+
+### The same comparison is worth +1.33 points or +7.11 points
+
+This is the part worth taking out of the weekend. On the common protocol at
+k=20, the identical pair of architectures compared at the identical temperature
+gives:
+
+| steps | 8.0M rec@20 | 15.1M rec@20 | gain | deficit ratio |
+| --- | --- | --- | --- | --- |
+| 8,508 | 0.6825 | 0.7536 | **+7.11 pts** | 0.776 |
+| 21,117 | 0.9131 | 0.9264 | **+1.33 pts** | 0.847 |
+
+A 5.3-fold difference in the headline number, from a multiplicative cut that
+barely moves. "Capacity is worth N points" is therefore not a property of
+capacity; it is a property of how long the baseline trained. Block 3's +1.33
+was never a floor or a ceiling — it was a reading taken where the deficit
+happened to be small.
+
+The ranking-not-coverage finding from block 3 reproduces at the shorter budget
+and more strongly. The 15.1M model proposes *fewer* distinct molecules per
+query (20.69 against 22.22), fills less of its budget (0.701 against 0.792),
+and still wins by +7.67 points at rec@1 and +8.03 at rec@20 on a paired
+first-k-slots count (296 up / 146 down, p = 8e-13; 219 up / 62 down, p = 1e-21,
+n = 1,956). Capacity buys ordering, not reach, at both step counts.
+
+### What the new cell actually overturns: the cut is not uniform at 50+
+
+Block 3 described capacity as a flat ~17% cut in the deficit, uniform across 32
+size-by-budget cells spanning 0.76–0.96. The new row has enough power to test
+that properly, and it fails. Fitting one pooled ratio and asking each band to
+match it:
+
+| band | n | 8.0M | 15.1M | uniform-cut prediction | residual | z | discordant pairs | p |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 30–34 | 1,189 | 0.6720 | 0.7553 | 0.7351 | +2.02 | +1.62 | 136 up / 37 dn | <0.001 |
+| 35–39 | 625 | 0.4912 | 0.6048 | 0.5890 | +1.58 | +0.81 | 94 up / 23 dn | <0.001 |
+| 40–49 | 380 | 0.2474 | 0.3579 | 0.3921 | −3.42 | −1.39 | 47 up / 5 dn | <0.001 |
+| 50+ | 127 | 0.0630 | 0.0787 | 0.2432 | **−16.44** | **−6.88** | 6 up / 4 dn | 0.754 |
+
+Three bands fit inside 1.6 SE. The fourth misses by sixteen and a half points
+at z = −6.9, and the reason is plain in the last two columns: at 50+ heavy
+atoms the 15.1M model recovers 6 molecules the 8.0M model missed and loses 4 it
+had, which is nothing at all (p = 0.75). **Above about 50 heavy atoms, doubling
+the parameters buys no measurable recovery.**
+
+Block 3 could not have seen this. At 21,117 steps the same band sits at 0.4488
+recovery, so the uniform cut predicts a 9.6-point gain with a 4.4-point SE and
+the residual is −4.94, z = −1.11 — consistent with the law and consistent with
+no gain, simultaneously. At 8,508 steps the band sits at 0.0630, the predicted
+gain is 18 points, the SE is 2.4, and the two hypotheses finally separate. The
+new cell is informative about the *law* precisely because its baseline is
+worse: a multiplicative claim is hardest to satisfy where the deficit is
+largest, and the undertrained row is where the deficits are large.
+
+So the uniform-cut description survives over 30–49 heavy atoms, at two training
+lengths, and should be stated with that restriction from now on rather than as
+a property of the model pair. The "uniform across 32 cells" claim in block 3 is
+withdrawn as stated; the cells were there, the power was not.
+
+### What block 3's registration got right and wrong, finally
+
+Both standing clauses confirmed, one of them vacuously. The mechanism I added
+on top of them was falsified with the sign reversed. And the finding that
+replaces it — no step dependence in the ratio, no capacity gain at all above 50
+heavy atoms — was not registered by anyone, which is the ordinary outcome of
+building a 2x2 for one reason and reading all four cells.
+
+### A correction found while adding the new cells to the b-divided-by-rec table
+
+Adding `medium_1m_8k` to the `b ÷ rec@60` table surfaced a defect in the
+README's own wording, not in any measurement. The sentence read "the exponent
+at 35+ rises from 0.303 to 0.343, and `b ÷ rec@60` goes with it, from 0.366 to
+0.380". Those two ratios are correct, and they are built from the **full-range**
+`b` (0.2815 and 0.3049). The exponents quoted immediately before them are the
+**k ≤ 20 refits**. Numerator and quoted exponent were from different columns in
+one sentence — the exact conflation night 5 warned about after scoring the
+0.303 threshold against the wrong column.
+
+Fixed by stating one convention and giving both. Full-range `b ÷ rec@60` at 35+
+across the eight cells that now exist runs 0.320 to 0.380; in the k ≤ 20
+convention the same cells run 0.290 to 0.427. The conclusion is unchanged —
+proportionality to within about ±9%, no monotone trend in recovery, four
+interventions and none of them bending the curve — but the two ranges are not
+interchangeable and neither is a subset of the other.
+
+Worth noting which cells moved the range: `small_full` and `medium_1m_8k`, at
+0.321 and 0.320, are the two newest and the two most undertrained, and they sit
+below the 0.334–0.366 band that six cells supported. That is a widening, not a
+trend; the ratio is not monotone in recovery across the eight.

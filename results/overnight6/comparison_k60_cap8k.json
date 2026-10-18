@@ -1,0 +1,129 @@
+{
+  "protocol": {
+    "eval_n": 2400,
+    "seed": 0,
+    "budget": "molecules",
+    "eval_k": 60,
+    "max_oversample": 12.0,
+    "temperature": 0.6,
+    "top_p": 1.0,
+    "pool_shard": "data/shards/1m",
+    "split": "valid",
+    "n_fp_unseen": 2321,
+    "fp_config": "morgan r=2 binary folded/2048",
+    "training_union_size": 1989502,
+    "shards_excluded": [
+      "data/shards/100k",
+      "data/shards/1m",
+      "data/shards/full"
+    ],
+    "min_heavy_atoms": 30,
+    "max_heavy_atoms": null
+  },
+  "runs": {
+    "medium_1m_8k": {
+      "checkpoint": "checkpoints/medium_1m_8k/best.pt",
+      "train_shard": "data/shards/1m",
+      "n_parameters": 15123953,
+      "trained_epoch": 2,
+      "trained_step": 8508,
+      "model_config": {
+        "d_model": 320,
+        "n_heads": 8,
+        "d_ff": 1280,
+        "n_encoder_layers": 5,
+        "n_decoder_layers": 5,
+        "dropout": 0.1,
+        "max_tokens": 128,
+        "vocab_size": 113,
+        "fp_vocab_size": 2048
+      },
+      "report": {
+        "ks": [
+          1,
+          5,
+          20
+        ],
+        "budget": "molecules",
+        "slices": {
+          "all": {
+            "n_queries": 2400,
+            "recovery_at_k": {
+              "1": 0.17708333333333334,
+              "5": 0.4008333333333333,
+              "20": 0.55875
+            },
+            "structure_accuracy_at_k": {
+              "1": 0.15166666666666667,
+              "5": 0.3720833333333333,
+              "20": 0.5333333333333333
+            },
+            "recovery_at_k_consensus": {
+              "1": 0.3466666666666667,
+              "5": 0.5341666666666667,
+              "20": 0.6083333333333333
+            },
+            "structure_accuracy_at_k_consensus": {
+              "1": 0.3120833333333333,
+              "5": 0.5125,
+              "20": 0.5875
+            },
+            "validity": 0.8806790356377299,
+            "duplicate_rate": 0.5415345338353712,
+            "unique_valid_per_query": 70.40583333333333,
+            "mean_samples_per_query": 272.375,
+            "mean_candidates_per_query": 207.59833333333333,
+            "mean_scored_per_query": 70.40583333333333,
+            "budget_filled_rate": 0.9733333333333334,
+            "mean_best_tanimoto": 0.9177263230680341,
+            "mean_hit_rank": 10.37716049382716
+          },
+          "fp_unseen": {
+            "n_queries": 2321,
+            "recovery_at_k": {
+              "1": 0.17707884532529083,
+              "5": 0.4015510555794916,
+              "20": 0.5596725549332184
+            },
+            "structure_accuracy_at_k": {
+              "1": 0.15639810426540285,
+              "5": 0.38043946574752263,
+              "20": 0.5433003015941404
+            },
+            "recovery_at_k_consensus": {
+              "1": 0.3494183541576906,
+              "5": 0.5376992675570874,
+              "20": 0.6100818612666954
+            },
+            "structure_accuracy_at_k_consensus": {
+              "1": 0.31968978888410166,
+              "5": 0.5230504093063335,
+              "20": 0.5980180956484275
+            },
+            "validity": 0.8811949021032126,
+            "duplicate_rate": 0.5454650510119854,
+            "unique_valid_per_query": 70.09564842740198,
+            "mean_samples_per_query": 274.8728996122361,
+            "mean_candidates_per_query": 208.78586816027575,
+            "mean_scored_per_query": 70.09564842740198,
+            "budget_filled_rate": 0.972856527358897,
+            "mean_best_tanimoto": 0.9173654816313899,
+            "mean_hit_rank": 10.377947737412365
+          }
+        },
+        "primary_metric": 0.5596725549332184,
+        "primary_metric_name": "recovery@20 (fp_unseen)",
+        "fp_unseen_fraction": 0.9670833333333333,
+        "elapsed_seconds": 3386.3810962080024,
+        "queries_per_second": 0.708721178099969,
+        "candidates_per_second": 147.12933537159006,
+        "generation": {
+          "k": 60,
+          "budget": "molecules",
+          "seed": 0,
+          "max_oversample": 12.0
+        }
+      }
+    }
+  }
+}

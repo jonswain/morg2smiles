@@ -44,3 +44,30 @@
 [10-18 18:11:34] stage 9 analyses exit=0
 [10-18 18:11:34] === blocks 3-5 done, 738 min to spare ===
 [10-18 18:11:34] stage 10: medium_1m_8k, 15.1M params, 1M shard, 8,508 steps
+[10-19 00:26:14] stage 10 exit=0
+[10-19 00:26:14] stage 10 stopped at: step budget of 8508 reached / 0 h
+[10-19 00:26:14] stage 10: medium_1m_8k and small_1m_matched on the common protocol at T=0.6
+[10-19 00:26:16] stage 10 common exit=1
+[10-19 00:26:19] stage 10 band tables exit=2
+[10-19 00:26:19] stage 10: medium_1m_8k at T=0.6, k=60, large protocol
+[10-19 00:26:20] stage 10 k=60 exit=1
+[10-19 00:26:22] stage 10 analyses exit=2
+[10-19 00:26:22] === stage 10 done, 363 min to spare ===
+[10-19 00:27:09] === stage 10 start, 363 min to Mon 06:30 ===
+[10-19 00:27:09] SKIP stage 10 training: checkpoints/medium_1m_8k/best.pt already exists
+[10-19 00:27:09] stage 10: medium_1m_8k and small_1m_matched on the common protocol at T=0.6
+[10-19 00:27:11] stage 10 common exit=1
+[10-19 00:27:13] stage 10 band tables exit=1
+[10-19 00:27:13] stage 10: medium_1m_8k at T=0.6, k=60, large protocol
+[10-19 00:27:15] stage 10 k=60 exit=1
+[10-19 00:27:17] stage 10 analyses exit=2
+[10-19 00:27:17] === stage 10 done, 362 min to spare ===
+[10-19 00:28:54] === stage 10 start, 362 min to Mon 06:30 ===
+[10-19 00:28:54] SKIP stage 10 training: checkpoints/medium_1m_8k/best.pt already exists
+[10-19 00:28:54] stage 10: medium_1m_8k and small_1m_matched on the common protocol at T=0.6
+[10-19 00:58:10] stage 10 common exit=0
+[10-19 00:58:14] stage 10 band tables exit=0
+[10-19 00:58:14] stage 10: medium_1m_8k at T=0.6, k=60, large protocol
+[10-19 01:58:34] stage 10 k=60 exit=0
+[10-19 01:58:50] stage 10 analyses exit=0
+[10-19 01:58:50] === stage 10 done, 272 min to spare ===
