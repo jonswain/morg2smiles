@@ -908,12 +908,18 @@ Open questions, in rough order of expected value:
 ## Development
 
 ```bash
-pytest -q                          # 323 tests, offline; data-dependent ones self-skip
+pytest -q                          # 440 tests, offline; the 5 needing a shard self-skip
 ruff check src tests scripts
-ruff format src tests scripts
+ruff format --check src tests scripts   # drop --check to rewrite in place
 ```
 
-CI runs the same three on Python 3.11 and 3.12.
+CI runs exactly these three on Python 3.11 and 3.12, in that order, and
+`format` gates `pytest` — so a formatting miss hides every test result behind
+it. Run them on the whole tree, not on the files you touched: checking
+per-file is how CI stayed red from 2026-10-17 to 2026-10-19 with the test step
+never executing. A bare `pytest -q` reproduces CI with no environment
+variables (`pythonpath` is set in `pyproject.toml`), and `ruff` is pinned in
+both places so the formatter cannot disagree with the gate.
 
 ## Licence
 

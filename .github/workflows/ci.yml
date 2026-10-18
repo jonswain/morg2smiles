@@ -12,7 +12,10 @@ concurrency:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    # Pinned rather than ubuntu-latest: the latest label migrates to Ubuntu 26
+    # from 2026-10-19, and this repo compares numbers across weeks, so the CI
+    # image should not change underneath a comparison without a commit saying so.
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -32,7 +35,10 @@ jobs:
           # CPU-only torch: the GPU wheels are ~2.5 GB and CI only runs tests
           # that need a few forward passes on tiny tensors.
           pip install torch --index-url https://download.pytorch.org/whl/cpu
-          pip install -e . pytest ruff
+          # ruff is pinned: `format --check` is a gate, and its output changes
+          # between releases, so an unpinned formatter can turn CI red with no
+          # code change. Bump it deliberately, in a commit.
+          pip install -e . pytest 'ruff==0.16.10'
 
       - name: Lint
         run: ruff check src tests scripts

@@ -20,7 +20,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=7.4", "ruff>=0.5", "matplotlib"]
+# ruff is pinned to the version CI gates on, so `ruff format` locally and
+# `ruff format --check` in CI can never disagree.
+dev = ["pytest>=7.4", "ruff==0.16.10", "matplotlib"]
 
 [project.scripts]
 morg2smiles = "morg2smiles.cli:main"
