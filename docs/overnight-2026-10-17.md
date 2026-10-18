@@ -1216,3 +1216,47 @@ information limit" is true of molecules up to 64 heavy atoms and says nothing
 about anything larger — and a good deal of medicinal chemistry sits above that
 line. Raising the cap is a `prepare.py` re-run plus retraining, so it is not a
 cheap experiment, but it is now a known boundary rather than an invisible one.
+
+## Stage 12 — registering a decode-robustness check on stage 11, before it runs
+
+Stage 11's +3.70 points at 50+ was measured at T=0.6, and there is a specific
+reason to doubt that setting in that regime. The decode sweep on a
+large-molecule tuning set picked **T=0.3**, not 0.6; the project adopted 0.6
+anyway because cooling bought "at most +2 points above 35 heavy atoms and
+nothing overall", and a size-conditional policy was worth +0.10 ± 0.25. But
+that verdict was pooled over 35+, where only 127 of 1,132 queries are 50+, and
+stage 11 has just shown that 50+ is where validity collapses: 0.616 for the
+8.0M model against 0.720 for the 15.1M one.
+
+So the 8.0M model's 50+ deficit may be partly a *decoding* handicap rather than
+a capability one, and a colder decoder would fix for free what stage 11 credited
+to parameters. Stage 11's own structure-accuracy result points the same way —
+exact structures nearly tripled, which is what you see when invalid strings
+turn into valid ones.
+
+The test reruns the identical 50+ protocol (seed 0, `--eval-n 1000
+--min-heavy-atoms 50 --eval-k 60`, same 893 fingerprint-unseen queries) at
+T=0.3 on both 8,508-step checkpoints, so every number is paired against stage
+11 query by query.
+
+**Pre-registered 03:25 Monday, before the run starts.** Cooling should raise
+validity and recovery for both models at 50+, by more than the +2 points the
+pooled 35+ figure suggested, because 50+ is the worst-validity regime in the
+project. It should help the **8.0M** model more in absolute terms, since it has
+the more to gain, so the capacity gap should narrow from +3.70.
+
+- **CONFIRMED** if the capacity gain at T=0.3 is positive but smaller than
+  +3.70 points — the deficit ratio rising above 0.961. Part of stage 11's gain
+  was a decode handicap; the rest is capability.
+- **FALSIFIED LOW** if the gain falls to zero or reverses. Then the whole 50+
+  capacity advantage was an artefact of decoding at 0.6, and stage 11's
+  headline needs withdrawing for the second time in one night.
+- **FALSIFIED HIGH** if the gain *grows* past +3.70 (ratio below 0.961), which
+  would mean cooling helps the larger model more and capacity's advantage on
+  large molecules is not a decode handicap at all.
+
+Registered separately, because it is the question the project already thinks it
+has answered: whether T=0.3 beats T=0.6 at 50+ for either model by more than
+the 1.6-point threshold this repo applies to training comparisons. If it does,
+**"T=0.6, top_p 1.0, everywhere"** is wrong as a universal and needs the size
+restriction the pooled sweep could not see.
