@@ -107,8 +107,10 @@ class TestTraceProtocol:
         sl = {"recovery_at_k": {"20": rec}}
         if tops_up:
             sl["budget_filled_rate"] = 0.9
-        return {"step": step, "valid": {"budget": "molecules", "ks": [1, 5, 20],
-                                        "slices": {"fp_unseen": sl}}}
+        return {
+            "step": step,
+            "valid": {"budget": "molecules", "ks": [1, 5, 20], "slices": {"fp_unseen": sl}},
+        }
 
     def test_the_top_up_is_part_of_the_signature(self, tmp_path):
         self._write(tmp_path, "old", [self._row(1500, 0.3, tops_up=False)])
@@ -125,7 +127,8 @@ class TestTraceProtocol:
 
     def test_a_real_mid_run_change_is_refused(self, tmp_path):
         self._write(
-            tmp_path, "r",
+            tmp_path,
+            "r",
             [self._row(1500, 0.3, tops_up=False), self._row(3000, 0.5, tops_up=True)],
         )
         with pytest.raises(SystemExit, match="protocol changed mid-run"):
@@ -133,10 +136,22 @@ class TestTraceProtocol:
 
     def test_the_cli_refuses_to_compare_across_the_boundary(self, tmp_path):
         """The error this guard exists for: a budget change read as capacity."""
-        self._write(tmp_path, "old", [self._row(s, 1 - 50.0 * s**-0.8, tops_up=False)
-                                      for s in (1500, 3000, 6000, 12000, 21000)])
-        self._write(tmp_path, "new", [self._row(s, 1 - 50.0 * s**-1.1, tops_up=True)
-                                      for s in (1500, 3000, 6000, 12000, 21000)])
+        self._write(
+            tmp_path,
+            "old",
+            [
+                self._row(s, 1 - 50.0 * s**-0.8, tops_up=False)
+                for s in (1500, 3000, 6000, 12000, 21000)
+            ],
+        )
+        self._write(
+            tmp_path,
+            "new",
+            [
+                self._row(s, 1 - 50.0 * s**-1.1, tops_up=True)
+                for s in (1500, 3000, 6000, 12000, 21000)
+            ],
+        )
         out = tmp_path / "o.json"
         result = CliRunner().invoke(
             step_curve,
@@ -151,13 +166,23 @@ class TestTraceProtocol:
         assert report["traces"]["new"]["exponent"] == pytest.approx(1.1)
 
     def test_one_protocol_compares_cleanly(self, tmp_path):
-        self._write(tmp_path, "a", [self._row(s, 1 - 50.0 * s**-0.8, tops_up=True)
-                                    for s in (1500, 3000, 6000, 12000, 21000)])
-        self._write(tmp_path, "b", [self._row(s, 1 - 50.0 * s**-1.1, tops_up=True)
-                                    for s in (1500, 3000, 6000, 12000, 21000)])
-        result = CliRunner().invoke(
-            step_curve, ["--runs", "a,b", "--checkpoints", str(tmp_path)]
+        self._write(
+            tmp_path,
+            "a",
+            [
+                self._row(s, 1 - 50.0 * s**-0.8, tops_up=True)
+                for s in (1500, 3000, 6000, 12000, 21000)
+            ],
         )
+        self._write(
+            tmp_path,
+            "b",
+            [
+                self._row(s, 1 - 50.0 * s**-1.1, tops_up=True)
+                for s in (1500, 3000, 6000, 12000, 21000)
+            ],
+        )
+        result = CliRunner().invoke(step_curve, ["--runs", "a,b", "--checkpoints", str(tmp_path)])
         assert result.exit_code == 0, result.output
 
 
@@ -269,11 +294,13 @@ class TestCli:
     def test_pair_and_break_even_tables(self, tmp_path):
         history(tmp_path, "r", planted(0.8, 50.0))
         short = anatomy(
-            tmp_path, "short.json",
+            tmp_path,
+            "short.json",
             {"35+": {"n_queries": 100, "recovery_at_k": {"20": 0.2, "60": 0.3}}},
         )
         long = anatomy(
-            tmp_path, "long.json",
+            tmp_path,
+            "long.json",
             {"35+": {"n_queries": 100, "recovery_at_k": {"20": 0.6, "60": 0.7}}},
         )
         curve = tmp_path / "curve.json"
@@ -281,9 +308,22 @@ class TestCli:
         out = tmp_path / "o.json"
         result = CliRunner().invoke(
             step_curve,
-            ["--runs", "r", "--checkpoints", str(tmp_path), "--pair", f"{short},{long}",
-             "--pair-steps", "1000,2000", "--bands", "35+", "--budget-curve", str(curve),
-             "--out", str(out)],
+            [
+                "--runs",
+                "r",
+                "--checkpoints",
+                str(tmp_path),
+                "--pair",
+                f"{short},{long}",
+                "--pair-steps",
+                "1000,2000",
+                "--bands",
+                "35+",
+                "--budget-curve",
+                str(curve),
+                "--out",
+                str(out),
+            ],
         )
         assert result.exit_code == 0, result.output
         report = json.loads(out.read_text())
@@ -308,10 +348,27 @@ class TestCli:
             out = tmp_path / f"o{slot}.json"
             result = CliRunner().invoke(
                 step_curve,
-                ["--runs", "r", "--checkpoints", str(tmp_path), "--pair", f"{short},{long}",
-                 "--pair-steps", "1000,2000", "--bands", "35+", "--budget-curve", str(curve),
-                 "--sec-per-slot", slot, "--out", str(out)],
+                [
+                    "--runs",
+                    "r",
+                    "--checkpoints",
+                    str(tmp_path),
+                    "--pair",
+                    f"{short},{long}",
+                    "--pair-steps",
+                    "1000,2000",
+                    "--bands",
+                    "35+",
+                    "--budget-curve",
+                    str(curve),
+                    "--sec-per-slot",
+                    slot,
+                    "--out",
+                    str(out),
+                ],
             )
             assert result.exit_code == 0, result.output
-            seen.append(json.loads(out.read_text())["break_even"]["35+"]["break_even_queries"]["0.5"])
+            seen.append(
+                json.loads(out.read_text())["break_even"]["35+"]["break_even_queries"]["0.5"]
+            )
         assert seen[1] == pytest.approx(seen[0] * 10)

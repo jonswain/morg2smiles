@@ -192,7 +192,10 @@ def break_even(
     help="Fit each trace on this fraction of its steps and score it against the last point.",
 )
 @click.option(
-    "--sec-per-step", default=1.337, show_default=True, help="Measured on small_1m: 7.84 h / 21,117."
+    "--sec-per-step",
+    default=1.337,
+    show_default=True,
+    help="Measured on small_1m: 7.84 h / 21,117.",
 )
 @click.option(
     "--sec-per-slot",
@@ -256,8 +259,14 @@ def main(
             click.echo(f"{name:>18}{len(trace):>5}  too few usable points")
             continue
         c, intercept, r = fit
-        entry = {"n_points": len(trace), "first_step": trace[0][0], "last_step": trace[-1][0],
-                 "rec_at_last": trace[-1][1], "exponent": c, "correlation": r}
+        entry = {
+            "n_points": len(trace),
+            "first_step": trace[0][0],
+            "last_step": trace[-1][0],
+            "rec_at_last": trace[-1][1],
+            "exponent": c,
+            "correlation": r,
+        }
         cut = trace[-1][0] * extrapolate_from
         early = [p for p in trace if p[0] <= cut]
         early_fit = fit_trace(early) if len(early) >= 3 else None
@@ -265,8 +274,12 @@ def main(
             ec, ei, _ = early_fit
             predicted = 1 - math.exp(ei) * trace[-1][0] ** -ec
             err = 100 * (predicted - trace[-1][1])
-            entry["extrapolated"] = {"fitted_to_step": cut, "exponent": ec,
-                                     "predicted": predicted, "error_points": err}
+            entry["extrapolated"] = {
+                "fitted_to_step": cut,
+                "exponent": ec,
+                "predicted": predicted,
+                "error_points": err,
+            }
             tail = f"{ec:>9.3f}{err:>+9.2f}"
         else:
             tail = f"{'--':>9}{'--':>9}"
@@ -341,9 +354,8 @@ def main(
         f"\n (training {sec_per_step:.3f} s/step once; inference {sec_per_slot:.5f} s/slot "
         "per query, forever)"
     )
-    header = (
-        f"{'band':>7}{'b':>7}{'c':>7}{'c/b':>6}"
-        + "".join(f"{'x' + f'{f:g}' + ': queries':>18}" for f in factors)
+    header = f"{'band':>7}{'b':>7}{'c':>7}{'c/b':>6}" + "".join(
+        f"{'x' + f'{f:g}' + ': queries':>18}" for f in factors
     )
     click.echo(header)
     click.echo("-" * len(header))
