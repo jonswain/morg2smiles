@@ -293,13 +293,30 @@ curve and is withdrawn as stated.
 
 This is not a composition artefact — the three shards were sampled and are the
 same distribution, with 30+ shares of 38.81%, 38.70% and 38.82% and mean heavy
-atoms of 28.24, 28.27 and 28.30. It is also not identified as a *corpus* effect,
-because at a fixed step count `steps × batch = corpus × passes` forces the
-repetition rate down as the corpus grows — 12.01 passes, then 1.21, then 0.58 —
-and the steepening coincides with crossing one epoch. What the three points do
-establish without disambiguating that: **at a fixed 8,508 steps, 1.88M distinct
-molecules seen 0.58 times each beats 90,682 molecules seen twelve times each by
-16.7 points of rec@60.** At fixed compute, prefer more molecules to more passes.
+atoms of 28.24, 28.27 and 28.30. At a fixed step count, though, `steps × batch =
+corpus × passes` forces the repetition rate down as the corpus grows — 12.01
+passes, then 1.21, then 0.58 — so the axis is corpus and repetition together.
+
+**That confound separates, because at a fixed corpus the steps axis *is* the
+passes axis.** Those runs exist: 12.01 → 29.81 passes over 90,682 molecules buys
++29.56 points and 1.21 → 3.00 passes over 900,917 buys +32.23, so **repetition
+is not worthless**, and the slope holds at +22.54 against +24.57 per doubling
+across a tenfold change in repetition regime — which is what an additively
+separable law in log space predicts. Fitting `value = f(log distinct) + g(log
+passes)` with g′ = 23.55 gives distinct molecules **+24.92 points per doubling**
+on the first segment and **+35.03** on the second.
+
+That reverses the emphasis. The corpus axis at constant steps is a
+near-cancellation — +24.92 for the data against −23.55 for the passes it costs,
+netting +1.37 — so it is a small difference of two large numbers and a terrible
+instrument. Most of the apparent 8.4× convexity is that cancellation amplifying
+a 1.4× convexity in f′ about sixfold. And the figure worth extrapolating from,
+for any question where extra data is not paid for out of passes, is
+**f′ ≈ 25–35 points per doubling of distinct molecules**, not +1.37 — the two
+answer different questions and this repo had been quoting the one that answers
+almost nobody's. Separability is an assumption, supported by g′ holding to 9%
+across the two rows; measuring f′ directly still needs the constant-epochs
+sweep.
 
 **What capacity buys is a constant fraction of the shortfall, the same
 fraction at every molecule size and every budget.** Doubling the parameters to
@@ -766,13 +783,11 @@ Open questions, in rough order of expected value:
    **epochs**, since at constant steps corpus size and repetition rate are
    locked together by `steps × batch = corpus × passes`. Until that runs, every
    extrapolation to PubChem scale from this repo is withdrawn — both night 1's
-   0.993 and the 0.949 that briefly replaced it. **Now the most valuable open
-   question here**, not a footnote: the corpus axis turns out to be convex
-   (+1.37 then +11.47 points per doubling), the steepening coincides exactly
-   with the repetition rate crossing one pass, and nothing measured so far can
-   say which of the two is doing the work. Points per doubling of corpus — the
-   number anyone would want to quote — is not identified by the three points
-   that exist.
+   0.993 and the 0.949 that briefly replaced it. The three points that exist,
+   decomposed under separability, put distinct molecules at **+24.9 then +35.0
+   points per doubling** against passes' +23.55; what the sweep would settle is
+   whether that convexity in f′ is real, since it currently rests on two
+   segments and on separability holding better than the 9% it was checked to.
 3. ~~**A full-length 15M run.**~~ **Done.** `medium_1m_full` trained to
    `small_1m`'s own 21,117 steps on the same shard in 11.2 h, and capacity is
    worth a flat 17% cut in the recovery deficit — the same fraction in every

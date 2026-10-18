@@ -829,3 +829,64 @@ and solid: **at a fixed compute budget of 8,508 steps, spending it on 1.88M
 distinct molecules seen 0.58 times each beats spending it on 90,682 molecules
 seen twelve times each by 16.7 points of rec@60**, and the exponent rises with
 it, 0.157 → 0.216. At fixed compute, prefer more molecules to more passes.
+
+### The confound is separable after all, and the answer changes the reading
+
+The section above said points-per-doubling-of-corpus is not identified by three
+points. That was too pessimistic, and the fix costs no GPU time: **at a fixed
+corpus, the steps axis *is* the passes axis.** Those runs already exist.
+
+| corpus | passes at 8,508 | at 21,117 | rec@60 | → | points | per doubling |
+|---|---|---|---|---|---|---|
+| 90,682 | 12.01 | 29.81 | 0.4752 | 0.7708 | +29.56 | **+22.54** |
+| 900,917 | 1.21 | 3.00 | 0.5205 | 0.8427 | +32.23 | **+24.57** |
+
+Two things fall out of this table before any modelling. First, **repetition is
+not worthless** — going from twelve passes to thirty over the *same* 90,682
+molecules buys +29.6 points, nearly what going from 1.2 passes to 3.0 over ten
+times the data buys. The simplest reading of the convexity, that gains
+accelerate because repetition is nearly free to give up, is wrong. Second, the
+slope is stable at +22.54 against +24.57 across a tenfold change in the
+repetition regime, which is exactly what an additively separable law in log
+space predicts and is the licence to fit one.
+
+So take `value = f(log distinct molecules) + g(log passes)` with g′ = 23.55
+points per doubling, and read the corpus segments at constant steps, where a
+corpus doubling *is* a passes halving:
+
+| segment | doublings | net measured | passes cost | f′ implied | f′ per doubling |
+|---|---|---|---|---|---|
+| 90.7k → 900.9k | 3.31 | +4.52 | −78.02 | +82.55 | **+24.92** |
+| 900.9k → 1.88M | 1.06 | +12.19 | −25.03 | +37.23 | **+35.03** |
+
+This reverses the emphasis of the section above in three ways.
+
+**The corpus axis at constant steps is a near-cancellation, so it is a terrible
+instrument.** Distinct molecules are worth +24.92 points per doubling on the
+first segment and the passes they cost are worth −23.55, which nets +1.37. The
+observable is a small difference of two large numbers, and that is the whole
+reason it looked flat. Nothing about the first segment says data does not
+matter; it says data and repetition were trading off at almost exactly par.
+
+**Most of the 8.4× convexity is amplification, not acceleration.** f′ rises
+from +24.92 to +35.03, a factor of 1.4. The net rises from +1.37 to +11.47, a
+factor of 8.4. A near-cancellation multiplies a mild convexity in the
+underlying quantity by about six. The headline above — "the second segment is
+8.4 times steeper" — is true of the observable and badly overstates what moved
+underneath it.
+
+**And the number worth extrapolating from is far larger than the raw axis
+suggested.** For anything asking what a bigger corpus buys at a *bigger compute
+budget* — where the extra data need not be paid for out of passes — the
+relevant figure is f′ ≈ 25 to 35 points per doubling of distinct molecules, not
++1.37. The two are not in conflict; they answer different questions, and this
+project has been quoting the one that answers almost nobody's.
+
+Three caveats, since this is an inference and not a measurement. Additive
+separability is assumed, supported only by g′ holding to 9% across the two
+rows. g′ is measured over 1.2–30 passes and the second segment needs it down at
+0.58, a modest extrapolation. And f′ is two segments, so its convexity is one
+comparison, not a curve. The constant-epochs sweep in README open question 2
+remains the thing that would measure f′ directly rather than inferring it —
+but the inference is sharp enough that the question is now "is f′ really
+convex", not "is any of this identified".
