@@ -635,3 +635,123 @@ the reverse-direction control in stage 8 puts the most weight on.
 Stage 8's pre-registration is unchanged by this, because it was written against
 the T=0.6 dose-1 column, which night 5 had already measured and stage 7 did not
 touch.
+
+## Stage 8 — the exposure law survives as a slope and fails as a law
+
+`size_mix_rev` trained to its full 8,508 steps in 2.9 h and was scored on the
+common protocol at T=0.6. It de-weights 30+ heavy atoms by 1/3, the reciprocal
+of `size_mix_s1`'s factor 3, with the same seed, shard, schedule and step count
+— so this is night 5's one quantitative law run backwards, out of sample, in
+the direction no dose had ever tested.
+
+### First: the registration's own premise was wrong
+
+The config predicted that "every band sits at the reciprocal exposure." It does
+not, and the error is mine:
+
+| band | forward ×3 | reverse ÷3 | product | log₂ fwd | log₂ rev | lever |
+|---|---|---|---|---|---|---|
+| 0–24, 25–29 | 0.563× | 1.350× | 0.759 | −0.830 | +0.433 | **0.52×** |
+| 30–34 … 50+ | 1.688× | 0.450× | 0.759 | +0.755 | −1.152 | **1.53×** |
+
+Re-weighting renormalises, so the 30+ share `s` maps to `3s/(1+2s)` under the
+forward dose and to `s/(3−2s)` under the reverse. Those are not reciprocal
+multipliers. The product is 0.759 in every band, and lopsidedly: the reverse
+dose pulls the bands it starves 1.53× further in log-exposure than the forward
+dose pushed them, while moving the bands it feeds only 0.52× as far. **A factor
+and its reciprocal do not produce mirror exposures, and I registered a
+prediction that assumed they would.**
+
+### The band prediction is falsified, and correcting the premise makes it worse
+
+> each band's gap should land within 2 points of minus its mirror-dose gap
+
+| band | forward gap | predicted | measured | off by | |
+|---|---|---|---|---|---|
+| 0–24 | −2.74 | +2.74 | **+0.28** | −2.46 | FAIL |
+| 25–29 | −1.17 | +1.17 | −0.39 | −1.56 | pass |
+| 30–34 | +0.27 | −0.27 | **−9.38** | −9.12 | FAIL |
+| 35–39 | +7.69 | −7.69 | −5.64 | +2.05 | FAIL |
+| 40–49 | +2.03 | −2.03 | −5.69 | −3.66 | FAIL |
+| 50+ | +3.66 | −3.66 | −2.44 | +1.22 | pass |
+
+**Two of six.** And the exposure error above is not an alibi: predicting each
+band instead from the forward dose's own fitted line, evaluated at the exposure
+the reverse dose actually realised, gives +2.32 / +2.32 / −3.05 / −3.05 /
+−3.05 / −3.05 against the measured values — **one of six** within 2 points.
+Pricing the lever correctly makes the band-level law fit worse, not better.
+
+### The slope prediction is confirmed
+
+> the fitted points-per-doubling should come back within 1.5 points of +3.4
+> with the same sign
+
+**+3.62, against +3.4.** Inside 0.22 of the registered value, same sign, on a
+dose that moves every band the opposite way. The three doses now read +3.39
+(r = 0.742), +4.21 (r = 0.988) and +3.62 (r = 0.802).
+
+So the aggregate exchange rate is real and transfers out of sample, in a
+direction it was never fitted to. What does not transfer is any claim about
+*which* band pays or collects how much.
+
+### Why: taking exposure away costs far more than adding it buys
+
+The reverse dose probes the same baseline from the same threshold in the
+opposite direction, so the two directions can be priced against each other
+band by band:
+
+| band | forward | pts/2× | reverse | pts/2× | steeper going down |
+|---|---|---|---|---|---|
+| 0–24 | loss | 3.30 | gain | 0.65 | **5.1×** |
+| 25–29 | loss | 1.41 | gain | −0.90 | **wrong sign** |
+| 30–34 | gain | 0.36 | loss | 8.14 | **22.9×** |
+| 35–39 | gain | 10.19 | loss | 4.90 | 0.5× |
+| 40–49 | gain | 2.69 | loss | 4.94 | 1.8× |
+| 50+ | gain | 4.85 | loss | 2.12 | 0.4× |
+
+For the three bands around the threshold — the 1,597 queries that are 82% of
+the protocol — **losing exposure hurts and gaining it does nothing.** 0–24
+loses 2.74 points when starved and gains 0.28 when fed; 25–29 loses 1.17 and
+then moves the *wrong way*, −0.39, when fed; 30–34 gains 0.27 when fed and
+loses 9.38 when starved, a factor of 23 between the two directions from an
+identical starting point. Above 35 atoms the asymmetry is absent or reversed,
+but those are 195, 123 and 41 queries.
+
+That is a coherent picture and it is not what a single exchange rate describes.
+The small and middle bands are **saturated in exposure**: they already see more
+examples than they can use, so more buys nothing, while less still costs. The
+large bands are starved in both directions, so they respond both ways. A law
+fitted inside one dose averages a saturated side against a starved side and
+recovers a slope that happens to be stable — which is exactly what survived
+here, and exactly why it survived while every band-level number failed.
+
+It also retrospectively explains the forward dose's poor fit, r = 0.742: the
+outlier was always 30–34, which bought nothing at 1.69× exposure. Night 5 read
+that as noise in a band of 373 queries. It was the saturation point, visible in
+the one cell that straddles it.
+
+### The reverse dose is strictly dominated, and two opposite doses coincide
+
+`size_mix_rev` gives up 56 molecules to gain 2 — **28 given up per one gained**,
+against the forward dose's 1.3. The marginal step from reverse to forward is
+−1.7, a negative price: moving to the forward dose gains molecules on *both*
+sides. There is no regime in which de-weighting large molecules is the right
+trade, which is worth having measured rather than assumed.
+
+And a coincidence that makes night 5's methodological point better than night 5
+did:
+
+| run | rec@20, whole protocol | struct@20 | net points |
+|---|---|---|---|
+| `variance_s1` (baseline) | 0.6534 | 0.6396 | — |
+| `size_mix_s1` (×3, 30+) | 0.6498 | 0.6375 | −0.28 |
+| `size_mix_t35` (×6, 35+) | **0.6258** | 0.6115 | −2.76 |
+| `size_mix_rev` (÷3, 30+) | **0.6258** | 0.6166 | −2.76 |
+
+Up-weighting large molecules sixfold and down-weighting them threefold produce
+**the same whole-protocol recovery to four decimal places**, while doing
+opposite things in every band. Night 5 argued from first principles that the
+common protocol cannot describe a redistributive intervention. Here are two
+interventions it cannot tell apart, moving in opposite directions. (Structure
+accuracy does separate them, 0.6115 against 0.6166 — a reminder that the two
+metrics are not interchangeable even when recovery coincides.)

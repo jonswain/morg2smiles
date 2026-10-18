@@ -572,6 +572,32 @@ can collect. The cooled exposure lines are +3.39 points per doubling for the
 first dose (r = 0.742) and +4.21 for the second (r = 0.988); the first dose's
 poor fit is entirely the 30–34 band, which gains +0.27 points at the same 1.69×
 exposure that buys 35–39 its +7.69.
+
+**Run backwards, the exposure law survives as a slope and fails as a law.**
+`size_mix_rev` de-weights 30+ heavy atoms by 1/3 — `size_mix_s1`'s factor
+inverted, same seed, shard and 8,508 steps — so every band moves the opposite
+way. The fitted rate comes back at **+3.62 points per doubling** against the
++3.4 it was registered at, out of sample and in a direction it was never fitted
+to. Every band-level prediction fails: only two of six land within 2 points of
+minus their forward-dose gap, and pricing each band from the forward fit at the
+exposure actually realised leaves **one of six** within 2 points. The reason is
+an asymmetry a single rate cannot hold. Around the threshold — the 1,597
+queries that are 82% of the protocol — **losing exposure hurts and gaining it
+does nothing**: 0–24 loses 2.74 points when starved and gains 0.28 when fed,
+25–29 loses 1.17 and then moves the wrong way when fed, and 30–34 gains 0.27
+when fed but loses 9.38 when starved, a factor of 23 from an identical
+baseline. Those bands are saturated in exposure; only 35+ responds in both
+directions. A rate fitted inside one dose averages a saturated side against a
+starved side, which is why the slope is stable and the bands are not.
+
+Two consequences worth stating. De-weighting is strictly dominated — 28
+molecules given up per one gained, against the forward dose's 1.3, and the step
+from reverse to forward gains molecules on *both* sides. And a factor and its
+reciprocal do not produce mirror exposures: renormalisation sends the 30+ share
+to `3s/(1+2s)` one way and `s/(3−2s)` the other, so the reverse dose pulls the
+bands it starves 1.53× further in log-exposure than the forward dose pushed
+them. The pre-registration in `configs/size_mix_rev.yaml` assumed otherwise and
+was wrong to.
 No threshold-and-factor escapes that arithmetic. If large molecules become the
 deliverable, the strongest arm measured is the factor-6 mix (+6.13 above 35
 atoms on the common protocol, +2.89 on the large one) and the reporting has to
