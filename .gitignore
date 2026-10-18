@@ -177,3 +177,9 @@ dist/
 !/results/overnight6/seed_union_capacity.json
 !/results/overnight6/miss_anatomy_small_1m_k60.json
 !/results/overnight6/budget_curve_small_1m_k60.json
+!/results/overnight6/comparison_common_t06_cap8k.json
+!/results/overnight6/band_common_t06_cap8k.json
+!/results/overnight6/band_common_t06_cap8k_structure.json
+!/results/overnight6/comparison_k60_cap8k.json
+!/results/overnight6/miss_anatomy_cap8k.json
+!/results/overnight6/budget_curve_cap8k.json

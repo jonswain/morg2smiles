@@ -1,0 +1,97 @@
+# The fourth cell: capacity at a second training length.
+#
+# Block 3 measured capacity properly for the first time -- 15.1M against 8.0M
+# on the same shard at the same 21,117 steps -- and found a gain that is a flat
+# 17% cut in the recovery deficit, the same fraction in every size band and at
+# every budget from k=1 to k=60. One step count cannot say whether that
+# fraction is a property of the capacity step or a snapshot of two runs passing
+# each other, and the question matters: block 1 established that nothing here
+# is converged at 21,117 steps, so a larger model at matched steps is further
+# from its own asymptote than a smaller one.
+#
+# The void block in docs/overnight-2026-10-17.md records why this cannot be
+# read off the training traces: medium_1m_full is scored under the post-
+# 2026-10-14 top-up protocol and small_1m is not, so their histories are not
+# comparable at any step. The only clean route is a second fully-trained
+# checkpoint scored by compare_checkpoints.py under one protocol, which is what
+# this is.
+#
+# The construction is matched, not truncated. The learning rate is a cosine
+# decay over min(total_steps, max_steps), so a run with max_steps 8,508 anneals
+# to zero at 8,508 and is NOT medium_1m_full's step 8,508 -- it is its own
+# complete run. That is deliberate: it makes this to medium_1m_full exactly
+# what small_1m_matched is to small_1m, so the 2x2
+#
+#                     8,508 steps      21,117 steps
+#      8.0M params    small_1m_matched small_1m
+#     15.1M params    medium_1m_8k     medium_1m_full
+#
+# has the same construction in both rows, and the step axis is read the same
+# way in both. All four share data/shards/1m and the same fingerprint.
+#
+# One asymmetry is inherited and cannot be fixed without retraining the 8M row:
+# this architecture trains at lr 4.5e-4 with 400 warmup steps and the 8M one at
+# 5e-4 with 300, a choice made when medium_1m_full was configured. Each row's
+# step comparison is therefore exact, and each column's capacity comparison
+# carries a 10% difference in learning rate alongside the 1.9x in parameters.
+# Block 3's headline number has the same caveat and it is stated there too.
+#
+# PRE-REGISTERED, as the uniform-cut model's sharpest test. If block 3's 17%
+# cut is a property of the capacity step, the same deficit ratio holds at 8,508
+# steps, which fixes this run's recovery before it exists. On the large
+# protocol at k=60 the prediction is
+#
+#     all   rec@60 = 0.6045   (deficit ratio 0.825 against small_1m_matched)
+#     35+   rec@60 = 0.4564   (deficit ratio 0.851)
+#
+# and, because a constant factor cannot change a slope, the step exponent
+# c = log(D_8508 / D_21117) / log(2.482) should come back equal to the 8.0M
+# row's: 1.226 for all, 1.117 at 35+.
+#
+# Scored as follows. CONFIRMED if the deficit ratio at 8,508 steps lands inside
+# the 0.76-0.96 interval that all 32 of block 3's size-by-budget cells occupy,
+# and c is within 0.10 of the 8.0M row's. FALSIFIED LOW (capacity's advantage
+# shrinks with training, so the 17% is an artefact of where small_1m stopped)
+# if the ratio is below 0.76, which means rec@60 above 0.635. FALSIFIED HIGH
+# (capacity's advantage grows with training, the reading the voided trace
+# comparison appeared to support) if the ratio is above 0.96, which means
+# rec@60 below 0.539. The falsified-high branch is the one with consequences:
+# it would mean block 3's +1.33 points is a floor that widens with every
+# further step, and that the capacity row should be trained out, not stopped
+# where the 8M row stopped.
+shard_dir: data/shards/1m
+out_dir: checkpoints/medium_1m_8k
+
+fingerprint:
+  radius: 2
+  n_bits: 2048
+  counts: false
+  folded: true
+
+model:
+  d_model: 320
+  n_heads: 8
+  d_ff: 1280
+  n_encoder_layers: 5
+  n_decoder_layers: 5
+  dropout: 0.1
+  max_tokens: 128
+
+train:
+  # 900,917 / 128 = 7,039 steps per epoch, so 8,508 lands early in epoch 2.
+  epochs: 2
+  batch_size: 128
+  lr: 0.00045
+  warmup_steps: 400
+  randomize_smiles: true
+  max_steps: 8508
+  # small_1m_matched's cadence, so the two 8,508-step runs are also matched on
+  # how much of their wall clock went to evaluation.
+  eval_every_steps: 4254
+  eval_n: 500
+  eval_k: 20
+  valid_loss_n: 2000
+  patience: 0
+  # medium_1m_full measured 1.91 s/step (11.2 h for 21,117), so 8,508 steps is
+  # 4.5 h. The brake is set above that and below the remaining clock.
+  max_hours: 5.5

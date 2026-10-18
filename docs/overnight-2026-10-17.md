@@ -385,6 +385,16 @@ proposes **fewer distinct molecules** per query, 13.6 against 14.7, while
 proposing more valid ones. It is more confident and more repetitive, and it
 wins anyway. Whatever capacity bought here, it was not coverage.
 
+One asymmetry survives in the comparison and is worth stating before the
+analysis rather than after it. `medium_1m_full` trains at lr 4.5×10⁻⁴ with 400
+warmup steps, `small_1m` at 5×10⁻⁴ with 300 — a choice made when the larger
+config was written, to be safe at the wider model, and not a variable anyone
+intended to move. So "1.9× the parameters" is strictly 1.9× the parameters and
+0.9× the learning rate. Nothing in this project has shown recovery to be
+sensitive to a 10% learning-rate change, and the effect sizes below are far
+larger than any plausible lr contribution, but the clean statement is that this
+is a capacity-plus-schedule step and not capacity alone.
+
 ### The gain is a constant fraction of the deficit, which is not what was registered
 
 The standing pre-registration, from night 5, verbatim:
