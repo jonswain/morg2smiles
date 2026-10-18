@@ -890,3 +890,23 @@ comparison, not a curve. The constant-epochs sweep in README open question 2
 remains the thing that would measure f′ directly rather than inferring it —
 but the inference is sharp enough that the question is now "is f′ really
 convex", not "is any of this identified".
+
+### A third reading for stage 10, registered before it lands
+
+Stage 9's decomposition adds a mechanism to the stage-10 pre-registration that
+was not in the config, so it goes on record now, while `medium_1m_8k` is still
+training and no number exists.
+
+The two cells stage 10 compares differ in repetition as well as steps: at 8,508
+steps on the 1M shard a model makes 1.21 passes, at 21,117 steps it makes 3.00.
+If part of what extra parameters buy is a better fit to molecules the model has
+already seen, then capacity should pay *more* where there is more repetition to
+exploit — at 21,117 steps — and the deficit ratio at 8,508 steps should come
+out **above** the 0.825 measured at 21,117. That is the falsified-high branch of
+the registration, and it would carry the consequence already recorded there:
+block 3's +1.33 points is a floor that widens with further training.
+
+The uniform-cut null predicts no such dependence. So the three branches now
+have mechanisms attached rather than only directions, and the registration is
+unchanged: ratio 0.76–0.96 confirms, below 0.76 falsifies low, above 0.96
+falsifies high. Pre-registered 18:30 Sunday; training ends about 22:45.
