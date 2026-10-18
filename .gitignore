@@ -167,3 +167,13 @@ dist/
 !/results/overnight6/step_curve_1m.json
 !/results/overnight6/step_curve_100k.json
 !/results/overnight6/step_curve_capacity.json
+!/results/overnight6/comparison_common_t06_capacity.json
+!/results/overnight6/band_common_t06_capacity.json
+!/results/overnight6/band_common_t06_capacity_structure.json
+!/results/overnight6/comparison_k60_capacity.json
+!/results/overnight6/miss_anatomy_capacity.json
+!/results/overnight6/size_bias_capacity.json
+!/results/overnight6/budget_curve_capacity.json
+!/results/overnight6/seed_union_capacity.json
+!/results/overnight6/miss_anatomy_small_1m_k60.json
+!/results/overnight6/budget_curve_small_1m_k60.json

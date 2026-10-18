@@ -1,0 +1,119 @@
+{
+  "dumps": "results/overnight6/outcomes_capacity",
+  "runs": [
+    "medium_1m_full",
+    "small_1m"
+  ],
+  "k": 60,
+  "metric": "recovery",
+  "bands": {
+    "30-34": {
+      "n_queries": 1189,
+      "per_seed": {
+        "medium_1m_full": 0.9428090832632464,
+        "small_1m": 0.928511354079058
+      },
+      "one_seed": 0.9356602186711522,
+      "union": 0.9495374264087468,
+      "union_if_independent": 0.9959114988035122,
+      "all_seeds_miss": 0.050462573591253154,
+      "luck_share_of_misses": 0.21568627450980365,
+      "doubling_factor": 1.016915325191873,
+      "projected_one_seed_at_k_times_n": 0.9514872155390738,
+      "equal_spend": {
+        "1_seeds_at_k_60": 0.9356602186711522,
+        "2_seeds_at_k_30": 0.9411269974768713
+      }
+    },
+    "35-39": {
+      "n_queries": 625,
+      "per_seed": {
+        "medium_1m_full": 0.904,
+        "small_1m": 0.8912
+      },
+      "one_seed": 0.8976,
+      "union": 0.928,
+      "union_if_independent": 0.9895552,
+      "all_seeds_miss": 0.072,
+      "luck_share_of_misses": 0.2968750000000008,
+      "doubling_factor": 1.033310942843185,
+      "projected_one_seed_at_k_times_n": 0.9274999022960428,
+      "equal_spend": {
+        "1_seeds_at_k_60": 0.8976,
+        "2_seeds_at_k_30": 0.9072
+      }
+    },
+    "40-49": {
+      "n_queries": 380,
+      "per_seed": {
+        "medium_1m_full": 0.7947368421052632,
+        "small_1m": 0.7578947368421053
+      },
+      "one_seed": 0.7763157894736843,
+      "union": 0.8184210526315789,
+      "union_if_independent": 0.9503047091412743,
+      "all_seeds_miss": 0.18157894736842106,
+      "luck_share_of_misses": 0.18823529411764672,
+      "doubling_factor": 1.0693254114306747,
+      "projected_one_seed_at_k_times_n": 0.8301342009790765,
+      "equal_spend": {
+        "1_seeds_at_k_60": 0.7763157894736843,
+        "2_seeds_at_k_30": 0.7921052631578948
+      }
+    },
+    "50+": {
+      "n_queries": 127,
+      "per_seed": {
+        "medium_1m_full": 0.5354330708661418,
+        "small_1m": 0.48031496062992124
+      },
+      "one_seed": 0.5078740157480315,
+      "union": 0.5669291338582677,
+      "union_if_independent": 0.7585715171430343,
+      "all_seeds_miss": 0.4330708661417323,
+      "luck_share_of_misses": 0.12000000000000001,
+      "doubling_factor": 1.1583870967741936,
+      "projected_one_seed_at_k_times_n": 0.5883147066294133,
+      "equal_spend": {
+        "1_seeds_at_k_60": 0.5078740157480315,
+        "2_seeds_at_k_30": 0.5039370078740157
+      }
+    },
+    "35+": {
+      "n_queries": 1132,
+      "per_seed": {
+        "medium_1m_full": 0.8259717314487632,
+        "small_1m": 0.8003533568904594
+      },
+      "one_seed": 0.8131625441696113,
+      "union": 0.8507067137809188,
+      "union_if_independent": 0.9652558403775799,
+      "all_seeds_miss": 0.14929328621908128,
+      "luck_share_of_misses": 0.2009456264775416,
+      "doubling_factor": 1.0523856209150328,
+      "projected_one_seed_at_k_times_n": 0.8557605689507842,
+      "equal_spend": {
+        "1_seeds_at_k_60": 0.8131625441696113,
+        "2_seeds_at_k_30": 0.823321554770318
+      }
+    },
+    "all": {
+      "n_queries": 2321,
+      "per_seed": {
+        "medium_1m_full": 0.8858250753985352,
+        "small_1m": 0.8660060318828091
+      },
+      "one_seed": 0.8759155536406722,
+      "union": 0.9013356311934511,
+      "union_if_independent": 0.9847012487931687,
+      "all_seeds_miss": 0.0986643688065489,
+      "luck_share_of_misses": 0.20486111111111033,
+      "doubling_factor": 1.0326099997290887,
+      "projected_one_seed_at_k_times_n": 0.9044791596075992,
+      "equal_spend": {
+        "1_seeds_at_k_60": 0.8759155536406722,
+        "2_seeds_at_k_30": 0.8836708315381301
+      }
+    }
+  }
+}

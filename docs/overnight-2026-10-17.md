@@ -361,3 +361,223 @@ so the columns are matched on data and cadence and the only variable between
 them is the parameter count. It is wired into the block 3 driver as stage 5b,
 ahead of the scoring, because it costs nothing and runs even if block 2 is
 truncated.
+
+## Block 3 — capacity pays, but it is not a dial on anything
+
+`medium_1m_full` reached the full 21,117 steps in 11.2 h, the same step count
+and the same shard as `small_1m`, so this is the comparison the night-5 claim
+was mislabelled as: 8.0M against 15.1M parameters with everything else held.
+Both were scored in one `compare_checkpoints.py` call on the common protocol at
+T=0.6, so they share the 2,000-molecule draw and the 1,956 fingerprint-unseen
+subset exactly.
+
+| run | params | rec@1 | rec@5 | rec@20 | struct@20 | validity | uniq/query |
+|---|---|---|---|---|---|---|---|
+| `small_1m` | 8.0M | 0.5920 | 0.8344 | 0.9131 | 0.9018 | 0.948 | 14.7 |
+| `medium_1m_full` | 15.1M | **0.6483** | **0.8650** | **0.9264** | **0.9131** | 0.966 | 13.6 |
+| gain (points) | | +5.63 | +3.06 | +1.33 | +1.12 | +1.8 | −1.1 |
+
+Capacity pays. It is the first thing in this project to move rec@1 by more than
+five points. The overall rec@20 gain is +1.33 points at 2.9 SE (p = 0.005).
+
+Note the last two columns before reading anything else: the larger model
+proposes **fewer distinct molecules** per query, 13.6 against 14.7, while
+proposing more valid ones. It is more confident and more repetitive, and it
+wins anyway. Whatever capacity bought here, it was not coverage.
+
+### The gain is a constant fraction of the deficit, which is not what was registered
+
+The standing pre-registration, from night 5, verbatim:
+
+> if the limit is capacity the gain concentrates above 35 atoms and the 0–24
+> band moves by less than a point; if the gain is flat across bands it is not
+> the size cliff that got better and the cliff is in the fingerprint or the
+> data.
+
+Band table, common protocol, k=20, generation order, 1,956 queries:
+
+| band | n | `small_1m` | `medium_1m_full` | gain | SE | p |
+|---|---|---|---|---|---|---|
+| 0–24 | 712 | 0.9579 | 0.9719 | **+1.40** | 0.63 | 0.041 |
+| 25–29 | 512 | 0.9629 | 0.9668 | +0.39 | 0.73 | 0.791 |
+| 30–34 | 373 | 0.9008 | 0.9035 | +0.27 | 0.89 | 1.000 |
+| 35–39 | 195 | 0.8718 | 0.8872 | +1.54 | 1.85 | 0.581 |
+| 40–49 | 123 | 0.6992 | 0.7724 | **+7.32** | 3.35 | 0.049 |
+| 50+ | 41 | 0.4634 | 0.4878 | +2.44 | 5.45 | 1.000 |
+| 35+ | 359 | 0.7660 | 0.8022 | **+3.62** | 1.65 | 0.041 |
+| all | 1,956 | 0.9131 | 0.9264 | +1.33 | 0.46 | 0.005 |
+
+**The first clause passes and the second fails.** The 35+ gain is +3.62 against
+0–24's +1.40, so it does concentrate above 35; but 0–24 moved by 1.40 points,
+not under one, and it is tied with 35+ as the second-most significant band in
+the table. The registered dichotomy does not resolve: the result is neither
+concentrated nor flat, and the gain is not monotone in size — 25–34 is dead
+(+0.39, +0.27) with live bands on both sides of it.
+
+The dichotomy does not resolve because it was registered on the wrong scale.
+Both dumps run to k=60 on the large protocol, so the deficit ratio can be read
+band by band and budget by budget. **This is the whole result in one table:**
+
+| band | n | k=1 | k=2 | k=5 | k=10 | k=20 | k=30 | k=40 | k=60 |
+|---|---|---|---|---|---|---|---|---|---|
+| 30–34 | 1,189 | 0.912 | 0.868 | 0.791 | 0.760 | 0.762 | 0.766 | 0.790 | 0.757 |
+| 35–39 | 625 | 0.931 | 0.866 | 0.878 | 0.837 | 0.772 | 0.815 | 0.810 | 0.845 |
+| 40–49 | 380 | 0.958 | 0.899 | 0.849 | 0.844 | 0.849 | 0.798 | 0.785 | 0.815 |
+| 50+ | 127 | 0.942 | 0.948 | 0.961 | 0.946 | 0.907 | 0.875 | 0.883 | 0.914 |
+| 35+ | 1,132 | 0.942 | 0.892 | 0.882 | 0.864 | 0.835 | 0.823 | 0.819 | 0.851 |
+| all | 2,321 | 0.929 | 0.882 | 0.851 | 0.830 | 0.812 | 0.806 | 0.811 | 0.825 |
+
+Each cell is `medium_1m_full`'s shortfall divided by `small_1m`'s on the same
+queries; 1.00 means capacity bought nothing. Thirty-two cells over the four
+bands and eight budgets, every one between 0.76 and 0.96, with no trend in
+either direction across a 2× range in target size and a 0.45-to-0.93 range in
+recovery. **Doubling the parameters cuts the shortfall by a roughly constant
+17%, at every size and every budget.**
+
+This table is the large protocol, which draws only molecules of 30 heavy atoms
+and up, so on its own it says nothing about the two bands the registration was
+actually about. The common protocol covers them, and the same ratio can be read
+off the band table above at k=20. The last two columns test the uniform cut as
+a one-parameter model: what a flat 17% predicts, and how far the measurement
+lands from it in units of its own SE.
+
+| band | n | deficit | ratio | cut | gain | SE | 17% predicts | off by |
+|---|---|---|---|---|---|---|---|---|
+| 0–24 | 712 | 4.21 | 0.667 | 33.3% | +1.40 | 0.63 | +0.72 | **+1.1 SE** |
+| 25–29 | 512 | 3.71 | 0.895 | 10.5% | +0.39 | 0.73 | +0.63 | −0.3 SE |
+| 30–34 | 373 | 9.92 | 0.973 | 2.7% | +0.27 | 0.89 | +1.69 | −1.6 SE |
+| 35–39 | 195 | 12.82 | 0.880 | 12.0% | +1.54 | 1.85 | +2.18 | −0.3 SE |
+| 40–49 | 123 | 30.08 | 0.757 | 24.3% | +7.32 | 3.35 | +5.11 | +0.7 SE |
+| 50+ | 41 | 53.66 | 0.955 | 4.5% | +2.44 | 5.45 | +9.12 | −1.2 SE |
+| 35+ | 359 | 23.40 | 0.845 | 15.5% | +3.62 | 1.65 | +3.98 | −0.2 SE |
+| all | 1,956 | 8.69 | 0.847 | 15.3% | +1.33 | 0.46 | +1.48 | −0.3 SE |
+
+The per-band cuts scatter from 2.7% to 33.3%, but the bands below 40 atoms have
+four to thirteen points of deficit to work with, so a tenth of a point of noise
+moves the ratio by several percent. **Every one of the nine rows is within 1.6
+SE of a flat 17% cut.** One number, no size dependence, fits the entire table.
+
+That is also what makes the registration ill-posed, and in a way worth
+recording. A uniform multiplicative cut yields a *point* gain proportional to
+the deficit, so it is automatically largest wherever recovery is lowest:
+"concentrates above 35 atoms" was not a prediction about chemistry but about
+arithmetic, and it would have come out true of any intervention that helped
+uniformly at all. Worse for the clause that failed, a flat 17% predicts **+0.72
+points** in the 0–24 band — the registered threshold of "less than a point" sat
+almost exactly on the uniform-cut prediction, and the measurement came in 1.1
+SE above it. The clause failed by one standard error, not because 0–24 turned
+out to be special.
+
+Read on the scale where "flat" means something, then, the registration's second
+disjunct is the one that fires: **it is not the size cliff that got better.**
+Nothing here is size-specific. The only hint of drift is the wrong way — the
+well-powered 50+ row on the large protocol sits at 0.88–0.96, the closest to
+1.00 of any band, so if capacity favours anything it is the easy end. The cliff
+is still there, 17% shallower.
+
+### The exponent prediction passes, and the pass means nothing
+
+The second standing pre-registration:
+
+> **the exponent at 35+ should land above 0.303**, `small_1m`'s value
+
+0.303 is `small_1m`'s k ≤ 20 window fit, so the matched quantity is the
+`b(<=20)` column. `small_1m`'s night-5 dump was re-scored through the identical
+`miss_anatomy.py` → `budget_curve.py` path for this comparison, reproducing its
+published numbers to the digit.
+
+| band | `small_1m` b | `medium` b | `small_1m` b(≤20) | `medium` b(≤20) | b/rec small | b/rec medium |
+|---|---|---|---|---|---|---|
+| 30–34 | 0.396 | 0.404 | 0.399 | 0.425 | 0.434 | 0.432 |
+| 35–39 | 0.387 | 0.408 | 0.403 | 0.496 | 0.447 | 0.460 |
+| 40–49 | 0.263 | 0.291 | 0.304 | 0.305 | 0.367 | 0.379 |
+| 50+ | 0.144 | 0.176 | 0.123 | 0.165 | 0.321 | 0.355 |
+| **35+** | 0.281 | 0.305 | **0.303** | **0.343** | 0.366 | 0.380 |
+| all | 0.317 | 0.333 | 0.334 | 0.368 | 0.376 | 0.383 |
+
+**Confirmed: 0.343 against the registered 0.303.** The full-range fit agrees,
+0.305 against 0.281.
+
+And it is worth nothing, for the reason block 1 established two days ago. The
+last two columns divide each exponent by its band's recovery at k=60: they move
+by −0.001, +0.013, +0.012, +0.034, +0.014 and +0.006. The spread of that same
+ratio across the five block-1 runs was 0.334–0.366, a range of 0.032 — wider
+than five of these six differences. **The exponent rose by almost exactly the
+amount its higher recovery accounts for.** The prediction was written when I
+believed the exponent was a capacity dial; it is confirmed as a number and void
+as an inference, and it was confirmed by the quantity it was meant to rule out.
+
+The residual is real but tiny and points the other way from the earlier
+reading: the deficit ratio falls from 0.94 at k=1 to 0.82 at k=40, so capacity
+helps slightly *more* at large budgets, which is what tilts the fit to a
+steeper slope. In points the opposite holds — +4.31 at k=1 against +2.76 at
+k=60 — because the deficit it is shrinking is itself shrinking faster. Both
+statements are true and they are about different scales; the night-5 heading
+"budget dilutes the match rate" is true in points only.
+
+### A null here would have proved nothing, and this is not a null
+
+The caveat committed with the registration still applies, now with its sign
+flipped. At 21,117 steps nothing in this project is converged, and the step
+traces show both runs still falling, so a 15.1M model at matched steps is
+further from its own asymptote than an 8.0M one. A flat result would therefore
+have been unreadable: consistent with capacity not helping, and equally with
+15M-at-21k sitting where 8M-at-13k sat.
+
+It did not come out flat, which means the caveat now works as a floor rather
+than an alibi: **+1.33 points and a 17% deficit cut are a lower bound on what
+this capacity step is eventually worth**, measured at the point least
+favourable to the larger model.
+
+The third reading registered alongside them — whether the 15.1M trace sits
+above `small_1m`'s at every matched step — remains unanswerable, for the
+protocol reason recorded in the Void block above, not for want of trying.
+
+### Two models beat two seeds of one, at the same price
+
+`seed_union.py` was run over the two k=60 dumps, treating capacity as the axis
+a seed usually occupies. Both were scored on the large protocol's same
+2,400-molecule draw, which the script verifies.
+
+| band | n | one model | union of two | luck | 1×60 | 2×30 |
+|---|---|---|---|---|---|---|
+| 30–34 | 1,189 | 0.9357 | 0.9495 | 21.6% | 0.9357 | **0.9411** |
+| 35–39 | 625 | 0.8976 | 0.9280 | 29.7% | 0.8976 | **0.9072** |
+| 40–49 | 380 | 0.7763 | 0.8184 | 18.8% | 0.7763 | **0.7921** |
+| 50+ | 127 | 0.5079 | 0.5669 | 12.0% | 0.5079 | 0.5039 |
+| 35+ | 1,132 | 0.8132 | 0.8507 | 20.1% | 0.8132 | **0.8233** |
+| all | 2,321 | 0.8759 | 0.9013 | 20.5% | 0.8759 | **0.8837** |
+
+(These are `seed_union.py`'s first-k-slots convention, ~0.5 points above the
+protocol's molecule-budget figures. Read the columns against each other.)
+
+**One fifth of what either model misses, the other one finds**, and splitting a
+fixed 60 molecules of budget across the two beats spending all 60 on the better
+of them in five of six bands, by +0.78 points overall and +1.01 at 35+. The
+exception is 50+, where halving the budget costs more than the second model
+brings — the one band where a single model's 60 slots are still the binding
+constraint.
+
+The honest limit on this: the comparable same-model seed unions from night 5
+were run at k=20 on the 100k models, where recovery is near 0.35 and the
+equal-spend gain was +0.06 to +0.55 points. They are not a control for this at
+k=60 on 1M-shard models, so "a second architecture beats a second seed" is
+*suggested* by the two tables and not established by either. A matched run
+would be `seed_union.py` over two seeds of `small_1m` at k=60, which does not
+exist.
+
+### What block 3 settles
+
+Three claims about the exponent have now been made and two retracted. The
+surviving picture is simpler than any of them: **the exponent is not an axis.**
+Training length moves it (block 1, 4:1 over corpus), capacity moves it (0.303 →
+0.343), and in both cases it moves by the amount the recovery level moved,
+leaving `b/rec` inside its own run-to-run spread. Nothing in six runs has
+changed the shape of the budget curve; interventions slide a model along it.
+
+Capacity's contribution, stated in the one form that survives all three
+scales: **a 17% cut in the shortfall, uniform in size and budget, bought with
+1.9× the parameters and 1.5× the inference cost** (1.5 against 2.3 queries/s).
+Against the prices in block 1's third-route table, that is a poor trade per
+unit of compute and a good one per unit of budget — and it is the only
+intervention so far that does anything at k=1.

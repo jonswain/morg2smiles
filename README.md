@@ -274,6 +274,26 @@ and slope as separate dials" was the wrong frame, and an earlier version of
 this section attributed the step to capacity, which never varied between the
 two checkpoints it compared.
 
+Capacity has since been measured properly, with a 15.1M-parameter model trained
+on the same shard for the same 21,117 steps, and it behaves the same way: the
+exponent at 35+ rises from 0.303 to 0.343, and `b ÷ rec@60` goes with it, from
+0.366 to 0.380 — a move smaller than the spread of that ratio across the other
+five runs. Six runs now, three interventions, and not one of them has changed
+the shape of the budget curve. They slide a model along it.
+
+**What capacity buys is a constant fraction of the shortfall, the same
+fraction at every molecule size and every budget.** Doubling the parameters to
+15.1M at matched steps and shard is worth +1.33 points of rec@20 overall and
++5.63 at rec@1, and the cleanest description of it is a single number: across
+four size bands and eight budgets from k=1 to k=60, the larger model's deficit
+divided by the smaller's lands between 0.76 and 0.96 in all 32 cells, with no
+trend in size or budget. **A flat 17% cut fits all nine bands of the common
+protocol to within 1.6 SE.** The point gains therefore look concentrated in big
+molecules — +7.32 at 40–49 against +1.40 at 0–24 — purely because the deficit
+is larger there; the size cliff is not what improved. The larger model also
+proposes *fewer* distinct molecules per query (13.6 against 14.7) while
+proposing more valid ones, so none of this gain is coverage.
+
 One part of that claim survives under the right label. The fit's other
 parameter, `A`, is the deficit extrapolated back to k=1, so `A` = 1 means
 nothing is ever found in a single try — and above 50 heavy atoms `A` is 1.00 to

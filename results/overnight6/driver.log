@@ -26,3 +26,10 @@
 [10-18 11:15:04] stage 5b matched steps exit=1
 [10-18 11:15:04] stage 5b step curve exit=0
 [10-18 11:15:04] stage 6: medium_1m_full and small_1m on the common protocol at T=0.6
+[10-18 11:56:31] stage 6 common exit=0
+[10-18 11:56:36] stage 6 band tables exit=0
+[10-18 11:56:36] stage 6: medium_1m_full at T=0.6, k=60, large protocol
+[10-18 13:54:42] stage 6 k=60 exit=0
+[10-18 13:55:12] stage 6 analyses exit=0
+[10-18 13:55:18] stage 6 union exit=0
+[10-18 13:55:18] stage 7: size_mix_t35 on the common protocol at T=0.6

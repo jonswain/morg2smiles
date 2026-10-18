@@ -1,0 +1,175 @@
+{
+  "k": 20,
+  "order": "generation",
+  "metric": "structure",
+  "budget": "molecules",
+  "n_fp_unseen": 1956,
+  "runs": [
+    "medium_1m_full",
+    "small_1m"
+  ],
+  "bands": {
+    "0-24": {
+      "n_queries": 712,
+      "share_of_protocol": 0.36400817995910023,
+      "per_run": {
+        "medium_1m_full": 0.9634831460674157,
+        "small_1m": 0.952247191011236
+      },
+      "pairs": {
+        "medium_1m_full->small_1m": {
+          "gap_points": -1.1235955056179692,
+          "b_only": 7,
+          "a_only": 15,
+          "paired_se_points": 0.6587662584021671,
+          "gap_in_paired_se": -1.7056057308448709,
+          "mcnemar_p": 0.13380050659179688
+        }
+      }
+    },
+    "25-29": {
+      "n_queries": 512,
+      "share_of_protocol": 0.261758691206544,
+      "per_run": {
+        "medium_1m_full": 0.9609375,
+        "small_1m": 0.955078125
+      },
+      "pairs": {
+        "medium_1m_full->small_1m": {
+          "gap_points": -0.5859375,
+          "b_only": 5,
+          "a_only": 8,
+          "paired_se_points": 0.7042092334890604,
+          "gap_in_paired_se": -0.8320502943378437,
+          "mcnemar_p": 0.5810546875
+        }
+      }
+    },
+    "30-34": {
+      "n_queries": 373,
+      "share_of_protocol": 0.19069529652351738,
+      "per_run": {
+        "medium_1m_full": 0.8954423592493298,
+        "small_1m": 0.8900804289544236
+      },
+      "pairs": {
+        "medium_1m_full->small_1m": {
+          "gap_points": -0.536193029490617,
+          "b_only": 6,
+          "a_only": 8,
+          "paired_se_points": 1.0031253047651316,
+          "gap_in_paired_se": -0.5345224838248492,
+          "mcnemar_p": 0.79052734375
+        }
+      }
+    },
+    "35-39": {
+      "n_queries": 195,
+      "share_of_protocol": 0.09969325153374232,
+      "per_run": {
+        "medium_1m_full": 0.8615384615384616,
+        "small_1m": 0.8615384615384616
+      },
+      "pairs": {
+        "medium_1m_full->small_1m": {
+          "gap_points": 0.0,
+          "b_only": 9,
+          "a_only": 9,
+          "paired_se_points": 2.1757131728816845,
+          "gap_in_paired_se": 0.0,
+          "mcnemar_p": 1.0
+        }
+      }
+    },
+    "40-49": {
+      "n_queries": 123,
+      "share_of_protocol": 0.06288343558282208,
+      "per_run": {
+        "medium_1m_full": 0.7398373983739838,
+        "small_1m": 0.6829268292682927
+      },
+      "pairs": {
+        "medium_1m_full->small_1m": {
+          "gap_points": -5.691056910569103,
+          "b_only": 5,
+          "a_only": 12,
+          "paired_se_points": 3.3521183948111064,
+          "gap_in_paired_se": -1.69774937525433,
+          "mcnemar_p": 0.143463134765625
+        }
+      }
+    },
+    "50+": {
+      "n_queries": 41,
+      "share_of_protocol": 0.020961145194274028,
+      "per_run": {
+        "medium_1m_full": 0.36585365853658536,
+        "small_1m": 0.3170731707317073
+      },
+      "pairs": {
+        "medium_1m_full->small_1m": {
+          "gap_points": -4.878048780487804,
+          "b_only": 2,
+          "a_only": 4,
+          "paired_se_points": 5.974365226300434,
+          "gap_in_paired_se": -0.8164965809277259,
+          "mcnemar_p": 0.6875
+        }
+      }
+    },
+    "30-39": {
+      "n_queries": 568,
+      "share_of_protocol": 0.2903885480572597,
+      "per_run": {
+        "medium_1m_full": 0.8838028169014085,
+        "small_1m": 0.8802816901408451
+      },
+      "pairs": {
+        "medium_1m_full->small_1m": {
+          "gap_points": -0.35211267605633756,
+          "b_only": 15,
+          "a_only": 17,
+          "paired_se_points": 0.9959250439247148,
+          "gap_in_paired_se": -0.3535533905932733,
+          "mcnemar_p": 0.860050065908581
+        }
+      }
+    },
+    "35+": {
+      "n_queries": 359,
+      "share_of_protocol": 0.18353783231083845,
+      "per_run": {
+        "medium_1m_full": 0.7632311977715878,
+        "small_1m": 0.7381615598885793
+      },
+      "pairs": {
+        "medium_1m_full->small_1m": {
+          "gap_points": -2.506963788300842,
+          "b_only": 16,
+          "a_only": 25,
+          "paired_se_points": 1.7836000661372835,
+          "gap_in_paired_se": -1.4055638569974584,
+          "mcnemar_p": 0.21102359760880063
+        }
+      }
+    },
+    "all": {
+      "n_queries": 1956,
+      "share_of_protocol": 1.0,
+      "per_run": {
+        "medium_1m_full": 0.9130879345603272,
+        "small_1m": 0.901840490797546
+      },
+      "pairs": {
+        "medium_1m_full->small_1m": {
+          "gap_points": -1.1247443762781195,
+          "b_only": 34,
+          "a_only": 56,
+          "paired_se_points": 0.48501191106876984,
+          "gap_in_paired_se": -2.319003617456813,
+          "mcnemar_p": 0.02630166513112228
+        }
+      }
+    }
+  }
+}
