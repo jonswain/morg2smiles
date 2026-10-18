@@ -1012,6 +1012,13 @@ atoms the 15.1M model recovers 6 molecules the 8.0M model missed and loses 4 it
 had, which is nothing at all (p = 0.75). **Above about 50 heavy atoms, doubling
 the parameters buys no measurable recovery.**
 
+> **Void.** That bolded sentence is wrong and is withdrawn by stage 11 below.
+> Ten discordant pairs cannot support it. On 893 queries at 50+ the gain is
+> +3.70 points [+2.13, +5.26], p = 9e-6. What survives is the rejection of the
+> uniform cut here — +3.70 against a predicted +18.32 — which is the part the
+> registration actually tested. The cut declines with size, from 25.4% at
+> 30–34 to 3.9% at 50+; it does not reach zero.
+
 Block 3 could not have seen this. At 21,117 steps the same band sits at 0.4488
 recovery, so the uniform cut predicts a 9.6-point gain with a 4.4-point SE and
 the residual is −4.94, z = −1.11 — consistent with the law and consistent with
@@ -1098,3 +1105,86 @@ effect size and n it probably is not — the registered CI straddles zero — so
 the honest output is an interval on a small positive number, not a second null.
 Recording that in advance so that an inconclusive result cannot be presented
 afterwards as evidence for zero.
+
+## Stage 11 — the powered test confirms the registration and refutes my own headline
+
+893 fingerprint-unseen queries at 50+ heavy atoms, k=60, T=0.6, on the two
+8,508-step checkpoints. Finished in 42 minutes.
+
+| k | 8.0M | 15.1M | gain | 95% CI | discordant | p | deficit ratio |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 20 | 0.0258 | 0.0482 | +2.24 | [+1.01, +3.47] | 26 up / 6 dn | 5e-4 | 0.977 |
+| 60 | 0.0459 | 0.0829 | **+3.70** | [+2.13, +5.26] | 44 up / 11 dn | 9e-6 | 0.961 |
+
+**The primary registration is CONFIRMED.** +3.70 points is below the +5.0
+threshold, and the uniform cut's prediction for this band was +18.32 points, so
+the multiplicative description is rejected at 50+ by a factor of five. Stage
+10's withdrawal of "uniform across 32 cells" stands, and it stands on 893
+queries rather than 127.
+
+**The secondary expectation is falsified, and it was the interesting one.** I
+registered that the gain at 50+ probably would not be distinguishable from
+zero, predicting roughly 48 up and 32 down. The actual split is 44 up and 11
+down, p = 9e-6, and the interval excludes zero comfortably. So stage 10's
+sentence — "above about 50 heavy atoms, doubling the parameters buys no
+measurable recovery" — is **wrong, and is withdrawn**. It was an artefact of
+127 queries and ten discordant pairs, which is precisely the risk the
+registration was written to guard against. Writing the guard did not stop me
+putting the overclaim in the commit message and the README first.
+
+What replaces it is a monotone decline in the fraction, not a cliff to zero:
+
+| band | deficit ratio @ 8,508 steps | cut |
+| --- | --- | --- |
+| 30–34 | 0.746 | 25.4% |
+| 35–39 | 0.777 | 22.3% |
+| 40–49 | 0.853 | 14.7% |
+| 50+ | 0.961 | 3.9% |
+
+Capacity helps at every size. The *fraction* of the deficit it removes falls
+about sixfold from the smallest band to the largest, which is why a single
+pooled ratio fits the middle of the range and misses the end so badly.
+
+### The null retreats to 60+, and this time it is labelled as underpowered
+
+Splitting the new protocol by size inside 50+:
+
+| band | n | 8.0M | 15.1M | gain | 95% CI | p | ratio |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 50–54 | 433 | 0.0647 | 0.1039 | +3.93 | [+1.39, +6.47] | 0.003 | 0.958 |
+| 55–59 | 257 | 0.0428 | 0.0934 | +5.06 | [+1.95, +8.56] | 0.004 | 0.947 |
+| 60+ | 203 | 0.0099 | 0.0246 | +1.48 | [−0.49, +3.94] | 0.38 | 0.985 |
+
+The 60+ row is the same shape as the one that just misled me: four discordant
+pairs against one, an interval straddling zero, and a ratio consistent with
+both a small gain and none. **It is recorded here as underpowered and not as a
+null.** The pool holds 243 molecules at 60+ in total, so this question cannot
+be answered by drawing more from it — it needs a larger clean pool, not a
+larger sample.
+
+### Structure accuracy moves more than recovery does
+
+| metric at 50+ | 8.0M | 15.1M | gain | p |
+| --- | --- | --- | --- | --- |
+| recovery@60 | 0.0459 | 0.0829 | +3.70 | 9e-6 |
+| structure@60 | 0.0190 | 0.0538 | **+3.47** | 1e-7 |
+
+Exact-structure accuracy nearly triples where recovery not quite doubles, and
+the structure gain (+3.47) is almost the whole of the recovery gain (+3.70) —
+so nearly every fingerprint hit capacity adds at 50+ is also a correct
+structure, not a collision. Validity on these molecules rises from 0.616 to
+0.720 as well. On large molecules the 8.0M model is producing invalid or
+near-miss strings and the 15.1M model is producing right answers; this is the
+one place in the project where the two failure modes are clearly separated.
+
+### What this costs the stage-10 story
+
+Nothing in the confirmed registration, and one sentence of the headline. The
+claim that survives is: capacity cuts a constant fraction of the recovery
+deficit, that fraction is independent of training length, and it declines with
+molecule size from about a quarter to about a twenty-fifth. The claim that does
+not survive is that it reaches zero. Two nulls have now been called in this
+project on roughly 130 queries and both have been overturned by enlarging the
+sample — the earlier one was the count-fingerprint question at p = 0.32. The
+operational lesson is cheap and I keep relearning it: a discordant-pair count
+in single digits is not evidence of absence, however good the p-value looks.

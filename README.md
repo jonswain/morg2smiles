@@ -349,16 +349,35 @@ moves from 0.847 to 0.776. Point gains likewise look concentrated in large
 molecules purely because the deficit is larger there; the size cliff is not
 what improved.
 
-Where the multiplicative description *fails* is the one place a 2x2 could
-detect it. Fit one pooled ratio to the undertrained row and 30–34, 35–39 and
-40–49 come in within 1.6 SE, while 50+ misses by 16.4 points at z = −6.9: at
-that size the 15.1M model recovers 6 molecules the 8.0M model missed and loses
-4 it had (p = 0.75). The 21,117-step row cannot see this — there the predicted
-gain is 9.6 points against a 4.4-point SE, so the law and a flat null are
-indistinguishable. A multiplicative claim is hardest to satisfy where the
-deficit is biggest, which is why the *worse* row is the informative one. An
+**The fraction is not constant in size, though: it declines about sixfold from
+the smallest band to the largest.** Fitting one pooled ratio to the
+undertrained row, 30–34, 35–39 and 40–49 come in within 1.6 SE while 50+ misses
+by 16.4 points at z = −6.9, so a dedicated 50+ protocol was run to measure that
+band properly — 893 fingerprint-unseen queries against the 127 the 30+ protocol
+happened to draw. The cut runs **25.4% / 22.3% / 14.7% / 3.9%** across 30–34,
+35–39, 40–49 and 50+. At 50+ that is +3.70 points of rec@60 [+2.13, +5.26],
+p = 9e-6, against the +18.32 a pooled ratio would predict: capacity helps at
+every size, and the multiplicative description holds only over 30–49. An
 earlier version of this section called the cut uniform across all 32 cells;
-that is withdrawn, and the 30–49 restriction is the honest statement.
+that is withdrawn.
+
+Two corrections to earlier readings of that band, both mine. The 21,117-step
+row cannot test it at all — the predicted gain there is 9.6 points against a
+4.4-point SE, so the law and a flat null are indistinguishable, and a
+multiplicative claim is hardest to satisfy where the deficit is biggest, which
+is why the *undertrained* row is the informative one. And a first pass on the
+30+ protocol's 127 queries at 50+ reported **no measurable gain** (6 up, 4
+down, p = 0.75); the powered protocol shows a real one, so that sentence is
+withdrawn. A single-digit discordant-pair count is not evidence of absence.
+What is genuinely unresolved is 60+, at +1.48 points [−0.49, +3.94] on 203
+queries — recorded as underpowered, not as a null, and unanswerable from this
+pool, which holds only 243 such molecules.
+
+On these large molecules capacity separates the two failure modes cleanly:
+exact-structure accuracy at 50+ nearly triples (0.0190 → 0.0538, p = 1e-7) and
+validity rises from 0.616 to 0.720, so the structure gain of +3.47 points is
+almost the whole of the +3.70 recovery gain. The 8.0M model is emitting invalid
+and near-miss strings where the 15.1M model emits right answers.
 
 One part of that claim survives under the right label. The fit's other
 parameter, `A`, is the deficit extrapolated back to k=1, so `A` = 1 means
@@ -846,9 +865,9 @@ Open questions, in rough order of expected value:
    21,117-step figure was not a lower bound. The mechanism registered on top of
    the prediction — that capacity should pay more where there is more
    repetition to exploit — was falsified with the sign reversed. What the cell
-   did overturn was the claim of uniformity across size: at 50+ heavy atoms
-   capacity buys nothing measurable (p = 0.75), which only the undertrained row
-   has the power to show. What is still open is the reverse asymmetry: nothing
+   did overturn was the claim of uniformity across size: the cut declines from
+   25.4% at 30–34 to 3.9% at 50+, measured on a dedicated 893-query protocol
+   after a first pass on 127 queries wrongly reported no gain at all there. What is still open is the reverse asymmetry: nothing
    has tested whether the *steps* exponent depends on capacity in a regime
    where the two models are not both far from their asymptotes.
 6. **Does a second architecture beat a second seed?** One fifth of what either
