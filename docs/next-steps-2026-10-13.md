@@ -1,5 +1,10 @@
 # Next steps — 2026-10-13
 
+> **Superseded by [next-steps-2026-10-19.md](next-steps-2026-10-19.md).**
+> Items 1, 2, 3 and 5 ran; item 4 (step saturation) did not, and carries
+> over. The full-ChEMBL deliverable this schedule was built around was
+> demoted on night 5.
+
 A snapshot of the development plan, and the analysis that informed it. Dated
 rather than named `roadmap.md` because the estimates below are tied to
 measurements that will go stale as soon as anything else runs.
