@@ -17,6 +17,28 @@ into bits, and the molecule is gone. This project tests how true that is, by
 training a fingerprint-conditioned decoder to generate molecules and checking
 them against an exact oracle.
 
+That number holds on **ChEMBL-like molecules of 3 to 64 heavy atoms with
+stereochemistry stripped**, which is the only domain anything here was measured
+on, and it falls steeply with molecule size inside that window — 100% below 15
+heavy atoms, 46% at 50–64. The next section but one has the figure, and
+[§8 of the methodology](docs/methodology.md#8-the-domain-every-number-lives-in)
+has the rest of the fine print.
+
+### Start here
+
+Five and a half thousand lines of night log are not a result. These four
+documents are:
+
+| document | what it is for |
+|---|---|
+| **[docs/results.md](docs/results.md)** | every measured law, with its domain, its error bar and the script that produced it |
+| **[docs/methodology.md](docs/methodology.md)** | the conventions, starting with the two recovery conventions that differ by points and have voided two pre-registrations |
+| **[docs/retractions.md](docs/retractions.md)** | all 27 withdrawn claims and the four causes behind them |
+| **[docs/next-steps-2026-10-19.md](docs/next-steps-2026-10-19.md)** | the plan to done, and the extensions parked below the line |
+
+The `docs/overnight-*.md` files are the primary record and are kept for
+provenance, not for reading.
+
 The task suits autonomous iteration unusually well:
 
 * **Correctness is decidable.** RDKit recomputes any candidate's fingerprint
@@ -214,6 +236,22 @@ use of `recovery` alone as a description of what the model does to large
 molecules.
 
 ### What the size cliff is, as far as it has been measured
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/size-cliff-dark.png">
+  <img src="docs/images/size-cliff-light.png" alt="Line chart of recovery against heavy-atom band for the 8M model at T=0.6. Recovery at 20 guesses falls from 100% below 15 heavy atoms to 46% at 50 to 64; recovery on the first guess falls from 96% to 27% across the same range." width="100%">
+</picture>
+
+Recovery at a 20-molecule budget falls from 1.000 below 15 heavy atoms to
+**0.4634** at 50–64, and first-guess recovery from 0.9630 to 0.2683. The band
+counts are on the ticks because the right-hand bands are thin: 41 queries in
+the last one. Rendered by `scripts/plot_size_cliff.py` from the same dumps and
+the same `hits` helper as the band tables, so the figure cannot drift from the
+numbers it illustrates.
+
+**50–64 is the whole of "large" here.** `prepare.py` caps heavy atoms at 64 and
+every shard used the default, so this project has measured nothing above that
+and the cliff's far end is a wall in the corpus, not in the model.
 
 Three explanations for it are dead. It is **not the budget** — the full-k rate
 is 1.000 in every size band, so the model is not running out of slots. It is
@@ -432,7 +470,8 @@ its own k ≤ 20 rungs predicted 0.232 at 35+ against 0.249 measured, where
 independence said 0.47. That is the evidence that the extrapolated prices are
 lower bounds rather than fiction.
 
-**Every size statement below is bounded at 64 heavy atoms.** Preprocessing
+**Every size statement anywhere in this README is bounded at 64 heavy atoms.**
+Preprocessing
 filters the corpus to 3–64 heavy atoms (`max_heavy_atoms`, default 64 in
 `src/morg2smiles/data/prepare.py`), so "50+" throughout this README means
 50–64, and the deepest band the data can reach holds 0.54% of it — 308
@@ -540,13 +579,37 @@ and evaluation would make every number meaningless rather than merely wrong.
 * Shards are deduplicated before splitting, and the split-disjointness
   invariants are under test.
 
+Four more rules were earned rather than designed, each by a retraction. They
+are the difference between this repo's early numbers and its current ones, and
+[docs/methodology.md](docs/methodology.md) is the long version:
+
+* **Register the interval, not the point.** A registration whose branches are
+  separated by less than the quantity's paired SE is decided before the GPU
+  starts. Say what each branch would *mean*, and make the branches tile the
+  line — night 7's left a gap, and the result landed in it.
+* **Report per band, never whole-protocol alone.** The common protocol is 63%
+  molecules under 30 heavy atoms and cannot describe an intervention acting on
+  part of the size distribution. It has hidden a 4.18-point loss behind
+  p = 0.32 twice over.
+* **Read every size claim on `structure_accuracy` as well as `recovery`.** The
+  two part company above 35 atoms, where one recovery in eight is a different
+  preimage.
+* **Compare within one run and one tool, never across either.** Nested shards
+  make per-run numbers incomparable, and the two recovery conventions differ by
+  about 4 points at k=60 — which has voided two pre-registrations and nearly
+  mis-scored a third.
+
 ## Scale
 
-Development is on an Apple M2 (MPS), so Phase 1 works at 100k–1M molecules with
-a ~20M parameter model. Nothing is MPS-specific — device selection is
-`mps → cuda → cpu` and configs are portable. The 103M-compound PubChem
-round-trip that motivated the project is a long-term aspiration, not a Phase 1
-target.
+Development is on an Apple M2 (MPS). The largest run here is 1,881,996
+molecules — all of ChEMBL 35 after filtering — at 8M parameters for 17,772
+steps in 5.3 h; the largest by compute is 21,117 steps on 909,800 molecules in
+7.8 h. Capacity tops out earlier than data does: scaling is linear in wall
+clock to 15M params and superlinear beyond, so the 8M model is doing the work
+throughout. Nothing is MPS-specific — device selection is `mps → cuda → cpu`
+and configs are portable. The 103M-compound PubChem round-trip that motivated
+the project is a long-term aspiration, and every extrapolation toward it from
+this repo has been withdrawn.
 
 ## Results
 
@@ -567,6 +630,15 @@ temperature 1.0 — held fixed across every night so the rows stay comparable.
 **Nearly nine in ten held-out Morgan fingerprints can be inverted exactly
 within 20 guesses at the protocol's settings, and three in four on the first
 guess.** Mean best Tanimoto is 0.976, so even the failures are near misses.
+
+One run is deliberately absent from the table: `small_full_1p2`, the
+1,881,996-molecule constant-passes cell, was scored at T=0.6 rather than 1.0,
+and this table's whole purpose is that the temperature never moves. On its own
+terms it reaches `rec@20` **0.8609** against `small_1m_matched`'s 0.6825, both
+re-scored together in the same job, and it is **not** the best model here —
+`small_1m` at 21,117 steps on a tenth of the data beats it, because at these
+budgets a pass is still worth more than a molecule. See
+[night 7](docs/overnight-2026-10-20.md).
 
 Candidates are ranked by **consensus**: how many of the model's samples spell
 the same molecule. Sampling the same answer by several routes turns out to be a
@@ -761,6 +833,41 @@ point of that slice: since the fingerprint is near-injective, a held-out
 fingerprint never collides with a training one, so memorisation earns nothing
 and anything above zero is reconstruction.
 
+## Limits
+
+What the headline number does **not** cover, in the order a sceptical reader
+would ask:
+
+* **Domain.** ChEMBL 35 only, 3–64 heavy atoms, stereochemistry stripped
+  (`strip_stereo: true`), twelve elements, 128 tokens. Nothing here speaks to
+  molecules outside that window, and "50+" always means 50–64.
+* **Scale.** 8M parameters, ≤1.88M molecules, ≤21,117 steps, one laptop GPU.
+  The corpus slope is +22.09 points per doubling measured over 90.7k–1.88M; it
+  is **not** a licence to extrapolate to PubChem's 10⁸, and both earlier
+  attempts to do so are withdrawn.
+* **The far end of the size cliff rests on thin samples.** The 50–64 band is
+  127 queries on the 30+ protocol and 893 on the dedicated one; 127 is the
+  sample size that produced two of this project's overturned nulls.
+* **Two recovery conventions.** A molecule budget and raw slots differ by about
+  4 points at k=60. Every number here says which it is, and comparisons across
+  tools are invalid — see
+  [§1 of the methodology](docs/methodology.md#1-recovery-has-two-conventions-and-they-differ-by-points).
+* **Nested shards.** The 10k, 100k and 1M shards are prefixes of one shuffle,
+  so per-run leaderboard numbers are not comparable to each other. Only
+  `compare_checkpoints.py` output is.
+* **The test split has never been touched.** Everything reported anywhere in
+  this project is validation, so no number here has survived a truly untouched
+  set.
+* **The final full-ChEMBL run has not been made.** `small_full` (8,508 steps)
+  and `small_full_1p2` (17,772) are both short of a full-length schedule.
+* **One architecture, one fingerprint.** Morgan r=2, 2,048 folded binary bits,
+  one encoder–decoder shape. Counts were ablated; radius, bit width and
+  architecture were not.
+
+[docs/retractions.md](docs/retractions.md) is the longer and more useful version
+of this section: 27 claims this project published and withdrew, and the four
+causes behind them.
+
 ## Prior art, including my own
 
 This is the second attempt. The first was
@@ -844,27 +951,42 @@ and a trained decoder that clears the go/no-go gate (`recovery@20` on
 The 2026-10-09 scaling runs looked like they had answered the "what was the
 ceiling?" question — **data** — but they had varied data and compute together.
 The 2026-10-10 controls show **compute** is worth at least +24.9 points on a
-fixed corpus, which is most of the gap that was attributed to data. They also
-show that corpus size cannot be isolated at a fixed step budget at all, so how
-much data is worth here remains open. Parameters remain the wrong lever on this
-hardware: scaling is linear in wall clock to 15M params and superlinear beyond.
+fixed corpus, which is most of the gap that was attributed to data. Isolating
+the corpus axis then took another nine nights and a run at constant *passes*
+rather than constant steps; it is worth **+22.09 points of rec@60 per doubling
+of distinct molecules**, flat rather than convex, over 90.7k–1.88M molecules of
+ChEMBL at 8M parameters. Parameters remain the wrong lever on this hardware:
+scaling is linear in wall clock to 15M params and superlinear beyond.
 
-Open questions, in rough order of expected value:
+Both scaling axes are now measured and both are closed as sources of further
+insight on a laptop, which is why
+[the closing plan](docs/next-steps-2026-10-19.md) exists and why the list below
+is extensions rather than a backlog. Each entry says what would settle it and
+what it would cost; none of them is required for the project's claims to stand.
+
+### Extensions, in rough order of expected value
 
 1. **How far do steps go?** Every run that completed its schedule was still
    improving, and 30 epochs of 90k molecules showed no overfitting at all —
    probably because SMILES randomisation makes every epoch a fresh target
    string. 10.6×/decade cannot continue, but nothing here has found where it
    stops, and it is the cheapest untested lever.
-2. **What a bigger corpus is actually worth.** Needs a sweep at constant
-   **epochs**, since at constant steps corpus size and repetition rate are
-   locked together by `steps × batch = corpus × passes`. Until that runs, every
-   extrapolation to PubChem scale from this repo is withdrawn — both night 1's
-   0.993 and the 0.949 that briefly replaced it. The three points that exist,
-   decomposed under separability, put distinct molecules at **+24.9 then +35.0
-   points per doubling** against passes' +23.55; what the sweep would settle is
-   whether that convexity in f′ is real, since it currently rests on two
-   segments and on separability holding better than the 9% it was checked to.
+2. ~~**What a bigger corpus is actually worth.**~~ **Measured.** The sweep ran
+   at constant **passes** rather than constant steps, which is what breaks the
+   `steps × batch = corpus × passes` lock: 900,917 → 1,881,996 distinct
+   molecules at a fixed 1.2087 passes takes rec@60 from 0.5205 to **0.7553** on
+   2,321 queries, so **f′ = +22.09 points per doubling of distinct molecules**
+   (SE 0.89, pre-registered in `configs/small_full_1p2.yaml`). The 90,682-molecule
+   cell of the same row is at the floor, 0.0000 at every k and band, as
+   registered. **The convexity in f′ is retracted** — the decomposition inferred
+   +35.03 for this segment and overstated it by 13 points. What survives is the
+   near-cancellation: at constant steps a corpus doubling is a passes halving,
+   so +22.09 against −23.55 nets +1.37, and the 8.4× "convexity" in that
+   observable was a difference of two large numbers. The extrapolations to
+   PubChem scale stay withdrawn — both night 1's 0.993 and the 0.949 that
+   briefly replaced it — because a slope measured over 90.7k–1.88M of ChEMBL at
+   8M parameters does not license a jump to 10⁸. See
+   [§2.9a of results.md](docs/results.md#29a-f-measured-directly-at-constant-passes).
 3. ~~**A full-length 15M run.**~~ **Done.** `medium_1m_full` trained to
    `small_1m`'s own 21,117 steps on the same shard in 11.2 h, and capacity is
    worth a cut of roughly a fifth of the recovery deficit between 30 and 49
@@ -880,7 +1002,15 @@ Open questions, in rough order of expected value:
    then agreed on which molecules are impossible — 80% of the evaluation set is
    unanimous, and the median miss is 34 heavy atoms against 24 for the
    unanimously solved. **It is a capability ceiling on large molecules, not an
-   information limit**, which is what the full-ChEMBL run is aimed at.
+   information limit.**
+
+   What would move it is not settled. A full-ChEMBL run at 3 passes is now
+   priced — fitted in deficit rather than in points, which returns >1.0 in four
+   of six bands — at rec@60 **0.92** whole-protocol but only **0.56** at 50–64,
+   so even 1.88M molecules and 44,112 steps leave the far end of the cliff
+   standing. That run is item 4 of the closing plan and has not been made; what
+   has, is `small_full` at 8,508 steps and `small_full_1p2` at 17,772, neither
+   of which is a full-length run.
 5. ~~**Is capacity's cut a property of the step, or of where the 8M run
    stopped?**~~ **Done, and it is neither.** The fourth cell of the capacity ×
    steps 2×2 — `medium_1m_8k`, 15.1M parameters at 8,508 steps, pre-registered
