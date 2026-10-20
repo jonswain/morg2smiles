@@ -270,6 +270,24 @@ gain least.
 | 50–64 | +18.52 | 19.8% |
 | all | **+22.09** | 46.1% |
 
+**f′ is itself size-dependent, and falls off in the same direction the size
+cliff does.** The 50–64 row above is 127 queries; re-measured on the dedicated
+893-query 50+ protocol (`--min-heavy-atoms 50 --max-oversample 10`, so the
+levels are not comparable to the table above, only the slopes):
+
+| band | n | 900,917 | 1,881,996 | per doubling | SE |
+|---|---|---|---|---|---|
+| 50–54 | 433 | 0.0647 | 0.2910 | **+21.30** | 2.18 |
+| 55–59 | 257 | 0.0428 | 0.1946 | **+14.28** | 2.47 |
+| 60–64 | 203 | 0.0099 | 0.1232 | **+10.66** | 2.31 |
+| all 50+ | 893 | 0.0459 | 0.2251 | **+16.86** | 1.40 |
+
+Each step down is about 3 SE, so the decline is a measurement rather than a
+reading of noise, and at 60–64 a corpus doubling pays less than half the
+whole-protocol rate. The 127-query estimate (+18.52) survived the re-measure
+at +16.86, 1.2 SE away — the first time in this project a number read on
+roughly 130 queries has held.
+
 **f′ is flat, not convex.** The pre-registered convex branch (+35.03/doubling →
 rec@60 0.86–0.92) is falsified by twelve standard errors; the inference
 overstated the far segment by 13 points, 60% of its measured value. The 90.7k

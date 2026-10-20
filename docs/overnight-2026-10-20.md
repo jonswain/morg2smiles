@@ -211,6 +211,64 @@ which is not a budget anyone has.
 
 ---
 
+## Night 7b — the 50+ band, on 893 queries instead of 127
+
+The table at the top rests on 2,321 queries, but its 50–64 row rests on 127 —
+the sample size that produced entries 13 and 15 of
+[retractions.md](retractions.md). Night 6 built a dedicated 50+ protocol for
+exactly that reason and scored `small_1m_matched` on it, and
+`small_1m_matched` is tonight's constant-passes partner, so the better-powered
+reading cost one generation pass: 19 minutes.
+
+Same invocation as night 6 stage 11 — `--eval-n 1000 --min-heavy-atoms 50
+--eval-k 60 -T 0.6 --top-p 1.0 --max-oversample 10`, 893 fingerprint-unseen
+queries, `miss_anatomy` convention.
+
+| band | n | 900,917 | 1,881,996 | Δ | per doubling | SE |
+|---|---|---|---|---|---|---|
+| 50–54 | 433 | 0.0647 | 0.2910 | +22.63 | **+21.30** | 2.18 |
+| 55–59 | 257 | 0.0428 | 0.1946 | +15.18 | **+14.28** | 2.47 |
+| 60–64 | 203 | 0.0099 | 0.1232 | +11.33 | **+10.66** | 2.31 |
+| **all 50+** | **893** | **0.0459** | **0.2251** | **+17.92** | **+16.86** | **1.40** |
+
+**The thin estimate held.** The 30+ protocol's 127 queries gave +18.52 per
+doubling; 893 queries give **+16.86**, a difference of 1.66 points against an
+SE of 1.40. For once a number read on ~130 queries survived being re-measured
+with power — worth recording precisely because the two previous times it did
+not, and the practice of re-measuring is what distinguishes the two outcomes
+rather than the result.
+
+**f′ declines with molecule size, monotonically, inside the 50–64 window.**
++21.30 at 50–54, +14.28 at 55–59, +10.66 at 60–64. Each gap is about 3 SE, so
+the trend is real and not a reading of noise. Set beside the whole-protocol
++22.09, the corpus axis pays progressively less the larger the molecule, and at
+60–64 it pays less than half the headline rate.
+
+That is the sharpest statement this project has of why more data does not fix
+the size cliff: **the returns to data are themselves size-dependent, and they
+fall off in the same direction the cliff does.** The 60–64 cell is the extreme
+case — 0.0099 to 0.1232, so a doubling of corpus takes it from one recovery in
+a hundred to one in eight, which is a large multiple of a very small number.
+
+A level note, since the same checkpoint appears at two values: `small_full_1p2`
+at 50–64 is 0.2598 on the 30+ protocol and 0.2251 here. Both are correct. The
+protocols cap the draw at 12 and 10 respectively, and §4 of
+[methodology.md](methodology.md) is explicit that a capped draw and an uncapped
+one are different protocols. The invocation was matched to night 6's on
+purpose, so the comparison within this table is prefix-to-prefix; it is the
+cross-table comparison that is not available.
+
+## Night 7c — the cell job 4's registration was missing
+
+The deficit-cut extrapolation above applies the 1M shard's 1.21 → 3.00 passes
+transition to the full shard. At 50–64 that transition was read on 127
+queries, so the prediction of 0.5646 inherited the thin sample even though both
+other cells are now well powered. `small_1m` — the 3.00-passes end — was not on
+the 50+ protocol, so it was scored there too.
+
+See `results/overnight7c/job4_registration.json` for the three-cell table and
+the resulting per-band predictions.
+
 ## Artefacts
 
 | file | what |
