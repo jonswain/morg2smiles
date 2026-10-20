@@ -50,6 +50,12 @@ RUNS = [
     ("small_100k_long", "checkpoints/small_100k_long/best.pt", "data/shards/100k"),
     ("small_1m_matched", "checkpoints/small_1m_matched/best.pt", "data/shards/1m"),
     ("small_full", "checkpoints/small_full/best.pt", "data/shards/full"),
+    # The constant-passes row, item 1 of docs/next-steps-2026-10-19.md. Both
+    # train on shards already listed above, so the common protocol's molecules
+    # and its fp_unseen union are unchanged by adding them -- which is what
+    # makes small_1m_matched's existing 0.5205 the right comparison.
+    ("small_full_1p2", "checkpoints/small_full_1p2/best.pt", "data/shards/full"),
+    ("small_100k_1p2", "checkpoints/small_100k_1p2/best.pt", "data/shards/100k"),
     ("small_100k_3ep", "checkpoints/small_100k_3ep/best.pt", "data/shards/100k"),
     ("count_fp_100k", "checkpoints/count_fp_100k/best.pt", "data/shards/100k"),
     ("variance_s1", "checkpoints/variance_s1/best.pt", "data/shards/100k"),

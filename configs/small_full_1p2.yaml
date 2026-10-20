@@ -1,0 +1,97 @@
+# Item 1 of docs/next-steps-2026-10-19.md: f' measured directly, at constant
+# passes.
+#
+# Stage 9 could not identify points-per-doubling-of-corpus from three points at
+# constant steps, because steps x batch = corpus x passes locks the two axes
+# together. Its fix was an inference: assume value = f(log distinct molecules)
+# + g(log passes), take g' = +23.55 points per doubling from the two
+# fixed-corpus rows, and back f' out of the net. That gave f' = +24.92 on the
+# 90.7k -> 900.9k segment and +35.03 on 900.9k -> 1.88M, resting on additive
+# separability checked to 9% on two rows.
+#
+# This run removes the assumption. At constant *passes* the comparison is f'
+# with nothing to subtract: hold the repetition rate fixed and vary only how
+# many distinct molecules the model sees.
+#
+#     small_1m_matched   900,917 molecules   8,508 steps   1.2087 passes
+#     this run         1,881,996 molecules  17,772 steps   1.2087 passes
+#
+# 1,881,996 x 1.2087 / 128 = 17,772, so the passes match to four figures and
+# the corpus ratio is 2.088x, or 1.0623 doublings.
+#
+# Why 1.21 passes and not 3: at 3 epochs the 1M cell is small_1m itself, at
+# rec@60 0.8427 on the large protocol, and f' ~ 35 over 1.06 doublings would
+# put this cell above 1.0. The top of the range saturates, so the segment has
+# to be read lower down, where both cells are unsaturated and one of the two
+# already exists on disk.
+#
+# Why this cannot be read off the final full-ChEMBL run's training trace
+# instead: block 1 of docs/overnight-2026-10-17.md established that a
+# cosine-annealed checkpoint at step n is not the same object as a complete
+# n-step run -- the learning rate anneals to zero at max_steps, so a run with
+# max_steps 17,772 is its own complete run and a longer run's step 17,772 is
+# not. That is what voided the earlier trace comparison, and it is why this is
+# a separate 6.6 h job rather than a free read.
+#
+# The construction is matched to small_1m_matched in every other respect: same
+# 8M architecture, same lr 5e-4, same 300 warmup steps, same fingerprint, same
+# randomisation, same T=0.6 scoring. The shard differs, which is the variable.
+#
+# PRE-REGISTERED, as an interval rather than a point -- the lesson stage 12
+# paid for by firing FALSIFIED HIGH on branches separated by less than the
+# paired SE of the quantity. Scored as rec@60 on the large protocol
+# (--eval-n 2400 --min-heavy-atoms 30 --eval-k 60 -T 0.6 --top-p 1.0
+# --max-oversample 12), the identical invocation that produced
+# small_1m_matched's 0.5205:
+#
+#     f' convex, +35.03/doubling   ->  +37.2 points  ->  rec@60 0.86-0.92
+#     f' flat,   +24.92/doubling   ->  +26.5 points  ->  rec@60 0.76-0.82
+#     separability fails           ->  outside both bands
+#
+# The bands are eight points apart, well clear of the 1.6-point whole-protocol
+# threshold this repo applies to its own training comparisons. A result in the
+# 0.82-0.86 gap is uninformative about convexity and is to be reported as such,
+# not rounded toward the nearer band. A result below 0.72 or above 0.95 is the
+# third branch, and the honest reading of it is that the decomposition in stage
+# 9 does not describe this corpus axis at all.
+#
+# Cost: 17,772 steps at small_1m's measured 1.337 s/step is 6.60 h. max_hours
+# is set above that with margin, because stopping on the wall clock instead of
+# on max_steps would leave the cosine schedule unfinished and void the
+# comparison -- the run would no longer be a complete 17,772-step run.
+shard_dir: data/shards/full
+out_dir: checkpoints/small_full_1p2
+
+fingerprint:
+  radius: 2
+  n_bits: 2048
+  counts: false
+  folded: true
+
+model:
+  d_model: 256
+  n_heads: 8
+  d_ff: 1024
+  n_encoder_layers: 4
+  n_decoder_layers: 4
+  dropout: 0.1
+  max_tokens: 128
+
+train:
+  # 1,881,996 / 128 = 14,703 steps per epoch, so 17,772 steps is 1.21 epochs
+  # and the cosine horizon follows max_steps, not this number.
+  epochs: 2
+  batch_size: 128
+  lr: 0.0005
+  warmup_steps: 300
+  randomize_smiles: true
+  max_steps: 17772
+  # Two evaluations, matched in spirit to small_1m_matched's two at 4,254: the
+  # mid-run numbers are for watching the curve, not for the comparison, which
+  # is made by compare_checkpoints.py on one protocol.
+  eval_every_steps: 8886
+  eval_n: 500
+  eval_k: 20
+  valid_loss_n: 2000
+  patience: 0
+  max_hours: 7.8

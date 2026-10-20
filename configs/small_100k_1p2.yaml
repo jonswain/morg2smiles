@@ -1,0 +1,70 @@
+# Item 1's floor check: the third cell of the constant-passes row, and the
+# cheapest test of additive separability this project can run.
+#
+#     this run           90,682 molecules     856 steps   1.2087 passes
+#     small_1m_matched  900,917 molecules   8,508 steps   1.2087 passes
+#     small_full_1p2  1,881,996 molecules  17,772 steps   1.2087 passes
+#
+# 90,682 x 1.2087 / 128 = 856. Three cells, one repetition rate, a 20.8x range
+# of distinct molecules.
+#
+# PRE-REGISTERED, and asymmetrically -- this cell can falsify and cannot
+# confirm. Stage 9's decomposition puts f' at roughly +25 points per doubling
+# on this segment, and 900,917 / 90,682 is 3.31 doublings, so the separable
+# model predicts this cell about 82 points below small_1m_matched's rec@60 of
+# 0.5205. That is far below zero, so the prediction is simply "the floor":
+#
+#     separability holds  ->  rec@60 at or near 0.00
+#     separability fails  ->  rec@60 above 0.05
+#
+# Why the asymmetry is not a hedge. Two things about this run can only push the
+# measured number *down*, and a number pushed down agrees with the prediction
+# without evidence. Warmup is 100 steps here against 300 in the other two
+# cells, which is 11.7% of the schedule against 3.5% and 1.7% -- scaled down
+# precisely because 300 of 856 steps would be a third of the run, but still
+# warmup-heavy relative to the family. And the scoring draw is capped below the
+# large protocol's (see scripts/overnight7.sh): a model this weak would hit the
+# oversample cap on nearly every query, so it is scored on 600 queries at
+# --max-oversample 4 rather than 2,400 at 12, which costs perhaps a point of
+# measured recovery and about seven hours of GPU time.
+#
+# So: a near-zero result here is consistent with separability and is weak
+# evidence for it. A result above 0.05 cannot be an artefact of either
+# handicap, and falsifies the decomposition that three of this project's
+# published numbers now rest on. That is worth 0.30 h of training.
+#
+# Cost: 856 steps at count_fp_100k's measured 1.26 s/step on this shard is
+# 18 minutes.
+shard_dir: data/shards/100k
+out_dir: checkpoints/small_100k_1p2
+
+fingerprint:
+  radius: 2
+  n_bits: 2048
+  counts: false
+  folded: true
+
+model:
+  d_model: 256
+  n_heads: 8
+  d_ff: 1024
+  n_encoder_layers: 4
+  n_decoder_layers: 4
+  dropout: 0.1
+  max_tokens: 128
+
+train:
+  # 90,682 / 128 = 709 steps per epoch, so 856 steps is 1.21 epochs.
+  epochs: 2
+  batch_size: 128
+  lr: 0.0005
+  warmup_steps: 100
+  randomize_smiles: true
+  max_steps: 856
+  # One evaluation, at the end. Nothing useful happens mid-run at this length.
+  eval_every_steps: 856
+  eval_n: 500
+  eval_k: 20
+  valid_loss_n: 2000
+  patience: 0
+  max_hours: 0.8
