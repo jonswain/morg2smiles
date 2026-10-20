@@ -222,12 +222,16 @@ under about two hours.
 > **The 50+ registration was rebuilt on 893 queries by night 7c**, and the
 > thin-sample version was optimistic by six points:
 >
-> | band | n | predicted rec@60 @3 passes |
-> |---|---|---|
-> | 50–54 | 433 | **0.6131** |
-> | 55–59 | 257 | **0.4598** |
-> | 60–64 | 203 | **0.3107** |
-> | all 50+ | 893 | **0.5052** (was 0.5646 off 127 queries) |
+> | band | n | predicted rec@60 | predicted struct@60 |
+> |---|---|---|---|
+> | 50–54 | 433 | **0.6131** | **0.5132** |
+> | 55–59 | 257 | **0.4598** | **0.3735** |
+> | 60–64 | 203 | **0.3107** | **0.2165** |
+> | all 50+ | 893 | **0.5052** (was 0.5646 off 127 queries) | **0.4100** |
+>
+> Register both columns. At 50+ between a fifth and two fifths of recoveries
+> are a different molecule with the same fingerprint, so recovery alone
+> overstates what the run will have achieved.
 >
 > Register these per band on the dedicated 50+ protocol (`--eval-n 1000
 > --min-heavy-atoms 50 --eval-k 60 -T 0.6 --max-oversample 10`), not the 30+

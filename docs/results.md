@@ -309,6 +309,24 @@ the ratio's is about 0.2 and that spread is inside it: **consistent with
 size-invariant, not measured to be.** Testing it needs a third passes point at
 50+, which does not exist.
 
+**On structure accuracy both slopes are about a fifth smaller**, and the gap
+widens with size — the opposite direction from the two cases that prompted the
+read-both rule:
+
+| band | f′ rec → struct | g′ rec → struct |
+|---|---|---|
+| 50–54 | +21.30 → **+17.60** | +32.40 → **+28.17** |
+| 55–59 | +14.28 → **+12.45** | +24.03 → **+19.88** |
+| 60–64 | +10.66 → **+6.03** | +16.15 → **+12.02** |
+| all 50+ | +16.86 → **+13.49** | +26.30 → **+22.11** |
+
+At 60–64, +10.66 points of recovery per corpus doubling is +6.03 points of
+getting the right molecule. The cause is collisions among hits, which scale
+with weakness rather than only with size: **58.5%** of hits are the wrong
+molecule for a cell at rec@60 0.0459, against 20.9% at 0.3908. **A slope
+measured from a floor cell flatters itself on recovery**, which is a general
+hazard of constant-passes designs.
+
 **f′ is flat, not convex.** The pre-registered convex branch (+35.03/doubling →
 rec@60 0.86–0.92) is falsified by twelve standard errors; the inference
 overstated the far segment by 13 points, 60% of its measured value. The 90.7k

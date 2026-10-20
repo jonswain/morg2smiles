@@ -172,7 +172,18 @@ Three rules, each earned by being broken:
 3. **Read any size claim on `structure_accuracy` as well as `recovery`.** The
    two part company above 35 atoms, where one recovery in eight is a different
    preimage. Both working interventions turned out to be *understated* by the
-   metric this project reports by default.
+   metric this project reports by default — **but the gap has no fixed sign.**
+   Night 7's scaling slopes at 50+ run the other way: recovery *overstates* f′
+   and g′ by about a fifth, and by 43% at 60–64. The rule is that both metrics
+   must be read, not that one direction is safe.
+
+   The reason is worth knowing, because it biases any cell near the floor.
+   Among hits at 50+, the fraction that are a different molecule with the same
+   fingerprint is **58.5%** for a model at rec@60 0.0459, 27.9% at 0.2251 and
+   20.9% at 0.3908. A weak model's few hits land on the ambiguous
+   fingerprints — the easy ones to satisfy and the ones where satisfying them
+   proves least — so **a slope measured from a floor cell flatters itself on
+   recovery.** Constant-passes designs put their small cells exactly there.
 
 A registration also has to say what each branch would *mean*. Both mechanisms
 registered for stage 12 were eliminated, and the useful output was the null —

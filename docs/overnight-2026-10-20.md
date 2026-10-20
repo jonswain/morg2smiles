@@ -313,6 +313,55 @@ it was measured to be** — which is the distinction entries 12, 13 and 24 of
 A reader who wants the invariant tested properly needs a third passes point at
 50+, which is item 2's territory and does not exist.
 
+### Read on structure accuracy, both axes pay about a fifth less
+
+Rule 3 of §7 of [methodology.md](methodology.md) says to read every size claim
+on `structure_accuracy` as well as `recovery`, because above 35 atoms one
+recovery in eight is a different preimage. The dumps were already on disk, so
+this cost nothing:
+
+| band | n | f′ on recovery | f′ on structure | g′ on recovery | g′ on structure | collisions among hits |
+|---|---|---|---|---|---|---|
+| 50–54 | 433 | +21.30 | **+17.60** | +32.40 | **+28.17** | 26.2% |
+| 55–59 | 257 | +14.28 | **+12.45** | +24.03 | **+19.88** | 24.0% |
+| 60–64 | 203 | +10.66 | **+6.03** | +16.15 | **+12.02** | 44.0% |
+| all 50+ | 893 | +16.86 | **+13.49** | +26.30 | **+22.11** | 27.9% |
+
+**Rule 3 fires, and in the direction the rule did not anticipate.** The rule was
+written because two working interventions turned out to be *understated* by
+recovery. Here recovery **overstates** both scaling slopes — by about a fifth
+whole-band, and by 43% at 60–64, where +10.66 points of recovery per corpus
+doubling is only +6.03 points of getting the right molecule. So the rule's
+value is that the two metrics must both be read, not that the gap has a known
+sign.
+
+The mechanism is in the last column. At 50+ a large minority of recoveries are
+a *different* molecule sharing the fingerprint, and the share depends on the
+model as much as on the size:
+
+| cell | rec@60 | struct@60 | collisions among hits |
+|---|---|---|---|
+| 1M, 1.21 passes | 0.0459 | 0.0190 | **58.5%** |
+| 1M, 3.00 passes | 0.3908 | 0.3091 | 20.9% |
+| full, 1.21 passes | 0.2251 | 0.1624 | 27.9% |
+
+**The weaker the model, the larger the share of its recoveries that are the
+wrong molecule** — 58.5% for the weakest cell. A weak model's few hits are
+concentrated on the ambiguous fingerprints, which are the easy ones to satisfy
+and the ones where satisfying them proves least. Any slope computed from a cell
+near the floor therefore flatters itself on recovery, and that is exactly the
+regime the constant-passes design puts the small cells in.
+
+None of this disturbs the headline — f′ is flat on both metrics and the convex
+branch dies on both — but it does mean **job 4 must register both metrics**:
+
+| band | n | predicted rec@60 | predicted struct@60 |
+|---|---|---|---|
+| 50–54 | 433 | 0.6131 | **0.5132** |
+| 55–59 | 257 | 0.4598 | **0.3735** |
+| 60–64 | 203 | 0.3107 | **0.2165** |
+| all 50+ | 893 | 0.5052 | **0.4100** |
+
 ## Artefacts
 
 | file | what |
