@@ -54,6 +54,7 @@ digits is not evidence of absence, however good the p-value looks.
 | 19 | **`max_hours` measured the wrong clock** | Built on `perf_counter`, which is right for per-step rates and wrong for a wall-clock brake, so the cap measured the wrong quantity from the moment it was written. |
 | 20 | **A void step-exponent pre-registration** | The prediction was computed in one recovery convention and the run scored in another; only one of two scripts caught it. |
 | 21 | **Unseeded evaluation** | Two evaluations of the same checkpoint differed by 2.2 points, about 1.4 standard errors at n ≈ 1000. |
+| 28 | **"Nothing above 64 heavy atoms exists in ChEMBL 35 as standardised here"** — the premise item 3 of the closing plan rested on | Circular: the standardisation *is* the cap. Measured on the raw chemreps file, **2.558% of ChEMBL 35 is above 64 heavy atoms**, about 63,000 molecules tailing to 508. The decision it supported (keep the cap) survived re-derivation, but on a different and better reason — `max_tokens: 128` binds first, and 73.0% of the molecules the atom cap discards exceed the decoder's context anyway, leaving a yield of 0.87%. A conclusion reached from a false premise is not a conclusion. |
 
 ## Registrations that were mis-specified rather than wrong
 
@@ -75,7 +76,7 @@ digits is not evidence of absence, however good the p-value looks.
 
 ## The pattern
 
-Twenty-seven entries, four causes:
+Twenty-eight entries, five causes:
 
 1. **Cross-run comparison.** Every claim that broke in the first two nights was
    a comparison *between* runs; every claim that survived was measured *within*
@@ -97,7 +98,14 @@ Twenty-seven entries, four causes:
    13 and 24. The common protocol is 63% small molecules and cannot describe
    anything acting on part of the size distribution.
 4. **Point-estimate registrations of noisy quantities.** Entries 22 and 23.
-   Register the interval.
+   Register the interval. Entry 26 is the refinement: adjacent intervals have
+   to tile the line, or scoring still needs a judgement made after the fact.
+5. **A premise that restates the design.** Entry 28 — "nothing above 64 heavy
+   atoms exists in ChEMBL as standardised here" — was true only because the
+   standardisation imposed the cap, and it was load-bearing for a decision
+   about whether to change the cap. The tell is a premise about the data whose
+   evidence is a config default. Check it against the raw file; it took one
+   120,000-row sample to find that 2.6% of ChEMBL lives above the line.
 
 And one thing that worked, repeatedly: **writing the number down before the run
 that produced it.** Entries 3, 10 and 13 were caught *because* a prediction was

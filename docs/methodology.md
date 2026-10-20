@@ -187,6 +187,22 @@ project**, and nothing here speaks to molecules larger than that. The clean
 pools are 1,068 molecules at 50+ and 243 at 60+ in the 1M shard, 1,421 and 308
 in the full shard, and **zero** above 64 in either.
 
+**What the cap costs, measured rather than assumed.** On a 120,000-row
+reservoir sample of the raw ChEMBL 35 chemreps file, 2.558% of the corpus is
+above 64 heavy atoms — about 63,000 molecules, tailing to 508. So the cap is a
+real exclusion and not a no-op, and an earlier claim that nothing above 64
+exists here was circular.
+
+But `max_tokens: 128` binds first. Running `standardize` at both caps over the
+molecules the atom cap discards: **73.0% of them exceed 128 tokens**, 0.1% hit
+the element whitelist, and only 26.8% — about 16,465 molecules, 0.87% of the
+1.88M corpus — would survive a raised cap. They sit at 65–79 heavy atoms, and
+every band's longest survivor tokenises to exactly 128, so what gets in is
+selected by SMILES compactness rather than by chemistry. Widening the domain
+therefore means raising the context length and retraining, not editing one
+default, which is why the cap was kept (item 3 of
+[next-steps-2026-10-19.md](next-steps-2026-10-19.md)).
+
 Stereochemistry is stripped (`strip_stereo: true`), elements are restricted to
 a twelve-element set, and tokens are capped at 128.
 

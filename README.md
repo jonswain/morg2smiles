@@ -840,7 +840,11 @@ would ask:
 
 * **Domain.** ChEMBL 35 only, 3–64 heavy atoms, stereochemistry stripped
   (`strip_stereo: true`), twelve elements, 128 tokens. Nothing here speaks to
-  molecules outside that window, and "50+" always means 50–64.
+  molecules outside that window, and "50+" always means 50–64. The atom cap
+  discards **2.6% of ChEMBL 35** — about 63,000 molecules, tailing to 508 heavy
+  atoms — so it is a real exclusion; but the 128-token decoder context would
+  discard three quarters of those anyway, so widening the domain means a longer
+  context and a retrain, not a bigger cap.
 * **Scale.** 8M parameters, ≤1.88M molecules, ≤21,117 steps, one laptop GPU.
   The corpus slope is +22.09 points per doubling measured over 90.7k–1.88M; it
   is **not** a licence to extrapolate to PubChem's 10⁸, and both earlier

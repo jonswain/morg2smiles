@@ -163,10 +163,46 @@ and raising the cap afterwards means redoing it. Two defensible answers:
   a night log.
 
 Recommendation: **keep and document**, unless the shard rebuild turns out to be
-under about two hours. The 60+ pool does not exist at any cap this corpus can
-supply — nothing above 64 atoms exists in ChEMBL 35 as standardised here — so
-raising the cap widens the window without populating the band that was actually
-unanswerable.
+under about two hours.
+
+> **DECIDED, night 7b: keep the cap at 64 — but not for the reason given above.**
+>
+> The sentence that used to sit here claimed "nothing above 64 atoms exists in
+> ChEMBL 35 as standardised here", which is circular: the standardisation *is*
+> the cap. Measured instead, on a 120,000-row reservoir sample of
+> `data/raw/chembl_35_chemreps.txt.gz`, **2.558% of ChEMBL 35 is above 64 heavy
+> atoms — about 63,000 molecules, tailing to 508 heavy atoms.** The premise was
+> false, so the decision was re-derived.
+>
+> What raising the cap would actually yield, measured by calling `standardize`
+> twice per molecule — once at 64 and once uncapped — on the 6,918 sampled
+> molecules the cap is responsible for discarding:
+>
+> | fate once the cap is raised | share | implied corpus-wide |
+> |---|---|---|
+> | **too many tokens** (>128) | **73.03%** | 44,794 |
+> | survives every filter | 26.84% | **16,465** |
+> | disallowed element | 0.13% | 80 |
+>
+> **The binding constraint is `max_tokens: 128`, not `max_heavy_atoms: 64`.**
+> Raising only the atom cap adds 16,465 molecules — 0.87% of the 1.88M corpus —
+> and they cluster at 65–79 heavy atoms (9,567 and 6,552), with 346 above 80 and
+> nothing above 120. Every band's longest survivor tokenises to exactly 128
+> tokens, i.e. the survivors are the molecules that happen to fit the decoder's
+> context, selected by SMILES compactness rather than by anything chemical.
+>
+> So the choice is not "raise the cap" but "raise the cap **and** the context",
+> and the latter retrains everything at a longer sequence length for a corpus
+> 0.87% larger, in bands where recovery at 50–64 is already 0.2598 and falling.
+> A 65–79 protocol would very likely measure a floor, which is the outcome item
+> 15 of [retractions.md](retractions.md) already called unanswerable.
+>
+> **Keep 64, and state the number.** The honest version of the limit is "the
+> cap discards 2.6% of ChEMBL, and the decoder's 128-token context would discard
+> three quarters of that anyway" — which is now in
+> [§8 of methodology.md](methodology.md#8-the-domain-every-number-lives-in) and
+> the README's Limits section. Cost of the decision: 0 h GPU, and no shard
+> rebuild needed to make it.
 
 ## 4. The final run: full ChEMBL, step budget from item 2 — 16–33 h GPU
 
