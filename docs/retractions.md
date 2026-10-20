@@ -63,12 +63,19 @@ digits is not evidence of absence, however good the p-value looks.
 | 23 | **A prediction computed for one model and registered on another** (stage 12, night 5) | The two accounts' constants came from the 100k arm while the run specified `small_1m`, so the registration was void before the GPU started. The run was still informative; the registration was not. |
 | 24 | **A metric chosen on its error bar alone** (the 30–39 band) | It did not clear, because three fifths of it is molecules that do not respond. An error bar is a necessary condition for choosing a metric, not a sufficient one. |
 | 25 | **A result quoted at a temperature the project no longer uses** | The size mix's exchange rate was 2.3 small molecules per large one at T=1.0 and **1.28** at the adopted T=0.6, with the whole-protocol penalty falling from −1.13 points to −0.28. The only case where a stale setting made a result look *worse* than it is. |
+| 26 | **Registered intervals that did not tile the line** (item 1, night 7) | The registration assigned 0.76–0.82, 0.86–0.92, an "uninformative" 0.82–0.86 and a third branch below 0.72 — leaving **0.72–0.76 unassigned**, which is where the result landed (0.7553). The verdict was clear anyway, but it required a judgement made after seeing the number, which is the thing a registration exists to prevent. "Flat if below 0.82" would have cost nothing. |
+
+## The claim this ledger's method killed on schedule
+
+| # | the claim | what killed it |
+|---|---|---|
+| 27 | **"f′ rises 1.4× along the corpus axis"** — the last live piece of the convexity story | Measured directly at constant passes: **+22.09** points per doubling on the 900.9k → 1.88M segment, against the +35.03 the decomposition inferred for it. The inference overstated it by 13 points, 60% of the measured value. Registered as an interval beforehand, and the convex branch missed by twelve standard errors. The near-cancellation half of §2.9 survives; the convexity half does not. |
 
 ---
 
 ## The pattern
 
-Twenty-five entries, four causes:
+Twenty-seven entries, four causes:
 
 1. **Cross-run comparison.** Every claim that broke in the first two nights was
    a comparison *between* runs; every claim that survived was measured *within*
@@ -76,6 +83,16 @@ Twenty-five entries, four causes:
 2. **A constant calibrated on one run, applied across runs.** Entries 17 and 20
    are this, and so is 25. The constant is usually invisible in the result it
    distorts.
+
+   Entry 20's specific form — a prediction computed in one recovery convention
+   and scored in another — has now been caught four times, and night 7 found
+   the structural reason it recurs. `compare_checkpoints.py` computes
+   `ks = [n for n in (1, 5, 20, 100) if n <= eval_k]`, so an `--eval-k 60` run
+   reports rec@1/5/20 *under a 60-slot budget* and **never prints rec@60**.
+   Every rec@60 in this project therefore comes from a second tool, and the two
+   tools do not share a convention. Scoring night 7's registration against the
+   wrong one of them inflated f′ by 4 points and would have read as a cleaner
+   CONFIRMED than the truth.
 3. **A metric averaged over a population that does not respond.** Entries 12,
    13 and 24. The common protocol is 63% small molecules and cannot describe
    anything acting on part of the size distribution.
@@ -87,3 +104,9 @@ that produced it.** Entries 3, 10 and 13 were caught *because* a prediction was
 on record and failed. A two-point slope reported as a law was about to go out
 with a PubChem extrapolation attached; the registration is what turned a repeat
 of the previous night's mistake into a result.
+
+Entry 27 is the clearest case: f′ was written down as an inference, labelled in
+`results.md` as *the most load-bearing unverified number in this project*, and
+given a run designed to kill it. It died. A number carrying that label and no
+scheduled test is the thing to look for in any project that keeps a ledger like
+this one.

@@ -76,6 +76,13 @@ So the final run is new, and the clean evaluation sets already exist for it.
 
 ## 1. Measure f′ directly, at constant passes — 7.5 h GPU
 
+> **DONE, night 7 ([overnight-2026-10-20.md](overnight-2026-10-20.md)).**
+> f′ = **+22.09** points of rec@60 per doubling (0.5205 → 0.7553, n = 2,321,
+> SE 0.89). The convex branch is falsified; f′ is flat, and marginally flatter
+> than the flat account's +24.92. The floor check came in at 0.0000 at every k
+> and band, as registered. Two consequences below: §4 gains a scoring-protocol
+> prerequisite, and `results.md` §2.9's convexity claim is retracted (entry 27).
+
 Stage 9 inferred `value = f(log distinct molecules) + g(log passes)` with
 g′ = +23.55 points per doubling, and backed out f′ = +24.92 on the first corpus
 segment and +35.03 on the second. Both rest on additive separability, checked
@@ -162,6 +169,20 @@ raising the cap widens the window without populating the band that was actually
 unanswerable.
 
 ## 4. The final run: full ChEMBL, step budget from item 2 — 16–33 h GPU
+
+> **New prerequisite from night 7: this run cannot be scored on rec@60 "all".**
+> With f′ measured and g′ = +23.55, the 3-pass full-shard cell lands at
+> 0.7553 + 1.3115 × 0.2355 = **1.06** — the whole-protocol metric saturates
+> before the run finishes, and a ceiling is where this project has twice
+> mistaken a null for a result. The headroom is in the large bands: 50–64 sits
+> at 0.2598, 40–49 at 0.5395. Size a 50+-restricted protocol in the style of
+> night 6's 893-query run **before** committing 16 h of GPU, because 127
+> queries is the sample size that produced two of the overturned nulls.
+>
+> Fitted in *deficit* rather than points — the points form returns >1.0 in four
+> of six bands — the 3-pass cell registers at rec@60 **0.92** whole-protocol,
+> **0.56** at 50–64, **0.83** at 40–49. Those are the numbers to write down
+> before the run.
 
 8.0M parameters, `data/shards/full`, batch 128, T=0.6 at evaluation, scored on
 **both** protocols with the band table.

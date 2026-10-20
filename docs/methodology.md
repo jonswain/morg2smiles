@@ -26,8 +26,19 @@ started, and the 50+ capacity gain reads +3.70 or +4.48 points depending only
 on which is used.
 
 **The rule: read columns against each other, never across tools.** A comparison
-is prefix-to-prefix or it is nothing. Three collisions of this kind are logged
-in the night documents; assume there will be a fourth.
+is prefix-to-prefix or it is nothing. Four collisions of this kind are logged in
+the night documents; assume there will be a fifth.
+
+**Why this one recurs, structurally.** `compare_checkpoints.py` computes its
+k-list as `ks = [n for n in (1, 5, 20, 100) if n <= eval_k]`, so a run invoked
+with `--eval-k 60` reports rec@1, rec@5 and rec@20 **under a 60-slot budget**
+and never prints rec@60 at all. Every rec@60 figure in this project therefore
+comes from a second tool — `miss_anatomy.py` (raw slots) or `band_analysis.py`
+(molecule budget) — and those two disagree by about 4 points at k=60. A rec@60
+baseline quoted from a night document is in whichever convention that night's
+table used, and the only safe move is to **recompute both sides from their
+dumps with one tool** before comparing. Night 7 did, and that is the only
+reason its registration was scored correctly.
 
 ## 2. There are two protocols, and their numbers are not comparable
 

@@ -1,0 +1,225 @@
+# Night 7 — f′ measured directly
+
+One job, one number. Item 1 of
+[next-steps-2026-10-19.md](next-steps-2026-10-19.md): measure points per
+doubling of distinct molecules at **constant passes**, so the corpus axis is
+read without the steps confound that made every earlier reading an inference.
+
+Driver `scripts/overnight7.sh`, six stages, finished 02:00 with 389 minutes to
+spare. Both trainings stopped on `stopped_because = "step budget reached"`, not
+on `max_hours` — so both cosine schedules ran to their own horizon and the
+matched construction of §6 of [methodology.md](methodology.md) holds.
+
+| | corpus | steps | passes | cost |
+|---|---|---|---|---|
+| `small_1m_matched` (existed) | 900,917 | 8,508 | 1.2087 | — |
+| **`small_full_1p2`** | 1,881,996 | 17,772 | 1.2087 | 5.27 h |
+| `small_100k_1p2` (floor check) | 90,682 | 856 | 1.2087 | 0.39 h |
+
+---
+
+## The result
+
+Large protocol, k = 60, T = 0.6, the same 2,321 fingerprint-unseen queries,
+`miss_anatomy` convention throughout (see [the convention near-miss](#the-convention-near-miss-which-is-the-fourth)):
+
+| band | n | 900,917 | 1,881,996 | Δ | per doubling | deficit cut / doubling |
+|---|---|---|---|---|---|---|
+| 30–34 | 1,189 | 0.6720 | 0.8671 | +19.51 | +18.36 | 56.0% |
+| 35–39 | 625 | 0.4912 | 0.7744 | +28.32 | +26.65 | 52.4% |
+| 40–49 | 380 | 0.2474 | 0.5395 | +29.21 | +27.48 | 36.5% |
+| 50–64 | 127 | 0.0630 | 0.2598 | +19.69 | +18.52 | 19.8% |
+| 30–39 | 1,814 | 0.6097 | 0.8352 | +22.55 | +21.21 | 54.4% |
+| 35+ | 1,132 | 0.3613 | 0.6378 | +27.65 | +26.02 | 40.7% |
+| **all** | **2,321** | **0.5205** | **0.7553** | **+23.48** | **+22.09** | **46.1%** |
+
+The corpus ratio is 2.0890×, or 1.0628 doublings. Binomial SE on the "all" row
+is 0.89 points.
+
+**f′ = +22.09 points per doubling of distinct molecules**, measured, with
+nothing subtracted and no separability assumed.
+
+It replicates in the two other conventions this project reports, which is the
+check that matters most given what nearly went wrong below:
+
+| convention | 900,917 | 1,881,996 | per doubling |
+|---|---|---|---|
+| raw slots (`miss_anatomy`, k=60) | 0.5205 | 0.7553 | **+22.09** |
+| molecule budget (`band_analysis`, k=60) | 0.5618 | 0.7846 | **+20.96** |
+| common protocol, k=20 (stage 6) | 0.6825 | 0.8609 | **+16.79** |
+
+The common-protocol figure is lower for the reason §2 of
+[methodology.md](methodology.md) gives — it is 63% molecules under 30 heavy
+atoms, and the 30–34 band is the slowest-gaining band in the table above — and
+it is *understated* on top of that: `small_full_1p2` fills only 53.3% of its
+20-slot budget at `--max-oversample 10`, against `small_1m_matched`'s 79.2%,
+because the better model duplicates more (§4, "better models explore less").
+The large protocol's cap of 12 leaves it at 91.0% filled.
+
+## Scoring the pre-registration
+
+Registered in `configs/small_full_1p2.yaml` before the run, as intervals:
+
+| branch | predicted rec@60 | outcome |
+|---|---|---|
+| f′ convex, +35.03/doubling | 0.86–0.92 | **FALSIFIED** — 10.5 points below the band |
+| f′ flat, +24.92/doubling | 0.76–0.82 | the reading, but see below |
+| separability fails | outside both, below 0.72 or above 0.95 | not this |
+
+Measured **0.7553**. The convex branch is dead by a margin of twelve standard
+errors, and that is the finding: **f′ does not rise along the corpus axis.**
+
+The flat branch is the honest reading, with one blemish I am not going to round
+away. The flat branch's *point* prediction was 0.5205 + 26.5 = 0.7855 and its
+band ran 0.76–0.82; the measurement lands **0.5 points below the band's lower
+edge** — 0.6 binomial SE, and well inside the 1.6-point threshold this repo
+applies to its own training comparisons, but outside the interval as written.
+Measured f′ is +22.09 against the flat account's +24.92: flat, and a little
+flatter than flat.
+
+And the registration had a hole. It assigned 0.76–0.82, 0.86–0.92, the
+0.82–0.86 gap ("uninformative"), and below 0.72 / above 0.95 ("separability
+fails") — leaving **0.72–0.76 and 0.92–0.95 unassigned**, which is exactly
+where the result landed. Logged as entry 26 of
+[retractions.md](retractions.md): adjacent registered intervals have to tile
+the line, or the registration cannot be scored without a judgement call made
+after seeing the number. Writing "flat if below 0.82, convex if above 0.86"
+would have cost nothing and been complete.
+
+## The floor check
+
+`small_100k_1p2`, 90,682 molecules at the same 1.2087 passes, registered
+asymmetrically — able to falsify, not to confirm. Separability predicts this
+cell about 82 points below 0.5205, i.e. at the floor.
+
+**0.0000**, at k = 1, 20 and 60, in both orderings, in all seven bands, on 571
+fingerprint-unseen queries. Validity 0.175, mean best Tanimoto on misses 0.293:
+856 steps does not produce a model that recovers anything. As registered, this
+is consistent with separability and is weak evidence for it — the two handicaps
+(100 warmup steps of 856, and a draw capped at 4 rather than 12) can only push
+the number down, and a number pushed to a floor it was predicted to be below
+agrees without evidence.
+
+What it does rule out: any account in which the 90.7k cell at 1.21 passes still
+recovers a few percent, which would have put f′ on the first segment far below
+the second and revived convexity from the other end.
+
+## The convention near-miss, which is the fourth
+
+§1 of [methodology.md](methodology.md) says to assume there will be a fourth
+collision between the two recovery conventions. This is it, and it was caught
+with the number already on screen.
+
+Stage 4's band table reports `small_full_1p2` at rec@60 **0.7846**. The
+registration's baseline, `small_1m_matched` at **0.5205**, comes from
+`miss_anatomy` — raw slots. Scoring 0.7846 against 0.5205 gives +26.4 points
+per 1.06 doublings, lands the result *inside* the registered flat band, and
+agrees with the flat account's +24.92 to within 1.5 points. It would have read
+as a clean CONFIRMED.
+
+It is wrong. 0.7846 is the molecule-budget convention and 0.5205 is not; the
+like-for-like pair is 0.5205 → 0.7553 or 0.5618 → 0.7846, and both give f′ ≈
++21 to +22, not +26.4. The mixed pair inflates f′ by about 4 points — enough to
+move the verdict from "flat, and a little flatter than flat" to "flat, dead
+centre", and enough to have been quoted as the project's measured f′ for good.
+
+The conclusion does not change, because the convex branch dies in every
+convention. The lesson is that it did not change *this* time. Three of the five
+numbers in the two tables above came from a tool whose k-list stops at 20:
+`compare_checkpoints.py` computes `ks = [n for n in (1, 5, 20, 100) if n <=
+eval_k]`, so an `--eval-k 60` run reports rec@1/5/20 **under a 60-slot budget**
+and never prints rec@60 at all. Every rec@60 in this project therefore comes
+from a second tool, and the two tools do not share a convention. That is the
+structural reason this keeps happening.
+
+## What this does to the corpus axis
+
+The remaining live claim in §2.9 of [results.md](results.md) was that f′ itself
+is mildly convex — rising 1.4× from +24.92 to +35.03 — with the observable's
+8.4× convexity being that mild rise amplified by a near-cancellation against
+passes. Half of that is now retracted and half is confirmed:
+
+- **The cancellation is real and is the whole story.** At constant steps a
+  corpus doubling is a passes halving, so the observable nets +1.37 from
+  +22.09 against −23.55. Two large numbers, a small difference, and the sign of
+  the difference is not robust.
+- **f′ is not convex.** Measured +22.09 on the 900.9k → 1.88M segment against
+  the +35.03 that the decomposition inferred for it. The inference overstated
+  the far segment by 13 points, which is 60% of the measured value.
+
+So the corpus axis, over 90.7k → 1.88M molecules of ChEMBL at 8M parameters, is
+**flat at roughly +22 points of rec@60 per doubling**, and the convexity that
+survived three nights was an artefact of reading a difference of two large
+numbers. `small_full`'s 0.6424 at 0.58 passes and `small_full_1p2`'s 0.7553 at
+1.21 passes are the same corpus at two repetition rates, and the gap between
+them (+11.29 points for 1.063 doublings of passes) is a third estimate of g′ at
+**+10.62** — which does *not* match the +23.55 from the fixed-corpus rows, and
+is the one loose thread left here. The two fixed-corpus estimates (+22.54,
++24.57) were both taken at ≥1.21 passes; this one straddles a single pass. A
+model that sees each molecule less than once is not in the same regime, and
+nothing in this project's g′ should be extrapolated below one pass.
+
+## What this does to job 4
+
+The final full-ChEMBL run was to be 3 or 6 passes at 1,881,996 molecules,
+chosen by the step-saturation job. With f′ measured, that cell can now be
+priced — and pricing it exposes a limit of the law itself.
+
+**In points, the additive law predicts the impossible.** 0.7553 + 1.3115
+doublings of passes × g′ 23.55 = **1.06**. It is worse per band: four of six
+bands come out above 1.0. A law fitted in points cannot be extrapolated toward
+a bounded metric's ceiling, and §2.9's decomposition is entirely in points.
+
+**In deficit terms it behaves.** The rest of this project fits deficits, not
+points, and the 1M shard already supplies the 1.21 → 3.00 passes transition at
+every band — `small_1m_matched` to `small_1m`, same 2,321 queries. Applying its
+*per-band deficit cut* to the full shard's measured cell:
+
+| band | 1M @1.21 | 1M @3.00 | deficit cut | full @1.21 | **predicted @3.00** | additive |
+|---|---|---|---|---|---|---|
+| 30–34 | 0.6720 | 0.9134 | 73.6% | 0.8671 | **0.9649** | 1.11 ✗ |
+| 35–39 | 0.4912 | 0.8656 | 73.6% | 0.7744 | **0.9404** | 1.15 ✗ |
+| 40–49 | 0.2474 | 0.7158 | 62.2% | 0.5395 | **0.8261** | 1.01 ✗ |
+| **50–64** | 0.0630 | 0.4488 | 41.2% | 0.2598 | **0.5646** | 0.65 |
+| 35+ | 0.3613 | 0.7686 | 63.8% | 0.6378 | **0.8687** | 1.05 ✗ |
+| all | 0.5205 | 0.8427 | 67.2% | 0.7553 | **0.9197** | 1.08 ✗ |
+
+So the 3-pass full-ChEMBL run is predicted at **rec@60 ≈ 0.92** whole-protocol,
+with 8 points of headroom, and that is the number to register. Note the deficit
+cut is itself size-dependent — 73.6% at 30–39 against 41.2% at 50–64 — so this
+is six predictions, not one scaled six ways.
+
+**The run should still not be headlined on rec@60 "all".** At 0.92 predicted
+against 0.7553 measured, three quarters of the remaining deficit lives in bands
+holding a quarter of the protocol, and a whole-protocol number 8 points from the
+ceiling is where this project has twice mistaken a null for a result. The
+50–64 band is the one with room — 0.2598 now, 0.5646 predicted, 30 points of
+swing — and at n = 127 it is also the thinnest; 127 queries is the sample size
+that produced two of the overturned nulls. A 50+-restricted protocol in the
+style of night 6's 893-query run is the right instrument, and sizing it is now a
+prerequisite for job 4 rather than an optional extra.
+
+One caution against the 0.92. The nearest thing to a matched-compute check runs
+the other way: `small_1m` at 21,117 steps on 900,917 molecules scores 0.8427,
+while `small_full_1p2` at 17,772 steps on 1,881,996 scores 0.7553 — the smaller
+corpus ahead by 8.7 points with 19% more steps. The additive law accounts for
+this exactly (the 1M cell has 1.31 doublings more passes, worth +31 points,
+against 1.06 doublings less corpus, worth −22), so nothing is inconsistent; but
+it is a reminder that **at these budgets passes still beat molecules**, and the
+"prefer more molecules to more passes" line in §2.9 holds only at fixed steps,
+which is not a budget anyone has.
+
+---
+
+## Artefacts
+
+| file | what |
+|---|---|
+| `results/overnight7/comparison_k60_full_1p2.json` | large protocol, 2,321 queries, rec@1/5/20 under a 60-slot budget |
+| `results/overnight7/miss_anatomy_full_1p2.json` | **rec@60 per band, the registered convention** |
+| `results/overnight7/band_k60_full_1p2{,_structure}.json` | rec@60 and structure accuracy, molecule budget |
+| `results/overnight7/budget_curve_full_1p2.json` | the k-curve for the deficit power law |
+| `results/overnight7/comparison_k60_100k_1p2.json` | the floor check, 571 queries |
+| `results/overnight7/comparison_common_1p2.json` | both cells on the common protocol, re-scored together |
+| `results/overnight7/outcomes_*/` | per-query dumps for all of the above |
+| `configs/small_full_1p2.yaml`, `configs/small_100k_1p2.yaml` | the registrations, written before the runs |

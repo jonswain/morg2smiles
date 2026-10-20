@@ -231,20 +231,56 @@ where a corpus doubling *is* a passes halving:
 | segment | net measured | passes cost | f′ implied | per doubling |
 |---|---|---|---|---|
 | 90.7k → 900.9k | +4.52 | −78.02 | +82.55 | **+24.92** |
-| 900.9k → 1.88M | +12.19 | −25.03 | +37.23 | **+35.03** |
+| 900.9k → 1.88M | +12.19 | −25.03 | +37.23 | ~~+35.03~~ |
 
-**The corpus axis at constant steps is a terrible instrument**: +24.92 against
+The second row is **superseded by direct measurement** — f′ on that segment is
++22.09, not +35.03 ([§2.9a](#29a-f-measured-directly-at-constant-passes)). Keep
+the row for the method, not the number.
+
+**The corpus axis at constant steps is a terrible instrument**: +22 against
 −23.55 nets +1.37, so the observable is a small difference of two large
-numbers, and most of the 8.4× convexity is that cancellation amplifying a mild
-convexity underneath (f′ rises 1.4×, the net 8.4×). For anything asking what a
-bigger corpus buys at a *bigger* compute budget — where the data need not be
-paid for out of passes — the figure is **f′ ≈ 25 to 35 points per doubling**,
-not +1.37.
+numbers, and the 8.4× convexity in it is that cancellation, not a property of
+the corpus.
 
-Status: this is an inference under additive separability, supported by g′
-holding to 9% on two rows, and it is being measured directly at constant passes
-as item 1 of [next-steps-2026-10-19.md](next-steps-2026-10-19.md). **Until that
-lands, f′ is the most load-bearing unverified number in this project.**
+### 2.9a f′ measured directly, at constant passes
+
+The decomposition above is no longer needed. Holding passes fixed at 1.2087 and
+varying only the corpus removes the confound, which is item 1 of the closing
+plan and [night 7](overnight-2026-10-20.md). Large protocol, k=60, T=0.6, the
+same 2,321 queries, raw-slot convention:
+
+| molecules | passes | steps | rec@60, all | 35+ | 50–64 |
+|---|---|---|---|---|---|
+| 90,682 | 1.2087 | 856 | 0.0000 | 0.0000 | 0.0000 |
+| 900,917 | 1.2087 | 8,508 | 0.5205 | 0.3613 | 0.0630 |
+| 1,881,996 | 1.2087 | 17,772 | **0.7553** | 0.6378 | 0.2598 |
+
+**f′ = +22.09 points of rec@60 per doubling of distinct molecules** on the
+900.9k → 1.88M segment (1.0628 doublings, +23.48 points, binomial SE 0.89), and
+a 46.1% cut of the deficit per doubling. It replicates at +20.96 in the
+molecule-budget convention and +16.79 on the common protocol at k=20, the last
+being lower because that protocol is 63% small molecules and the small bands
+gain least.
+
+| band | per doubling | deficit cut / doubling |
+|---|---|---|
+| 30–34 | +18.36 | 56.0% |
+| 35–39 | +26.65 | 52.4% |
+| 40–49 | +27.48 | 36.5% |
+| 50–64 | +18.52 | 19.8% |
+| all | **+22.09** | 46.1% |
+
+**f′ is flat, not convex.** The pre-registered convex branch (+35.03/doubling →
+rec@60 0.86–0.92) is falsified by twelve standard errors; the inference
+overstated the far segment by 13 points, 60% of its measured value. The 90.7k
+cell is at the floor — 0.0000 at every k, in every band, on 571 queries — as
+registered, which is consistent with additive separability and weak evidence
+for it.
+
+Domain: 8M parameters, ChEMBL 90.7k–1.88M molecules, 3–64 heavy atoms, at
+1.2087 passes. **g′ should not be extrapolated below one pass**: the same corpus
+at 0.58 and 1.21 passes gives g′ = +10.62 per doubling, half the +23.55 measured
+at ≥1.21 passes.
 
 ### 2.10 Count fingerprints carry information that does not reach recovery
 
