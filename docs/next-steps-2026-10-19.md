@@ -216,9 +216,23 @@ under about two hours.
 > queries is the sample size that produced two of the overturned nulls.
 >
 > Fitted in *deficit* rather than points — the points form returns >1.0 in four
-> of six bands — the 3-pass cell registers at rec@60 **0.92** whole-protocol,
-> **0.56** at 50–64, **0.83** at 40–49. Those are the numbers to write down
-> before the run.
+> of six bands — the 3-pass cell registers at rec@60 **0.92** whole-protocol and
+> **0.83** at 40–49. Those are the numbers to write down before the run.
+>
+> **The 50+ registration was rebuilt on 893 queries by night 7c**, and the
+> thin-sample version was optimistic by six points:
+>
+> | band | n | predicted rec@60 @3 passes |
+> |---|---|---|
+> | 50–54 | 433 | **0.6131** |
+> | 55–59 | 257 | **0.4598** |
+> | 60–64 | 203 | **0.3107** |
+> | all 50+ | 893 | **0.5052** (was 0.5646 off 127 queries) |
+>
+> Register these per band on the dedicated 50+ protocol (`--eval-n 1000
+> --min-heavy-atoms 50 --eval-k 60 -T 0.6 --max-oversample 10`), not the 30+
+> one. The instrument this prerequisite asked for now exists and has three
+> cells on it: `small_1m_matched`, `small_1m` and `small_full_1p2`.
 
 8.0M parameters, `data/shards/full`, batch 128, T=0.6 at evaluation, scored on
 **both** protocols with the band table.

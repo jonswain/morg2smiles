@@ -288,6 +288,27 @@ whole-protocol rate. The 127-query estimate (+18.52) survived the re-measure
 at +16.86, 1.2 SE away — the first time in this project a number read on
 roughly 130 queries has held.
 
+**The passes axis decays the same way, and the ratio between them does not.**
+With `small_1m` scored on the same protocol, both slopes are available per band:
+
+| band | n | f′ / corpus doubling | g′ / passes doubling | g′ / f′ |
+|---|---|---|---|---|
+| 50–54 | 433 | +21.30 | +32.40 | 1.52 |
+| 55–59 | 257 | +14.28 | +24.03 | 1.68 |
+| 60–64 | 203 | +10.66 | +16.15 | 1.52 |
+| all 50+ | 893 | +16.86 | +26.30 | 1.56 |
+
+**Neither scaling lever reaches the far end of the size cliff**: both pay about
+half as much at 60–64 as at 50–54. That is the strongest form of the
+"capability ceiling on large molecules" finding — the ceiling is not something
+more data or more passes removes, within the range this hardware can reach.
+
+The ratio sits at 1.52–1.68 while both slopes halve, which looks like a
+size-invariant exchange rate near 1.55. Each slope's SE is about 2.2 points, so
+the ratio's is about 0.2 and that spread is inside it: **consistent with
+size-invariant, not measured to be.** Testing it needs a third passes point at
+50+, which does not exist.
+
 **f′ is flat, not convex.** The pre-registered convex branch (+35.03/doubling →
 rec@60 0.86–0.92) is falsified by twelve standard errors; the inference
 overstated the far segment by 13 points, 60% of its measured value. The 90.7k

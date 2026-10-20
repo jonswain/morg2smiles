@@ -180,12 +180,14 @@ every band — `small_1m_matched` to `small_1m`, same 2,321 queries. Applying it
 | 30–34 | 0.6720 | 0.9134 | 73.6% | 0.8671 | **0.9649** | 1.11 ✗ |
 | 35–39 | 0.4912 | 0.8656 | 73.6% | 0.7744 | **0.9404** | 1.15 ✗ |
 | 40–49 | 0.2474 | 0.7158 | 62.2% | 0.5395 | **0.8261** | 1.01 ✗ |
-| **50–64** | 0.0630 | 0.4488 | 41.2% | 0.2598 | **0.5646** | 0.65 |
+| **50–64** | 0.0630 | 0.4488 | 41.2% | 0.2598 | ~~0.5646~~ | 0.65 |
 | 35+ | 0.3613 | 0.7686 | 63.8% | 0.6378 | **0.8687** | 1.05 ✗ |
 | all | 0.5205 | 0.8427 | 67.2% | 0.7553 | **0.9197** | 1.08 ✗ |
 
 So the 3-pass full-ChEMBL run is predicted at **rec@60 ≈ 0.92** whole-protocol,
-with 8 points of headroom, and that is the number to register. Note the deficit
+with 8 points of headroom, and that is the number to register. The 50–64 row is
+struck through because night 7c re-derived it on 893 queries at **0.5052**
+rather than 0.5646; use that one. Note the deficit
 cut is itself size-dependent — 73.6% at 30–39 against 41.2% at 50–64 — so this
 is six predictions, not one scaled six ways.
 
@@ -264,10 +266,52 @@ The deficit-cut extrapolation above applies the 1M shard's 1.21 → 3.00 passes
 transition to the full shard. At 50–64 that transition was read on 127
 queries, so the prediction of 0.5646 inherited the thin sample even though both
 other cells are now well powered. `small_1m` — the 3.00-passes end — was not on
-the 50+ protocol, so it was scored there too.
+the 50+ protocol, so it was scored there too: 20 minutes, 893 queries.
 
-See `results/overnight7c/job4_registration.json` for the three-cell table and
-the resulting per-band predictions.
+| band | n | 1M @1.21 | 1M @3.00 | deficit cut | full @1.21 | **predicted @3.00** |
+|---|---|---|---|---|---|---|
+| 50–54 | 433 | 0.0647 | 0.4896 | 45.4% | 0.2910 | **0.6131** |
+| 55–59 | 257 | 0.0428 | 0.3580 | 32.9% | 0.1946 | **0.4598** |
+| 60–64 | 203 | 0.0099 | 0.2217 | 21.4% | 0.1232 | **0.3107** |
+| all 50+ | 893 | 0.0459 | 0.3908 | 36.2% | 0.2251 | **0.5052** |
+
+**The thin sample was optimistic, by six points.** The 127-query route
+predicted 0.5646 at 50–64; the 893-query route predicts **0.5052**. Both the
+f′ cell and the deficit cut moved down, and the error compounded because the
+prediction multiplies them. This is the number to register for job 4, and it
+is the clearest argument in this night's work for not registering anything off
+127 queries — the estimate held within its error bar, and the *prediction built
+on it* was still six points out.
+
+### Both scaling axes pay less on large molecules, and in the same proportion
+
+With `small_1m` on this protocol, both slopes are measurable in every band:
+
+| band | n | f′ (per corpus doubling) | g′ (per passes doubling) | g′ / f′ |
+|---|---|---|---|---|
+| 50–54 | 433 | +21.30 | +32.40 | 1.52 |
+| 55–59 | 257 | +14.28 | +24.03 | 1.68 |
+| 60–64 | 203 | +10.66 | +16.15 | 1.52 |
+| all 50+ | 893 | +16.86 | +26.30 | 1.56 |
+
+**Neither axis closes the size cliff, and both decay in the direction the cliff
+does.** More distinct molecules and more passes over them both pay roughly half
+as much at 60–64 as at 50–54. Nothing in this project's two scaling levers
+reaches the far end of the cliff, which is the strongest form of the "capability
+ceiling on large molecules" claim and the reason the ceiling is not a data
+problem.
+
+The ratio column is the interesting part and the part to be careful with. It
+sits at 1.52–1.68 across a band where both slopes halve, which *looks* like a
+size-invariant exchange rate of about 1.55 passes-doublings per
+corpus-doubling. But each slope carries an SE of roughly 2.2 points, so the
+ratio's SE is about 0.2, and 1.52 against 1.68 is well inside it. **The honest
+statement is that the ratio is consistent with being size-invariant, not that
+it was measured to be** — which is the distinction entries 12, 13 and 24 of
+[retractions.md](retractions.md) were all paid for.
+
+A reader who wants the invariant tested properly needs a third passes point at
+50+, which is item 2's territory and does not exist.
 
 ## Artefacts
 
