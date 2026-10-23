@@ -124,7 +124,7 @@ from morg2smiles import Morg2Smiles, compute
 
 model = Morg2Smiles.load("checkpoints/small_1m/best.pt")
 fp = compute("CC(=O)Oc1ccccc1C(=O)O", model.fp_config)
-model.generate(fp, k=20)        # oracle-verified matches first
+model.generate(fp, k=20)  # oracle-verified matches first
 ```
 
 ## The metric, and why the qualifier matters

@@ -1,0 +1,70 @@
+# Item 2 of docs/next-steps-2026-10-19.md: the third point on the 100k step arm.
+#
+# The arm exists at 8,508 steps (rec@60 0.4752) and 21,117 (0.7708). This is
+# 52,500, another 2.48x, and it is what picks the final run's step budget.
+#
+# PRE-REGISTRATION, as an interval -- the lesson stage 12 paid for.
+# Quantity: rec@60 on the large protocol at T=0.6 (--eval-n 2400
+# --min-heavy-atoms 30 --eval-k 60 --top-p 1.0 --max-oversample 12), 8.0M
+# parameters, 100k shard, a complete 52,500-step run.
+#
+#   registered interval        0.88 - 0.95
+#   naive log-log extrapolation at c ~ 1.06   0.93
+#   below 0.85                 the first evidence of saturation in this project
+#
+# Why the extrapolation is not trusted: step_curve.py showed the step deficit
+# is not straight in log-log. Fitting the first half of a 15-point trace
+# underestimates its last point by 4.33 points on small_1m, with the exponent
+# climbing from 0.568 to 0.805 as more range is included. A curve accelerating
+# in log-log space cannot continue, since recovery is bounded by 1, so the
+# registered interval is wider on the low side than the fit suggests.
+#
+# One caveat to carry into item 4: this is measured on the 90,682-molecule
+# corpus at 74 passes, so its transfer to the full shard is an assumption, and
+# the assumption is to be stated where item 4's budget is justified.
+#
+# Identical to configs/small_100k_long.yaml except for the step budget, the
+# epoch count needed to reach it, and the evaluation cadence.
+shard_dir: data/shards/100k
+out_dir: checkpoints/small_100k_52k
+
+fingerprint:
+  radius: 2
+  n_bits: 2048
+  counts: false
+  folded: true
+
+model:
+  d_model: 256
+  n_heads: 8
+  d_ff: 1024
+  n_encoder_layers: 4
+  n_decoder_layers: 4
+  dropout: 0.1
+  max_tokens: 128
+
+train:
+  # 90,682 / 128 = 709 steps per epoch, so 75 epochs is 53,175 steps and
+  # max_steps stops it on 52,500 exactly -- 74.05 passes.
+  epochs: 75
+  batch_size: 128
+  lr: 0.0005
+  warmup_steps: 300
+  randomize_smiles: true
+  # 4,000 rather than small_100k_long's 1,500: thirteen in-training evaluations
+  # instead of thirty-five. small_100k_long measured 1.373 s/step all-in at the
+  # tighter cadence, which at 52,500 steps is 20.0 h, and the window this runs
+  # in is 24 h. The in-training metric is a progress trace, not a reported
+  # number -- the registration above is read off compare_checkpoints.py -- so
+  # cadence is the right thing to spend to protect completion.
+  eval_every_steps: 4000
+  eval_n: 500
+  valid_loss_n: 2000
+  patience: 0
+  max_steps: 52500
+  # Sized to let a 15% slowdown still finish. A run stopped by this guard is
+  # not a complete 52,500-step run, the cosine schedule is unfinished, and the
+  # pre-registration does not apply to it -- the voided-trace lesson from
+  # block 1. Hence the clock guard in scripts/overnight8.sh asks for 22 h
+  # before starting at all, rather than starting and hoping.
+  max_hours: 21.0
