@@ -51,7 +51,7 @@ All measured on this M2, all from runs on disk:
 | quantity | value | source |
 |---|---|---|
 | 8.0M training, 1M/full shard | 1.337 s/step | `small_1m`, 7.84 h for 21,117 steps |
-| 8.0M training, 100k shard | 1.26 s/step | `count_fp_100k`, 2.98 h for 8,508 steps |
+| 8.0M training, 100k shard | ~~1.26 s/step~~ **1.373** | ~~`count_fp_100k`~~ — that is a *counts*-fingerprint run. Use `small_100k_long`: 8.05 h for 21,117 steps, folded, same shard |
 | 15.1M training | 1.91 s/step | `medium_1m_full`, 11.2 h for 21,117 steps |
 | generation | 0.016 s/slot/query | `small_1m_matched`, 2,298 s for 2,400 × 60 |
 | one scoring arm, large protocol at k=60 | ~0.64 h | 2,400 queries × 60 slots |
@@ -128,9 +128,33 @@ itself, and the decomposition with it.
 
 ## 2. Step saturation, the third point on the 100k arm — 19 h GPU
 
+> **LAUNCHED 2026-10-24 10:43**, git c4b2062, as
+> [scripts/overnight8.sh](../scripts/overnight8.sh) against a Sunday 11:00
+> deadline. Registration in `configs/small_100k_52k.yaml`: rec@60 **0.88–0.95**,
+> below 0.85 is saturation.
+>
+> **Re-priced on launch, and 18.4 h was optimistic.** That figure used
+> `count_fp_100k`'s 1.198 s/step, which is a *counts*-fingerprint run. The
+> comparable cell is `small_100k_long` — same shard, same folded fingerprint,
+> long run — at **1.373 s/step** over 21,117 steps, making 52,500 steps
+> **20.0 h** rather than 18.4. The cost table below understates this arm by
+> about a sixth, and the same error would understate item 4.
+>
+> Two changes followed. Evaluation cadence drops to every 4,000 steps from
+> 1,500, spending a progress trace to protect completion, since the registered
+> number is read off `compare_checkpoints.py` and not the in-training metric.
+> And training is the only stage given the clock: an incomplete run voids the
+> registration, while the k=60 scoring is 80 minutes against a checkpoint on
+> disk, so every later stage skips rather than overruns and the script re-runs
+> idempotently to collect what the clock cut.
+>
+> Observed rate in the first epoch is ~0.92 s/step, *faster* than
+> `small_100k_long`'s all-in 1.373, which would bring this in near 13.4 h. The
+> guards are sized for the slow case and do not mind being early.
+
 This is what picks item 4's step budget. The 100k arm has 8,508 steps (rec@60
 0.4752) and 21,117 (0.7708); the third point is 52,500, another 2.48×, at
-**18.4 h** plus scoring.
+**20.0 h** plus scoring.
 
 Register an interval, and note why the obvious extrapolation is untrustworthy:
 `step_curve.py` showed the step deficit is *not* straight in log-log — fitting
