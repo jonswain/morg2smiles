@@ -57,6 +57,11 @@ RUNS = [
     ("small_full_1p2", "checkpoints/small_full_1p2/best.pt", "data/shards/full"),
     ("small_100k_1p2", "checkpoints/small_100k_1p2/best.pt", "data/shards/100k"),
     ("small_100k_3ep", "checkpoints/small_100k_3ep/best.pt", "data/shards/100k"),
+    # The step-saturation third point, item 2 of docs/next-steps-2026-10-19.md.
+    # Same 100k shard as small_100k_long and small_100k_3ep, so the protocol's
+    # molecules and its fp_unseen union are unchanged by adding it -- which is
+    # what keeps the arm's existing 0.4752 and 0.7708 the right comparisons.
+    ("small_100k_52k", "checkpoints/small_100k_52k/best.pt", "data/shards/100k"),
     ("count_fp_100k", "checkpoints/count_fp_100k/best.pt", "data/shards/100k"),
     ("variance_s1", "checkpoints/variance_s1/best.pt", "data/shards/100k"),
     ("variance_s2", "checkpoints/variance_s2/best.pt", "data/shards/100k"),
