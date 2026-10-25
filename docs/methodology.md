@@ -157,7 +157,7 @@ Two further traps in the same family:
 
 ## 7. Pre-registration, as practised here
 
-Three rules, each earned by being broken:
+Five rules, each earned by being broken:
 
 1. **Register the interval, not the point.** Stage 12 of the 2026-10-17 weekend
    wrote three branches separated by point estimates of a quantity whose paired
@@ -184,6 +184,31 @@ Three rules, each earned by being broken:
    fingerprints — the easy ones to satisfy and the ones where satisfying them
    proves least — so **a slope measured from a floor cell flatters itself on
    recovery.** Constant-passes designs put their small cells exactly there.
+
+4. **The registered intervals must tile the line.** Night 8 registered rec@60
+   in 0.88–0.95, with "below 0.85" as saturation, and left **0.85–0.88
+   unnamed**. The measurement came in at **0.8789** — 0.11 points under the
+   floor, a sixth of the 1.6-point threshold in §5 — so it fell in the gap and
+   the reading had to be constructed after the fact. Item 1 of the closing plan
+   got this right by declaring its own 0.82–0.86 gap uninformative *in advance*;
+   night 8 did not. Every point on the line must map to a branch, and
+   "uninformative" is a legitimate branch provided it is named before the run.
+
+5. **Register the slope, not the level, whenever the metric is bounded.** The
+   same night's level test could not see what it was built to detect. Recovery
+   is bounded by 1, so a threshold on the level conflates *the curve bent* with
+   *the curve ran out of room*: rec@60 cleared 0.85 comfortably while the
+   deficit exponent fell 0.911 → 0.701 across one doubling of steps, which is
+   the bend the test existed to find. A saturation question is a question about
+   a derivative, and it should be registered in the deficit form — which has no
+   ceiling — rather than in points.
+
+   Its companion: **a registered quantity has to be measured in the regime the
+   decision applies to.** Night 8's bend is real and sits between the 30th and
+   74th pass over a fixed corpus, because on one corpus the steps axis *is* the
+   passes axis. The budget it was meant to pick is for a run at 3–6 passes, so
+   the measurement could not speak to it at all. See §3 — the same
+   nested-comparison failure in a different coordinate.
 
 A registration also has to say what each branch would *mean*. Both mechanisms
 registered for stage 12 were eliminated, and the useful output was the null —

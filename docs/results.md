@@ -87,6 +87,40 @@ Fitting a 15-point trace to its first half underestimates its last point by
 4.33 points on `small_1m`, with the exponent climbing from 0.568 to 0.805 as
 more range is included. `c` is a local slope, not a law.
 
+#### 2.2a The slope falls with range, and the step axis bends
+
+Night 8 added a third point to the 100k arm at 52,500 steps and the local slope
+turns out to fall, not rise. Held-out protocol, rec@60 on the fp_unseen slice,
+k = 60, n = 2,321:
+
+| segment | steps | passes | rec@60 | per doubling | deficit | c |
+|---|---|---|---|---|---|---|
+| 1 | 8,508 → 21,117 | 12.01 → 29.81 | 0.4752 → 0.7708 | +22.54 | 0.5248 → 0.2292 | **0.9113** |
+| 2 | 21,117 → 52,500 | 29.81 → 74.05 | 0.7708 → 0.8789 | **+8.23** | 0.2292 → 0.1211 | **0.7008** |
+
+Two near-identical doublings, and the second cuts the deficit a fifth less
+efficiently. The deficit form has no ceiling, so this is not recovery running
+out of room: **the step law weakens with range, and this is the first bend the
+project has measured.** Structure accuracy agrees — structure@60 0.8656 against
+rec@60 0.8789, the usual few points below and not a different shape.
+
+Two things this does *not* license.
+
+**It does not transfer out of its repetition regime.** On a fixed corpus the
+steps axis is the passes axis, so segment 2 is the 30th to the 74th look at the
+same 90,682 molecules. The in-regime comparison — 900,917 molecules at 1.21 →
+3.00 passes — gives **+24.57** points per doubling with no bend at all, so a
+run at a handful of passes should be priced off that and not off this. §2.9's
+confound, in the other coordinate.
+
+**The in-training traces say the opposite and are wrong here.** `step_curve.py`
+fits each run's own history and reports the exponent *climbing* with range
+(0.703 on `small_100k_long`, 0.843 at 52,500) with the extrapolation error
+shrinking from −2.64 to −0.43 points. Those traces are own-shard, 500
+molecules, at differing evaluation cadences, and the script prints that warning
+itself. Where a trace and the held-out protocol disagree, the protocol is the
+measurement.
+
 ### 2.3 Where the two kinds of spend cross over
 
 Budget is charged on every query forever, training once. Cutting the deficit by

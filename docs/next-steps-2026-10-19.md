@@ -262,6 +262,40 @@ under about two hours.
 > one. The instrument this prerequisite asked for now exists and has three
 > cells on it: `small_1m_matched`, `small_1m` and `small_full_1p2`.
 
+> **BUDGET DECIDED 2026-10-25: 6 passes, 88,224 steps, ~27 h** — and *not* by
+> the rule written below, which night 8 voided. See
+> [overnight-2026-10-24.md](overnight-2026-10-24.md). Item 2 found a real bend,
+> but it sits between the 30th and 74th pass over a fixed 90,682 molecules,
+> because on one corpus the steps axis is the passes axis. This run does 3→6
+> passes over 1.88M and never sees a molecule a seventh time, so the bend is 24
+> passes out of regime. The in-regime pair — 900,917 molecules at 1.21 → 3.00
+> passes — gives +24.57 points per doubling with no bend, so the axis is still
+> paying where this run sits and the longer budget is the one the evidence
+> supports. Re-priced off `small_full_1p2`'s 1.056 s/step (the plan's 1.337 is
+> the *1M* shard): **13.5 h at 3 passes, 27.0 h at 6**, not 16.4 and 32.8.
+>
+> **The 50+ registration below is superseded**: night 7c computed it for 3
+> passes, and the budget is now 6. Rebuilt by
+> [scripts/job4_registration.py](../scripts/job4_registration.py) from the three
+> cells of the 50+ instrument, in deficit form, on both metrics, at k=60 on the
+> 893-query draw:
+>
+> | band | n | rec@60 | struct@60 |
+> |---|---|---|---|
+> | 50–54 | 433 | **0.7325 – 0.7997** | **0.6482 – 0.7222** |
+> | 55–59 | 257 | **0.5804 – 0.6696** | **0.4979 – 0.5884** |
+> | 60–64 | 203 | **0.3841 – 0.4785** | **0.2682 – 0.3542** |
+> | all 50+ | 893 | **0.6310 – 0.6912** | **0.5403 – 0.6025** |
+>
+> Two things set those widths, and both are lessons rather than decoration.
+> **43% of the passes extrapolation is beyond the measured range** — g′ is read
+> over 1.31 doublings and the target is 2.31 — so the upper bound holds the
+> exponent constant and the lower bound decays it by night 8's measured factor
+> of 0.769. And the extrapolation bounds *alone* span 2.5 points at 60–64 while
+> the binomial SE on 203 queries is 3.5, so each interval is widened by one SE
+> per side. A registration narrower than the noise on its own instrument is
+> night 7c's thin-sample error in a new place.
+
 8.0M parameters, `data/shards/full`, batch 128, T=0.6 at evaluation, scored on
 **both** protocols with the band table.
 
