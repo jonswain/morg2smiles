@@ -1,0 +1,136 @@
+{
+  "target": {
+    "shard": "data/shards/full",
+    "passes": 6.0,
+    "steps": 88219,
+    "base_cell": "small_full_1p2",
+    "base_passes": 1.2087,
+    "passes_doublings": 2.3115062894008505,
+    "g_measured_over_doublings": 1.3115062894008507,
+    "fraction_extrapolated": 0.43261833402114724,
+    "night8_decay_applied_beyond_measured": 0.7690113025348403
+  },
+  "metric": "structure",
+  "k": 1,
+  "rows": [
+    {
+      "band": "30-34",
+      "n": 1189,
+      "cells": {
+        "matched_900k_1p21": 0.36248948696383515,
+        "full_1p2": 0.607232968881413,
+        "s1m_900k_3p00": 0.7140454163162321
+      },
+      "f_prime_deficit_exponent": 0.6574233685778814,
+      "g_prime_deficit_exponent": 0.8819348495551633,
+      "extrapolation_lo": 0.8899016486690172,
+      "extrapolation_hi": 0.9044004400014279,
+      "se_at_lo": 0.009077588385924667,
+      "se_at_hi": 0.008527415054264497,
+      "registered_lo": 0.8808240602830926,
+      "registered_hi": 0.9129278550556924
+    },
+    {
+      "band": "35-39",
+      "n": 625,
+      "cells": {
+        "matched_900k_1p21": 0.192,
+        "full_1p2": 0.4688,
+        "s1m_900k_3p00": 0.5888
+      },
+      "f_prime_deficit_exponent": 0.5692916984591518,
+      "g_prime_deficit_exponent": 0.7430502135757786,
+      "extrapolation_lo": 0.8180772326082422,
+      "extrapolation_hi": 0.8384825650427359,
+      "se_at_lo": 0.015431234511666638,
+      "se_at_hi": 0.01472030179919366,
+      "registered_lo": 0.8026459980965756,
+      "registered_hi": 0.8532028668419296
+    },
+    {
+      "band": "40-49",
+      "n": 380,
+      "cells": {
+        "matched_900k_1p21": 0.09210526315789473,
+        "full_1p2": 0.2657894736842105,
+        "s1m_900k_3p00": 0.4263157894736842
+      },
+      "f_prime_deficit_exponent": 0.28820325509111305,
+      "g_prime_deficit_exponent": 0.5049676332022442,
+      "extrapolation_lo": 0.6455456699743523,
+      "extrapolation_hi": 0.6730754002147785,
+      "se_at_lo": 0.024538715809046523,
+      "se_at_hi": 0.02406378070224027,
+      "registered_lo": 0.6210069541653057,
+      "registered_hi": 0.6971391809170188
+    },
+    {
+      "band": "50+",
+      "n": 127,
+      "cells": {
+        "matched_900k_1p21": 0.015748031496062992,
+        "full_1p2": 0.05511811023622047,
+        "s1m_900k_3p00": 0.16535433070866143
+      },
+      "f_prime_deficit_exponent": 0.05540849473475263,
+      "g_prime_deficit_exponent": 0.1813669000455604,
+      "extrapolation_lo": 0.2725757721115327,
+      "extrapolation_hi": 0.2933953351690901,
+      "se_at_lo": 0.03951260344819868,
+      "se_at_hi": 0.04040294216991007,
+      "registered_lo": 0.23306316866333404,
+      "registered_hi": 0.3337982773390002
+    },
+    {
+      "band": "30-39",
+      "n": 1814,
+      "cells": {
+        "matched_900k_1p21": 0.3037486218302095,
+        "full_1p2": 0.5595369349503859,
+        "s1m_900k_3p00": 0.6708930540242558
+      },
+      "f_prime_deficit_exponent": 0.6214951837986411,
+      "g_prime_deficit_exponent": 0.8242825911392432,
+      "extrapolation_lo": 0.8658277223955294,
+      "extrapolation_hi": 0.8824164163293888,
+      "se_at_lo": 0.008002551878238071,
+      "se_at_hi": 0.007562954616868849,
+      "registered_lo": 0.8578251705172913,
+      "registered_hi": 0.8899793709462577
+    },
+    {
+      "band": "35+",
+      "n": 1132,
+      "cells": {
+        "matched_900k_1p21": 0.13869257950530034,
+        "full_1p2": 0.3542402826855124,
+        "s1m_900k_3p00": 0.48674911660777387
+      },
+      "f_prime_deficit_exponent": 0.39094064604810974,
+      "g_prime_deficit_exponent": 0.56947043355289,
+      "extrapolation_lo": 0.7159383262564709,
+      "extrapolation_hi": 0.7406926752293529,
+      "se_at_lo": 0.013403583168071968,
+      "se_at_hi": 0.013025763953876182,
+      "registered_lo": 0.7025347430883989,
+      "registered_hi": 0.7537184391832291
+    },
+    {
+      "band": "all",
+      "n": 2321,
+      "cells": {
+        "matched_900k_1p21": 0.25333907798362776,
+        "full_1p2": 0.4838431710469625,
+        "s1m_900k_3p00": 0.6031882809133994
+      },
+      "f_prime_deficit_exponent": 0.5011231031812814,
+      "g_prime_deficit_exponent": 0.6953825539681339,
+      "extrapolation_lo": 0.8106502070487978,
+      "extrapolation_hi": 0.8306006506622436,
+      "se_at_lo": 0.008132266382156774,
+      "se_at_hi": 0.007786000588383052,
+      "registered_lo": 0.802517940666641,
+      "registered_hi": 0.8383866512506267
+    }
+  ]
+}

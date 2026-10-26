@@ -1,0 +1,157 @@
+# Item 4 of docs/next-steps-2026-10-19.md: the final run. Full ChEMBL, 6 passes.
+#
+# See docs/final-run-plan.md for the plan this implements and every cost in it.
+#
+# 8.0M parameters, data/shards/full (1,881,996 training molecules), batch 128,
+# cosine to completion, T=0.6 at evaluation. Identical to
+# configs/small_full_1p2.yaml in architecture, lr, warmup, fingerprint and
+# randomisation -- the step budget is the only variable, which is what makes
+# this cell small_full_1p2 moved along the passes axis alone, and that is
+# exactly what the registration below extrapolates.
+#
+# ---------------------------------------------------------------- the budget
+#
+# 6 passes, and NOT by the rule item 2 was commissioned to apply. That rule was
+# "saturation absent by 52,500 steps -> 6 passes; present -> 3". Saturation
+# appeared (night 8: the deficit exponent falls 0.9113 -> 0.7008), so by the
+# letter of the rule this should be 3 passes. The rule does not apply.
+#
+# On a fixed corpus steps x batch = corpus x passes, so item 2's bend was
+# measured between the 30th and the 74th pass over the same 90,682 molecules.
+# This run does 3 -> 6 passes over 1,881,996 and never sees a molecule a
+# seventh time; the bend is 24 passes out of regime. The in-regime comparison
+# is the 1M-shard pair -- 900,917 molecules at 1.21 -> 3.00 passes -- and it
+# gives +24.57 points per doubling with no bend at all. The axis is still
+# paying where this run sits.
+#
+# ---------------------------------------------------------------- PRE-REGISTRATION
+#
+# Registered as INTERVALS, per band, on BOTH metrics, and the intervals TILE --
+# night 8's amendment (retractions entry 26), after a registration left
+# 0.85-0.88 unnamed and the result landed in it.
+#
+# Interval construction, from scripts/job4_registration.py: fitted in DEFICIT
+# rather than points, because the points form returns above 1.0 in most bands.
+# The instrument is three cells on one protocol -- small_1m_matched (900,917
+# molecules, 1.21 passes), small_full_1p2 (1,881,996, 1.21) and small_1m
+# (900,917, 3.00) -- so f' is read at constant passes and g' at constant
+# corpus, and the target is full_1p2 moved along passes alone. 43% of that
+# extrapolation sits beyond the measured range (g' is read over 1.31 doublings,
+# the target is 2.31), so the upper bound holds the exponent constant and the
+# lower bound decays it by night 8's measured 0.769. Each interval is then
+# widened by one binomial SE per side, because at 60-64 the extrapolation
+# bounds alone span 2.5 points against an SE of 3.5 and a registration
+# narrower than the noise on its own instrument is night 7c's error again.
+#
+# (1) THE HEADLINE IS NOT THE MEASUREMENT. rec@60 whole-protocol registers at
+#     0.9634-0.9767 and every band below 40 heavy atoms registers above 0.97.
+#     That is the ceiling, not a prediction, and this project has twice
+#     mistaken a ceiling for a null. Report it; do not score the result on it.
+#     The 1.6-point whole-protocol threshold cannot resolve anything up there.
+#
+# (2) rec@60 / struct@60 on the 50+ protocol, the registration OF RECORD for
+#     large molecules. 893 queries, --eval-n 1000 --min-heavy-atoms 50
+#     --eval-k 60 -T 0.6 --top-p 1.0 --max-oversample 10.
+#     results/overnight8/job4_registration_6p_{recovery,structure}.json
+#
+#       band      n    rec@60           struct@60
+#       50-54   433    0.7325-0.7997    0.6482-0.7222
+#       55-59   257    0.5804-0.6696    0.4979-0.5884
+#       60-64   203    0.3841-0.4785    0.2682-0.3542
+#       all 50+ 893    0.6310-0.6912    0.5403-0.6025
+#
+# (3) rec@1 / struct@1 in CONSENSUS order, on the large protocol at k=60.
+#     This is where the room to move is: every band is clear of the ceiling and
+#     the intervals are 3-7 points wide.
+#     results/overnight9/job4_registration_k1_6p_{recovery,structure}.json
+#
+#       band      n    rec@1            struct@1
+#       30-34  1189    0.9073-0.9354    0.8808-0.9129
+#       35-39   625    0.8467-0.8916    0.8026-0.8532
+#       40-49   380    0.6705-0.7445    0.6210-0.6971
+#       35+    1132    0.7538-0.8021    0.7025-0.7537
+#       all    2321    0.8405-0.8732    0.8025-0.8384
+#
+# (4) rec@60 / struct@60 at 40-49 on the large protocol -- the one band of the
+#     30+ protocol that still carries information at this budget.
+#     results/overnight9/job4_registration_30plus_6p_{recovery,structure}.json
+#
+#       band      n    rec@60           struct@60
+#       40-49   380    0.9140-0.9522    0.8946-0.9375
+#       35+    1132    0.9368-0.9599    0.9227-0.9486
+#
+# (5) Whether the deficit power law's exponents TRANSPORT to this corpus: b per
+#     band against the 0.144-0.396 range of results.md section 2.1, and c
+#     against the 0.701-0.911 range item 2 measured. Not an interval -- a
+#     question the run answers, read off budget_curve.py and step_curve.py.
+#
+# Scored with band_analysis.py, NOT compare_checkpoints.py: the latter computes
+# ks = [n for n in (1, 5, 20, 100) if n <= eval_k], so an --eval-k 60 run
+# reports rec@1/5/20 under a 60-slot budget and never prints rec@60. Every
+# rec@60 in this project comes from band_analysis.py and the two tools do not
+# share a convention -- retractions entry 20, caught four times.
+#
+# All five read at k=60, order as named above, metric as named, budget
+# molecules -- the convention the 50+ instrument was built in.
+shard_dir: data/shards/full
+out_dir: checkpoints/small_full_6p
+
+fingerprint:
+  radius: 2
+  n_bits: 2048
+  counts: false
+  folded: true
+
+model:
+  d_model: 256
+  n_heads: 8
+  d_ff: 1024
+  n_encoder_layers: 4
+  n_decoder_layers: 4
+  dropout: 0.1
+  max_tokens: 128
+
+train:
+  # 1,881,996 / 128 = 14,703 steps per pass, so max_steps is 6 x 14,703 and
+  # epochs is one more than needed -- max_steps binds, and the cosine horizon
+  # follows max_steps rather than the epoch count. (job4_registration.py
+  # reports 88,219 for the same budget, its own rounding of 6.0 passes from
+  # 88,218.56; one step in 88,000 and the same run.)
+  epochs: 7
+  batch_size: 128
+  lr: 0.0005
+  warmup_steps: 300
+  randomize_smiles: true
+  max_steps: 88218
+  # 8,000, giving twelve in-training evaluations. Cadence buys two things that
+  # trade against each other: train.py:443 checks the stop conditions -- the
+  # wall-clock brake included -- only at these boundaries, so the cadence is
+  # also the brake's resolution. 4,000 would cost 1.18 h of evaluation for a
+  # 1.17 h brake; per-epoch would cost 0.36 h for a 4.28 h brake. 8,000 is
+  # 0.62 h for 2.33 h.
+  #
+  # Cheap at that, because the trace is not a reported number: every
+  # registration above is read off band_analysis.py against the finished
+  # checkpoint. Night 8 is why that distinction is load-bearing -- its
+  # in-training trace had the step exponent CLIMBING with range while the
+  # held-out protocol had it falling. The protocol is the measurement.
+  eval_every_steps: 8000
+  eval_n: 500
+  eval_k: 20
+  valid_loss_n: 2000
+  patience: 0
+  # A RUNAWAY GUARD, NOT A BUDGET. The job is priced at 26.3 h of training
+  # (88,218 steps at a solved 1.047 s/step, plus twelve evaluations at ~185 s)
+  # with an upper bound of 28.9 h if the whole run held the slowest sustained
+  # rate any 8.0M cell has produced. 31.0 sits above that.
+  #
+  # It is deliberately NOT tight, because a run stopped by this guard has an
+  # unfinished cosine schedule and the pre-registration above does not apply to
+  # it -- block 1's voided-trace lesson. So scripts/overnight9.sh refuses to
+  # start without a 33 h window rather than starting and hoping, and this
+  # number exists only to stop a genuinely runaway process.
+  #
+  # The clock is right: train.py:404 uses time.time(), so retractions entry
+  # 19 -- max_hours built on perf_counter, which does not advance while the
+  # process is suspended -- is fixed and this is true wall clock.
+  max_hours: 31.0

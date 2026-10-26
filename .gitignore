@@ -196,3 +196,28 @@ dist/
 !/results/overnight6/budget_curve_s188m_8k_t06.json
 !/results/overnight6/comparison_50plus_8k_t06.json
 !/results/overnight6/comparison_50plus_8k_t03.json
+# Night 8's and night 9's pre-registrations for item 4, the final run. These
+# are the evidence behind the intervals in configs/small_full_6p.yaml and
+# docs/final-run-plan.md -- the numbers written down before the run that tests
+# them, which retractions.md calls the one practice that repeatedly worked. A
+# few KB each. The outcome dumps and tqdm logs beside them stay ignored.
+!/results/overnight8/
+/results/overnight8/*
+!/results/overnight8/job4_registration_6p_recovery.json
+!/results/overnight8/job4_registration_6p_structure.json
+!/results/overnight8/b50_matched_recovery.json
+!/results/overnight8/b50_matched_structure.json
+!/results/overnight8/b50_full1p2_recovery.json
+!/results/overnight8/b50_full1p2_structure.json
+!/results/overnight8/b50_s1m_recovery.json
+!/results/overnight8/b50_s1m_structure.json
+!/results/overnight9/
+/results/overnight9/*
+!/results/overnight9/b30_instrument_recovery.json
+!/results/overnight9/b30_instrument_structure.json
+!/results/overnight9/b30_k1_recovery.json
+!/results/overnight9/b30_k1_structure.json
+!/results/overnight9/job4_registration_30plus_6p_recovery.json
+!/results/overnight9/job4_registration_30plus_6p_structure.json
+!/results/overnight9/job4_registration_k1_6p_recovery.json
+!/results/overnight9/job4_registration_k1_6p_structure.json

@@ -1,0 +1,85 @@
+{
+  "k": 60,
+  "order": "generation",
+  "metric": "structure",
+  "budget": "molecules",
+  "n_fp_unseen": 893,
+  "runs": [
+    "medium_1m_8k",
+    "small_1m_matched"
+  ],
+  "bands": {
+    "50-54": {
+      "n_queries": 433,
+      "share_of_protocol": 0.48488241881298993,
+      "per_run": {
+        "medium_1m_8k": 0.08314087759815242,
+        "small_1m_matched": 0.04157043879907621
+      },
+      "pairs": {
+        "medium_1m_8k->small_1m_matched": {
+          "gap_points": -4.157043879907621,
+          "b_only": 4,
+          "a_only": 22,
+          "paired_se_points": 1.1776026590283566,
+          "gap_in_paired_se": -3.530090432487313,
+          "mcnemar_p": 0.0005335211753845215
+        }
+      }
+    },
+    "55-59": {
+      "n_queries": 257,
+      "share_of_protocol": 0.2877939529675252,
+      "per_run": {
+        "medium_1m_8k": 0.07392996108949416,
+        "small_1m_matched": 0.019455252918287938
+      },
+      "pairs": {
+        "medium_1m_8k->small_1m_matched": {
+          "gap_points": -5.447470817120623,
+          "b_only": 1,
+          "a_only": 15,
+          "paired_se_points": 1.556420233463035,
+          "gap_in_paired_se": -3.5,
+          "mcnemar_p": 0.000518798828125
+        }
+      }
+    },
+    "60-64": {
+      "n_queries": 203,
+      "share_of_protocol": 0.22732362821948487,
+      "per_run": {
+        "medium_1m_8k": 0.029556650246305417,
+        "small_1m_matched": 0.009852216748768473
+      },
+      "pairs": {
+        "medium_1m_8k->small_1m_matched": {
+          "gap_points": -1.9704433497536942,
+          "b_only": 0,
+          "a_only": 4,
+          "paired_se_points": 0.9852216748768473,
+          "gap_in_paired_se": -1.9999999999999996,
+          "mcnemar_p": 0.125
+        }
+      }
+    },
+    "50+": {
+      "n_queries": 893,
+      "share_of_protocol": 1.0,
+      "per_run": {
+        "medium_1m_8k": 0.0683090705487122,
+        "small_1m_matched": 0.027995520716685332
+      },
+      "pairs": {
+        "medium_1m_8k->small_1m_matched": {
+          "gap_points": -4.031354983202687,
+          "b_only": 5,
+          "a_only": 41,
+          "paired_se_points": 0.759499438199918,
+          "gap_in_paired_se": -5.307910421576295,
+          "mcnemar_p": 4.405936238072172e-08
+        }
+      }
+    }
+  }
+}

@@ -62,6 +62,22 @@ RUNS = [
     # molecules and its fp_unseen union are unchanged by adding it -- which is
     # what keeps the arm's existing 0.4752 and 0.7708 the right comparisons.
     ("small_100k_52k", "checkpoints/small_100k_52k/best.pt", "data/shards/100k"),
+    # The final run, item 4 of docs/next-steps-2026-10-19.md -- full ChEMBL at
+    # 6 passes. Registered in configs/small_full_6p.yaml, planned in
+    # docs/final-run-plan.md.
+    #
+    # This line exists before the training does, and deliberately. Night 8 lost
+    # three hours because small_100k_52k had a config and no entry here, so
+    # --only small_100k_52k could not resolve and scoring failed two seconds
+    # after a seventeen-hour run. A new checkpoint needs its RUNS entry in the
+    # same commit as its config.
+    #
+    # data/shards/full is already listed above via small_full and
+    # small_full_1p2, so adding this run leaves the union of training sets, the
+    # protocol's draw and its fp_unseen flags all unchanged -- which is what
+    # keeps the three cells of both instruments the right comparisons and makes
+    # the pre-registered intervals valid for it.
+    ("small_full_6p", "checkpoints/small_full_6p/best.pt", "data/shards/full"),
     ("count_fp_100k", "checkpoints/count_fp_100k/best.pt", "data/shards/100k"),
     ("variance_s1", "checkpoints/variance_s1/best.pt", "data/shards/100k"),
     ("variance_s2", "checkpoints/variance_s2/best.pt", "data/shards/100k"),

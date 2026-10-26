@@ -1,0 +1,85 @@
+{
+  "k": 60,
+  "order": "generation",
+  "metric": "recovery",
+  "budget": "molecules",
+  "n_fp_unseen": 893,
+  "runs": [
+    "medium_1m_8k",
+    "small_1m_matched"
+  ],
+  "bands": {
+    "50-54": {
+      "n_queries": 433,
+      "share_of_protocol": 0.48488241881298993,
+      "per_run": {
+        "medium_1m_8k": 0.12702078521939955,
+        "small_1m_matched": 0.07852193995381063
+      },
+      "pairs": {
+        "medium_1m_8k->small_1m_matched": {
+          "gap_points": -4.849884526558893,
+          "b_only": 7,
+          "a_only": 28,
+          "paired_se_points": 1.3663001808544148,
+          "gap_in_paired_se": -3.5496478698597707,
+          "mcnemar_p": 0.0005082604475319386
+        }
+      }
+    },
+    "55-59": {
+      "n_queries": 257,
+      "share_of_protocol": 0.2877939529675252,
+      "per_run": {
+        "medium_1m_8k": 0.11284046692607004,
+        "small_1m_matched": 0.054474708171206226
+      },
+      "pairs": {
+        "medium_1m_8k->small_1m_matched": {
+          "gap_points": -5.836575875486381,
+          "b_only": 4,
+          "a_only": 19,
+          "paired_se_points": 1.8660823047909412,
+          "gap_in_paired_se": -3.127716210856122,
+          "mcnemar_p": 0.002599477767944336
+        }
+      }
+    },
+    "60-64": {
+      "n_queries": 203,
+      "share_of_protocol": 0.22732362821948487,
+      "per_run": {
+        "medium_1m_8k": 0.034482758620689655,
+        "small_1m_matched": 0.014778325123152709
+      },
+      "pairs": {
+        "medium_1m_8k->small_1m_matched": {
+          "gap_points": -1.9704433497536946,
+          "b_only": 1,
+          "a_only": 5,
+          "paired_se_points": 1.2066451934892504,
+          "gap_in_paired_se": -1.632993161855452,
+          "mcnemar_p": 0.21875
+        }
+      }
+    },
+    "50+": {
+      "n_queries": 893,
+      "share_of_protocol": 1.0,
+      "per_run": {
+        "medium_1m_8k": 0.1019036954087346,
+        "small_1m_matched": 0.05711086226203808
+      },
+      "pairs": {
+        "medium_1m_8k->small_1m_matched": {
+          "gap_points": -4.479283314669653,
+          "b_only": 12,
+          "a_only": 52,
+          "paired_se_points": 0.8958566629339306,
+          "gap_in_paired_se": -4.999999999999999,
+          "mcnemar_p": 4.5666107004454105e-07
+        }
+      }
+    }
+  }
+}
