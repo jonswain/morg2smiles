@@ -372,3 +372,92 @@ where the content is. Three things to hold onto when the number lands:
 - **The headline will saturate and that is not a result.** §4a. Report rec@60
   all-slice as a ceiling reading, and put the weight on rec@1, 40–49, 50+ and
   structure accuracy.
+
+---
+
+## 8. Stage 6, registered 2026-10-30 while stage 1 trained
+
+Registration (5) — *do the exponents transport to this corpus?* — is the one
+entry the driver answers badly, and the fix is free. Recorded here before the
+number exists, because that is the only reason any of the other four are worth
+anything.
+
+### What is wrong with stage 5b
+
+The driver reads the step exponent from `step_curve.py --runs`, which fits each
+run's **own in-training trace**: 500 molecules of that run's own shard, at that
+run's own cadence. Night 8 established that the trace and the held-out protocol
+**disagree in direction** on this exact quantity — the trace had `c` climbing
+with range while the protocol had it falling — and that the protocol is the
+authority. `step_curve.py` prints the refusal itself and will do so again here,
+because `small_1m` predates the 2026-10-14 top-up change and the other two
+runs do not.
+
+So stage 5b gives three per-run exponents that are individually valid and
+mutually incomparable, and none of them is on the instrument the registration
+should be scored on.
+
+### What stage 6 does instead
+
+The matched-pair route, which reads the deficit at one fixed k off two
+`miss_anatomy.py` reports on **one protocol**:
+
+```
+step_curve.py \
+  --pair results/overnight7/miss_anatomy_full_1p2.json,results/overnight9/miss_anatomy_full_6p.json \
+  --pair-steps 17772,88218
+```
+
+`small_full_1p2` and `small_full_6p` are the same 8.0M architecture on the same
+`data/shards/full`, scored by the same night-6 invocation at k=60, T=0.6,
+`--max-oversample 12`, on the same 2,321 queries. Prefix-to-prefix, so the
+comparison is the one §3 of [methodology.md](methodology.md) permits. Validated
+on 2026-10-30 against the 100k 2×2 cells, where it reproduces night 8's
+published `c` of 0.9113 to four decimals.
+
+### And it is a passes measurement, not only a steps one
+
+This is the part worth the paragraph. On a fixed corpus `steps × batch =
+corpus × passes`, so the pair above is **1.2087 → 6.00 passes over the same
+1,881,996 molecules** — which makes `c` here the deficit-form `g′`, measured
+**in the regime item 4 actually runs in** and with no repetition confound,
+since neither cell sees a molecule a seventh time. Night 8's bend was measured
+at 30 → 74 passes and could not speak to this range; this pair can.
+
+Doing the same on the 50+ instrument needs one extra `miss_anatomy.py` call,
+because the driver's stage 5 reads only the 30+ dump:
+
+```
+miss_anatomy.py --dump results/overnight9/outcomes_50plus_full_6p/small_full_6p.jsonl --k 60
+step_curve.py --pair results/overnight7b/miss_anatomy_50plus_full_1p2.json,<that> --pair-steps 17772,88218
+```
+
+**That is a second passes point at 50+ on the full shard, and night 7c recorded
+that no such point exists.** It said testing the `g′ / f′ ≈ 1.55` invariant
+"needs a third passes point at 50+, which does not exist" — this run creates
+one. The invariant can then be tested on a second corpus rather than asserted
+from one.
+
+### Registered as questions, with the numbers they are read against
+
+Not intervals, because these are exponents whose error bars this project has
+never measured on a single pair, and a registration narrower than an unmeasured
+noise floor is night 7c's error in a new place. What is registered is **which
+number each answer is compared to, and what each comparison would mean**:
+
+| quantity | read against | what a match would mean |
+|---|---|---|
+| `c` at k=60, all bands | item 2's **0.7008–0.9113** | the step law's local slope transports from the 100k corpus at 30–74 passes to the full corpus at 1.2–6 passes — which would be surprising, since those regimes share no repetition range |
+| `c` per band | the 2×2's k=60 column (1.092 / 1.083 / 0.770 / 0.381 for 30–34 / 35–39 / 40–49 / 50+) | the exponent's size dependence is a property of the decoding problem rather than of a corpus |
+| `b` from `budget_curve.py` | **0.144–0.396** (results.md §2.1) | the budget law transports, as it has to every cell so far |
+| `b ÷ rec@60` | **0.320–0.380** | the eighth confirmation that interventions slide a model along one curve rather than bending it; a value outside it would be the first evidence of a second dial |
+| `g′` at 50+ on the full shard | the 1M shard's **+26.30** per passes doubling | g′ is corpus-invariant. A lower value on the larger corpus would mean passes and molecules substitute rather than add, which the additive law of §2.9 assumes they do not |
+| `g′ / f′` at 50+ | **1.52–1.68** | the exchange rate is size- *and* corpus-invariant, tested on a second corpus for the first time |
+
+**The honest expectation for the first row is a miss.** `c` is a local slope and
+night 8 measured it falling with range; there is no reason a slope read at
+30–74 passes should hold at 1.2–6. A match would be more interesting than a
+miss, which is the opposite of how the other four registrations are built, and
+is why this one is a question.
+
+Zero GPU. Every input is a dump the run already writes.
