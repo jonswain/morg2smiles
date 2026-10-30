@@ -12,5 +12,10 @@ dependencies:
   - click
   - matplotlib
   - pytest
-  - ruff
+  # Pinned to the version CI gates on, like pyproject's dev extra. `ruff format
+  # --check` is a gate and its output changes between releases, so an unpinned
+  # formatter here would let a fresh conda env disagree with CI about formatting
+  # with no code change -- which is the failure the pin in pyproject.toml and
+  # the one in the workflow both exist to prevent.
+  - ruff=0.16.10
   - pip
