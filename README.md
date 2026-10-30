@@ -33,7 +33,7 @@ documents are:
 |---|---|
 | **[docs/results.md](docs/results.md)** | every measured law, with its domain, its error bar and the script that produced it |
 | **[docs/methodology.md](docs/methodology.md)** | the conventions, starting with the two recovery conventions that differ by points and have voided two pre-registrations |
-| **[docs/retractions.md](docs/retractions.md)** | all 27 withdrawn claims and the four causes behind them |
+| **[docs/retractions.md](docs/retractions.md)** | all 28 withdrawn claims and the five causes behind them |
 | **[docs/next-steps-2026-10-19.md](docs/next-steps-2026-10-19.md)** | the plan to done, and the extensions parked below the line |
 
 The `docs/overnight-*.md` files are the primary record and are kept for
@@ -869,7 +869,7 @@ would ask:
   architecture were not.
 
 [docs/retractions.md](docs/retractions.md) is the longer and more useful version
-of this section: 27 claims this project published and withdrew, and the four
+of this section: 28 claims this project published and withdrew, and the five
 causes behind them.
 
 ## Prior art, including my own
@@ -1042,7 +1042,7 @@ what it would cost; none of them is required for the project's claims to stand.
 ## Development
 
 ```bash
-pytest -q                          # 440 tests, offline; the 5 needing a shard self-skip
+pytest -q                          # 464 tests, offline; the 5 needing a shard self-skip
 ruff check src tests scripts
 ruff format --check src tests scripts   # drop --check to rewrite in place
 ```
