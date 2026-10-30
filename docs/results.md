@@ -1,7 +1,8 @@
 # Results: the measured laws, in one place
 
-The README tells the story and the night logs record how each number was
-arrived at, including the wrong turns. This document is neither: it is a
+The README tells the story, [report.md](report.md) is the one self-contained
+account of the whole experiment, and the night logs record how each number was
+arrived at, including the wrong turns. This document is none of those: it is a
 reference sheet. Every quantity this project claims, with its domain of
 validity, its error bar, the script that produced it and the log that argued
 it out.
@@ -438,7 +439,10 @@ Claims tested and refused, so they are not re-opened by accident:
 | the 50+ capacity gain is a decode artefact of T=0.6 | cooling to T=0.3 moves it by +1.01 points [−0.90, +2.91] |
 | validity is the binding constraint on large molecules | cooling raises validity and recovery nets zero |
 | successive samples are independent draws | the deficit is a power law in k with a size-dependent exponent; independence predicted 0.66 at k=100 against a measured decay |
-| splitting a fixed budget across models beats spending it on the best one | measured and dead |
+| splitting a fixed budget across models beats spending it on the best one | measured and dead, at both k=20 and k=60 |
+| ensembling independently-seeded models reaches molecules one model cannot | 1.6% of one seed's misses above 50 atoms are found by either of two others, and 96.9% of the band is missed by all three against 95.3% from chance alone. Three *differently trained* models move the 35+ luck from 13.5% to 14.2%. The reachable set is the same small set for every seed |
+| a size-conditional decode temperature | +0.10 ± 0.25 points over a flat 0.6. Cooling never *hurt* small molecules, so there was nothing to condition on — an intervention that only helps subgroup X is worth conditioning on X only if it hurts not-X |
+| there is latent generative capability to read out of this model | perturbing a fingerprint degrades the inverse rather than steering it. Across twelve drop/add/swap conditions, the fraction of queries where some novel candidate beats the original molecule on closeness to the perturbed target is **≤ 0.010**, and Tanimoto to the *original* exceeds Tanimoto to the perturbed target in every condition. It snaps back |
 | counts fix the size cliff | −4.18 points at 30+; ambiguity was never what made the cliff |
 | recovery level and budget slope are separate dials | `b ÷ rec@60` is invariant across eight cells |
 | the exponent is a property of capacity | it is training length; the comparison that said otherwise varied no capacity |
@@ -454,7 +458,9 @@ Claims tested and refused, so they are not re-opened by accident:
 | `docs/overnight-2026-10-15.md` | temperature, seeds, the 1.6-point threshold |
 | `docs/overnight-2026-10-16.md` | the size cliff factorised, the budget curve, the mix |
 | `docs/overnight-2026-10-17.md` | the capacity × steps 2×2, the corpus axis, the step law |
-| `docs/overnight-2026-10-20.md` | f′ at constant passes |
+| `docs/overnight-2026-10-20.md` | f′ at constant passes, and both slopes at 50+ |
+| `docs/overnight-2026-10-24.md` | step saturation, and the bend in the step law |
+| `docs/report.md` | all of the above as one account, with the methods and the limits |
 
 Every claim this project published and later withdrew is listed in
 [retractions.md](retractions.md), with what caused each.
