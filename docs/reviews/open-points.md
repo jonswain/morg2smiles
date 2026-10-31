@@ -49,7 +49,7 @@ figure from the dumps — added in round 3 and which failed on its first run.
 | R1-C | 1 | consistency | 17 items: the `\|r\|`/cells/range composite, eight-vs-nine cells, the 98.6% inference, the invented sixth cause, Phase 1 hours, date range, "two of them", §2.1 self-reference, shard table "total"/"clean", test count, and the untraceable numbers | `fixed` | see `round-1-response.md` |
 | R1-N | 1 | naming | five names for three protocols | `fixed` | one name each, swept; aliases noted once in §3.6 |
 | R1-A7 | 1 | addition | add the existing size-cliff figure to §5.12 | `deferred` | `plot_size_cliff.py` predates the final run; what the figure should show is a judgement better made with round 2 in hand |
-| R1-A8 | 1 | addition | validity-by-band table | `open` | a few minutes of CPU over the dumps; §5.10's argument turns on validity and no band-level figures exist |
+| R1-A8 | 1 | addition | validity-by-band table | `fixed` | closed after round 3, pre-registered first — see the round-3 block below and §5.10 |
 
 ## Round 2
 
@@ -74,7 +74,7 @@ figure from the dumps — added in round 3 and which failed on its first run.
 | R2-17 | minor | §5.11a's placement and self-diagnosing opening | `fixed` (part) / `rejected` (part) | opening rewritten; **declined** the renumber — ~40 cross-references and two heavily-cited anchors to fix a `minor` |
 | R2-L | line edits | 20 items | `fixed` | all applied; see `round-2-response.md` |
 | R2-X | factual | "1.46% of distinct atom environments" traces to nothing | `fixed` | **removed** from `report.md` and `README.md`, replaced by the measured 950,967 → 943,177 |
-| R2-A | addition | `preimages_per_hit` column for §5.13's concentration table | `open` | free from `budget_curve_full_6p.json` |
+| R2-A | addition | `preimages_per_hit` column for §5.13's concentration table | `fixed` | added in round 3 — 1.66 / 1.83 / 2.29 / **3.54** |
 
 ## Round 3
 
