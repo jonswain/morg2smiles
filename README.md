@@ -1095,7 +1095,7 @@ the session that produced these numbers is
 ## Development
 
 ```bash
-pytest -q                          # 501 tests, offline; the 5 needing a shard self-skip
+pytest -q                          # 523 tests, offline; the 5 needing a shard self-skip
 ruff check src tests scripts
 ruff format --check src tests scripts   # drop --check to rewrite in place
 python scripts/check_md.py         # docs: links, #anchors, and cross-document §n

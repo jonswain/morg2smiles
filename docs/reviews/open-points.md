@@ -12,11 +12,19 @@ Round 3's reviewer must return a verdict on every row that is not `fixed`.
 |---|---|---|---|---|
 | 1 | 4 | 10 | 3 | 16 (+28 line edits, 17 consistency, ~70 comprehensibility) |
 | 2 | 3 | 12 | 2 | 17 (+20 line edits, comprehensibility log) |
+| 3 | **0** | 3 | 8 | 11, plus adjudication of all 33 earlier points |
 
-**Round 2 found more `major` points than round 1, not fewer.** Two of its three
-blockers were defects the round-1 revision introduced, including the convention
-collision committed in the same commit that documented it as having happened
-five times. The count going up is the measurement working.
+**Blockers: 4 → 3 → 0.** Round 2 found *more* majors than round 1, because two
+of its three blockers were defects the round-1 revision introduced — including
+the convention collision committed in the same commit that documented it as
+having happened five times. Round 3 found three majors, and said that three of
+its eleven new points were again defects introduced by the previous revision.
+
+That is the real finding of the exercise: **each round's fixes introduced new
+arithmetic errors at roughly a third the rate it removed them.** Reviewers do
+not converge on their own. What closed it was
+`tests/test_report_figures.py` — 22 tests that recompute every load-bearing
+figure from the dumps — added in round 3 and which failed on its first run.
 
 ## Register
 
@@ -67,3 +75,26 @@ five times. The count going up is the measurement working.
 | R2-L | line edits | 20 items | `fixed` | all applied; see `round-2-response.md` |
 | R2-X | factual | "1.46% of distinct atom environments" traces to nothing | `fixed` | **removed** from `report.md` and `README.md`, replaced by the measured 950,967 → 943,177 |
 | R2-A | addition | `preimages_per_hit` column for §5.13's concentration table | `open` | free from `budget_curve_full_6p.json` |
+
+## Round 3
+
+Round 1's reviewer, returning with round 2's review in hand. Verdict: **minor
+revision**. It adjudicated all 33 earlier numbered points: **24 resolved**, **2
+rejections justified**, **8 still standing** (now fixed below), and raised 3
+majors and 8 minors of its own.
+
+| id | severity | point | status | where resolved |
+|---|---|---|---|---|
+| R3-01 | major | §1.4 says "eleven misses, ten run with size"; the scoring file gives nine and eight | `fixed` | verified from `job4_scored.json`; round 1 had it right, the round-2 rewrite broke it |
+| R3-02 | major | the `c` per-band targets are sourced to the wrong cell | `fixed` | they are the 100k **step** pair (§5.3's), not §5.8's 1M capacity 2×2; its all-slice 0.911 is §5.3's 0.9113 |
+| R3-03 | major | round 2's comprehensibility log was untracked and 17 terms unaddressed | `fixed` | 5 glossary rows, 7 inline definitions; this row is the tracking that was missing |
+| R3-M | minor | 8 items: "four-tenths" is 0.86; 50–69 vs 50–64; consensus `rec@60` asserted not measured; §3.7's "four points" unnamed cell; §2.1's circular replacement; §1.4's convention column; §5.4's mixed cut factors; two surviving aliases | `fixed` | see `round-3-response.md`; consensus `rec@60` now **measured** at 0.9586 |
+| R2-13b | major | the declined half — helping the reader with "night N" | `fixed` | round 3's lighter fix: one forward pointer at the first occurrence, not dating every mention |
+| R1-C, R1-N | consistency | 5 consistency items and 2 aliases still standing | `fixed` | — |
+| R2-07, R2-09, R2-10, R2-11 | major | the halves round 3 judged still standing | `fixed` | — |
+| R2-17, R1-A7 | minor | the renumber and the stale figure | `rejected`, **judged justified by round 3** | cost verified independently: ~167 occurrences across `docs/` |
+| R1-A8 | addition | validity-by-band table | **`open`** | asked for by all three rounds. A few minutes of CPU, not free. §5.10's cancellation argument turns on validity and no band-level figures exist. The one outstanding item, left visible on purpose. |
+| R2-A | addition | `preimages_per_hit` column | `fixed` | added as the last column of §5.13's concentration table — 1.66 / 1.83 / 2.29 / **3.54** |
+
+**Closing state: zero `open` rows except R1-A8, which is recorded as open rather
+than dropped.**

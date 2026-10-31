@@ -16,6 +16,7 @@ whether its points were genuinely addressed.
 |---|---|---|
 | 1 | [round-1-review.md](round-1-review.md) | [round-1-response.md](round-1-response.md) |
 | 2 | [round-2-review.md](round-2-review.md) | [round-2-response.md](round-2-response.md) |
+| 3 | [round-3-review.md](round-3-review.md) | [round-3-response.md](round-3-response.md) |
 
 [open-points.md](open-points.md) is the running register: every numbered point
 from every round, its severity, and whether it was fixed, rejected with a
@@ -31,3 +32,19 @@ the Summary that the project's own final run had falsified and nobody had gone
 back to retire — and one genuine scientific gap, six pre-registered intervals
 that were never scored because the scoring tool's default arguments did not
 contain them. That gap is now [retractions.md](../retractions.md) entry 29.
+
+## What three rounds actually showed
+
+Blockers went 4 → 3 → 0 and the verdict went major → major → minor revision, but
+the interesting number is not the trend. **Two of round 2's three blockers were
+defects the round-1 revision introduced**, and round 3 reported that three of
+its eleven new points were defects round 2's revision introduced. Each pass
+removed more errors than it added, but it did add them — including, once, the
+project's signature convention error, committed in the same commit that
+documented it as having happened five times.
+
+Round 3 drew the right conclusion: `check_md.py` guarded the document's
+references and nothing guarded its arithmetic. So the exercise ends with
+`tests/test_report_figures.py`, which recomputes every load-bearing figure from
+the dumps and fails if the prose disagrees. It caught a rounding error on its
+first run. That guard, not the three reviews, is what makes the next edit safe.
