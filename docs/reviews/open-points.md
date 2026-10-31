@@ -93,8 +93,9 @@ majors and 8 minors of its own.
 | R1-C, R1-N | consistency | 5 consistency items and 2 aliases still standing | `fixed` | — |
 | R2-07, R2-09, R2-10, R2-11 | major | the halves round 3 judged still standing | `fixed` | — |
 | R2-17, R1-A7 | minor | the renumber and the stale figure | `rejected`, **judged justified by round 3** | cost verified independently: ~167 occurrences across `docs/` |
-| R1-A8 | addition | validity-by-band table | **`open`** | asked for by all three rounds. A few minutes of CPU, not free. §5.10's cancellation argument turns on validity and no band-level figures exist. The one outstanding item, left visible on purpose. |
+| R1-A8 | addition | validity-by-band table | **`fixed`** | done, and pre-registered first (`scripts/validity_by_band.py`'s header, committed before the script was run). 3 of 4 registered items hold; the registered *monotone* decline misses, and that miss is the finding — validity plateaus at ~0.87 above 55 heavy atoms while `rec@60` keeps falling 0.804 → 0.755 → 0.680, so it cannot be what makes the cliff. §5.10 now carries the table. |
 | R2-A | addition | `preimages_per_hit` column | `fixed` | added as the last column of §5.13's concentration table — 1.66 / 1.83 / 2.29 / **3.54** |
 
-**Closing state: zero `open` rows except R1-A8, which is recorded as open rather
-than dropped.**
+**Closing state: zero `open` rows.** R1-A8, the last one, was closed after round
+3 — see §5.10. It was pre-registered before measurement, which is how a request
+arriving from review avoids becoming a post-hoc reading.

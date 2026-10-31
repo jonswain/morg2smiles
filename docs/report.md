@@ -868,7 +868,7 @@ A cap that is never exercised in testing is an assertion, not a guard.
 ### 3.11 Reproducing CI
 
 ```bash
-pytest -q                               # 523 tests; the 5 needing a shard self-skip
+pytest -q                               # 528 tests; the 5 needing a shard self-skip
 ruff check src tests scripts
 ruff format --check src tests scripts
 python scripts/check_md.py              # documentation references, not run by CI
@@ -1304,6 +1304,55 @@ validity by 6.6 and 2.8 points for the two models and *lowers* distinct
 molecules per query by 3.3 and 6.1. **Validity is not the binding constraint on
 large molecules** — the invalid strings cooling removes are replaced by valid
 wrong answers, not by right ones.
+
+#### Validity by band, and why it cannot be the cause
+
+That conclusion rested on a cancellation rather than on validity itself, which
+the report had no band-level figures for. Pre-registered in the header of
+[`scripts/validity_by_band.py`](../scripts/validity_by_band.py) and committed
+before the script was run, then measured on the final run's dumps:
+
+| band | 30+ protocol | n | 50+ instrument | n |
+|---|---|---|---|---|
+| 30–34 | 0.9796 | 1,189 | — | — |
+| 35–39 | 0.9758 | 625 | — | — |
+| 40–49 | 0.9626 | 380 | — | — |
+| 50–54 | 0.9114 | 57 | 0.9106 | 433 |
+| 55–59 | 0.9340 | 38 | **0.8660** | 257 |
+| 60–64 | 0.8926 | 32 | **0.8674** | 203 |
+| whole protocol | **0.9724** | 2,321 | **0.8899** | 893 |
+
+The whole-protocol figures reproduce the night-9 logs exactly (0.972 and 0.890),
+which is the arithmetic check rather than the result. Four things were
+registered; three hold and the fourth misses in the informative direction:
+
+1. **Validity falls with size — holds.** 0.9796 at 30–34 to 0.9127 at 50+ within
+   one protocol.
+2. **50–64 is the worst band — holds.** 0.9127, the lowest of the 30+
+   protocol's four main bands, which is what §5.10 had asserted unchecked.
+3. **The intervals — hold**, all three (30–34 in 0.975–0.995, 50+ in 0.84–0.94,
+   60–64 in 0.80–0.90). But the registered *monotone decline* across the three
+   sub-bands **misses**: on the 893-query instrument validity goes 0.9106 →
+   0.8660 → 0.8674, flat to within 0.14 points across the top two.
+4. **The inference holds, decisively.** The worst band still returns 0.866, so
+   about **52 of 60 slots are chemically valid** where the model draws 3.54
+   preimages per solved query. The registration named 0.35 as the level that
+   would falsify "validity is not the binding constraint"; the measurement is
+   not close to it.
+
+**The missed sub-claim is the finding.** Validity *plateaus* above 55 heavy
+atoms, at roughly 0.87, while recovery over the same three bands keeps falling —
+`rec@60` of 0.8037 → 0.7549 → 0.6798 (§5.13). A quantity that stops moving where
+the thing it supposedly explains keeps moving is not the explanation. §5.10's
+conclusion was reached from a cancellation; this is direct evidence for it.
+
+One unregistered observation, which points the same way as §5.12. **The
+duplicate rate falls sharply with size** — 0.930 → 0.728 across the 30+
+protocol's bands, and 0.721 → 0.596 across the instrument's. Large molecules
+yield *more* distinct proposals per query, not fewer. The model is not short of
+chemically valid, distinct ideas about a 60-atom molecule; it is that none of
+them is the right one, which is the concentration result of §5.12 seen from the
+supply side.
 
 A size-conditional temperature is dead, and the reason generalises. A
 fingerprint's set-bit count predicts heavy atoms at r = 0.83, so routing is

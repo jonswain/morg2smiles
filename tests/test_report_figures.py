@@ -230,6 +230,44 @@ class TestNoRetractedFigureSurvives:
         assert withdrawn not in report
 
 
+class TestValidityByBand:
+    """§5.10's validity table, and the plateau that is its actual finding."""
+
+    def test_whole_protocol_validity_reconciles_with_the_night_logs(self, report):
+        a = dump("results/overnight9/validity_by_band_30plus.json")["bands"]
+        b = dump("results/overnight9/validity_by_band_50plus.json")["bands"]
+        assert f"{a['all']['validity']:.4f}" == "0.9724"
+        assert f"{b['all']['validity']:.4f}" == "0.8899"
+        assert "| whole protocol | **0.9724** | 2,321 | **0.8899** | 893 |" in report
+
+    def test_fifty_plus_is_the_worst_band_on_the_30plus_protocol(self, report):
+        a = dump("results/overnight9/validity_by_band_30plus.json")["bands"]
+        main = {k: a[k]["validity"] for k in ("30-34", "35-39", "40-49", "50+")}
+        assert min(main, key=main.get) == "50+"
+        assert f"{main['50+']:.4f}" == "0.9127"
+
+    def test_validity_plateaus_above_55_atoms(self, report):
+        b = dump("results/overnight9/validity_by_band_50plus.json")["bands"]
+        # The registered monotone decline missed: the top two bands are flat.
+        assert b["50-54"]["validity"] > b["55-59"]["validity"]
+        assert abs(b["60-64"]["validity"] - b["55-59"]["validity"]) < 0.002
+        assert "0.9106 →" in report and "0.8660 → 0.8674" in report
+
+    def test_the_inference_survives_its_own_falsifier(self, report):
+        b = dump("results/overnight9/validity_by_band_50plus.json")["bands"]
+        worst = min(v["validity"] for k, v in b.items() if k != "all")
+        assert worst >= 0.35, "validity would now be the binding constraint"
+        assert round(worst * 60) == 52
+        assert "**52 of 60 slots are chemically valid**" in report
+
+    def test_the_duplicate_rate_falls_with_size(self, report):
+        a = dump("results/overnight9/validity_by_band_30plus.json")["bands"]
+        b = dump("results/overnight9/validity_by_band_50plus.json")["bands"]
+        assert a["30-34"]["duplicate_rate"] > a["50+"]["duplicate_rate"]
+        assert b["50-54"]["duplicate_rate"] > b["60-64"]["duplicate_rate"]
+        assert "0.930 → 0.728" in report and "0.721 → 0.596" in report
+
+
 class TestContents:
     """The table of contents is generated, so it must not drift from the headings.
 

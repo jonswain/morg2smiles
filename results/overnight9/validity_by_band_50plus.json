@@ -1,0 +1,40 @@
+{
+  "dump": "results/overnight9/outcomes_50plus_full_6p/small_full_6p.jsonl",
+  "bands": {
+    "50-54": {
+      "n_queries": 433,
+      "validity": 0.9105593378721132,
+      "valid_per_query": 299.30484988452656,
+      "proposals_per_query": 328.70438799076214,
+      "duplicate_rate": 0.7207385704951205
+    },
+    "55-59": {
+      "n_queries": 257,
+      "validity": 0.8660432719993418,
+      "valid_per_query": 245.77431906614785,
+      "proposals_per_query": 283.78988326848247,
+      "duplicate_rate": 0.6319137850659501
+    },
+    "60-64": {
+      "n_queries": 203,
+      "validity": 0.8674167467631594,
+      "valid_per_query": 226.72906403940885,
+      "proposals_per_query": 261.384236453202,
+      "duplicate_rate": 0.5955598273685004
+    },
+    "50+": {
+      "n_queries": 893,
+      "validity": 0.889927848422057,
+      "valid_per_query": 267.40089585666294,
+      "proposals_per_query": 300.474804031355,
+      "duplicate_rate": 0.6718407596785975
+    },
+    "all": {
+      "n_queries": 893,
+      "validity": 0.889927848422057,
+      "valid_per_query": 267.40089585666294,
+      "proposals_per_query": 300.474804031355,
+      "duplicate_rate": 0.6718407596785975
+    }
+  }
+}
