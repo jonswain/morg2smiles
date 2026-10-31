@@ -32,6 +32,21 @@ ROOT = Path(__file__).resolve().parent.parent
 # Working documents that are deliberately not part of the published docs.
 SKIP_NAMES = {"draft-blog-post.md"}
 
+# Directories of verbatim records *about* another document. Every "§n" in a
+# review of report.md refers to report.md, and the reviews are kept word for
+# word, so neither the section convention nor their internal links are this
+# repo's to enforce. Checking them produced 180 false positives.
+SUBJECT_IS_ELSEWHERE = ("docs/reviews",)
+
+
+def about_another_document(path: Path) -> bool:
+    try:
+        rel = path.relative_to(ROOT).as_posix()
+    except ValueError:
+        return False
+    return rel.startswith(SUBJECT_IS_ELSEWHERE)
+
+
 HEADING = re.compile(r"^(#{1,6})\s+(.*)$")
 LINK = re.compile(r"\[[^\]]*\]\(([^)\s]+)\)")
 # "§5.13", "§3.9", "§8" -- the project's own cross-reference convention.
@@ -111,6 +126,8 @@ def check_links(files: list[Path]) -> list[str]:
     cache: dict[Path, set[str]] = {}
     problems = []
     for path in files:
+        if about_another_document(path):
+            continue
         for i, line in enumerate(path.read_text().splitlines(), 1):
             for m in LINK.finditer(line):
                 target = m.group(1)
@@ -138,6 +155,8 @@ def check_sections(files: list[Path]) -> list[str]:
     """
     problems = []
     for path in files:
+        if about_another_document(path):
+            continue
         own = section_numbers(path)
         if not own:
             continue

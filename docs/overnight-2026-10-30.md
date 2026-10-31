@@ -32,8 +32,15 @@ existed so that the verdict is a lookup rather than a judgement, and refusing by
 construction to read a registration against a band table measured in a
 different convention. Full output in `results/overnight9/job4_scored.json`.
 
-**9 of 20 scored entries landed inside their intervals.** The misses are not
-scattered:
+**9 of 26 registered intervals landed inside.** Six of them — the 50–54 /
+55–59 / 60–64 sub-bands of registration (2), on both metrics — were **not scored
+on the night**, because `band_analysis.py`'s default band list does not contain
+that split, so stage 4b produced only the pooled 50+ row. They were computed
+later from the dump already on disk, at no GPU cost, and they are the sharpest
+result of the run: see "the registration of record" below. The night's own
+figure was "9 of 20".
+
+The misses are not scattered:
 
 | registration | band | registered | measured | verdict |
 |---|---|---|---|---|
@@ -108,6 +115,44 @@ against molecule budget. That is the convention collision of
 [methodology §1](methodology.md#1-recovery-has-two-conventions-and-they-differ-by-points),
 caught for the fifth time, here by proof-reading rather than by a guard. The
 conclusion is unchanged in either convention, which is luck and not a defence.)
+
+## The registration of record, scored late
+
+§4b of [final-run-plan.md](final-run-plan.md) registers rec@60 and struct@60 for
+50–54, 55–59 and 60–64 on the 50+ instrument and calls them "the registration
+**of record** for large molecules". **Stage 4b did not measure them.**
+`band_analysis.py`'s default band list is
+`0-24,25-29,30-34,35-39,40-49,50+,30-39,35+,all`, with no 50–54/55–59/60–64
+split, and the driver passed no `--bands`, so the only row produced was the
+pooled 50+ one. Nothing failed; six registered intervals simply were not scored,
+and the night's headline read "9 of 20" against 26 registered.
+
+Recomputed from `outcomes_50plus_full_6p/small_full_6p.jsonl`, which was already
+on disk — no GPU, generation order, molecule budget, k=60:
+
+| band | n | metric | registered | measured | verdict |
+|---|---|---|---|---|---|
+| 50–54 | 433 | rec@60 | 0.7325–0.7997 | 0.8037 | MISS HIGH 0.40 pts (0.2 SE) |
+| 55–59 | 257 | rec@60 | 0.5804–0.6696 | 0.7549 | MISS HIGH 8.53 pts (3.2 SE) |
+| 60–64 | 203 | rec@60 | 0.3841–0.4785 | **0.6798** | **MISS HIGH 20.13 pts (6.1 SE)** |
+| 50–54 | 433 | struct@60 | 0.6482–0.7222 | 0.7436 | MISS HIGH 2.14 pts (1.0 SE) |
+| 55–59 | 257 | struct@60 | 0.4979–0.5884 | 0.6537 | MISS HIGH 6.53 pts (2.2 SE) |
+| 60–64 | 203 | struct@60 | 0.2682–0.3542 | **0.5813** | **MISS HIGH 22.71 pts (6.6 SE)** |
+
+**The miss grows monotonically with size on both metrics**, 0.40 → 8.53 → 20.13
+and 2.14 → 6.53 → 22.71. That is the night's directional finding stated as
+sharply as the data can state it, and it was sitting unscored. The further the
+extrapolation reached, the worse it over-predicted the cliff.
+
+**The method failure is worth its own line.** This project's rule has been to
+write the number down before the run. These numbers *were* written down, on
+night 8, and still went unscored — because the tool that scores them has a
+default argument that does not contain the registered bands. **The defaults of
+the scoring tool are part of the registration**, and `score_job4.py`'s guard
+could not catch this: it verifies that a registration and a measurement share a
+convention, and it reported the three sub-bands as "absent" in its own output,
+which nobody read as a failure. A guard that reports a gap without failing is a
+log line.
 
 ## Stage 6: the exponents, on the protocol rather than the trace
 
@@ -185,10 +230,18 @@ And the concentration finding holds, which is why more budget does not close it:
 | 50+ | 2.874 | 0.9435 | **0.189** | 3.54 |
 
 Preimages per query *rise* with size — 50+ queries draw more of them, not fewer
-— while 18.9% of 50+ queries draw none at all, and the Poisson column shows the
-proposals are concentrated on fewer queries than chance everywhere. The cliff is
-a concentration problem, not a scarcity one, and six passes made it much
-smaller without changing its shape.
+— while 18.9% of 50+ queries draw none at all.
+
+The Poisson column needs reading more carefully than this report first did.
+Measured recovery sits **above** the Poisson expectation in every band except
+50+ (0.9823 against 0.8036 at 30–34, 0.9184 against 0.8775 at 40–49), and
+**below** it only at 50+ (0.8110 against 0.9435). So below 50 atoms the
+preimages are spread *more* evenly across queries than chance, and concentration
+is a large-molecule phenomenon rather than a general one. An earlier version of
+this paragraph said the proposals are "concentrated on fewer queries than chance
+everywhere", which the dump contradicts in five bands of six. The cliff is still
+a concentration problem at its far end, and six passes made it much smaller
+without changing that.
 
 ## Process notes
 

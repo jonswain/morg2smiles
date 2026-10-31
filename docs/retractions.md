@@ -55,6 +55,7 @@ digits is not evidence of absence, however good the p-value looks.
 | 20 | **A void step-exponent pre-registration** | The prediction was computed in one recovery convention and the run scored in another; only one of two scripts caught it. |
 | 21 | **Unseeded evaluation** | Two evaluations of the same checkpoint differed by 2.2 points, about 1.4 standard errors at n ≈ 1000. |
 | 28 | **"Nothing above 64 heavy atoms exists in ChEMBL 35 as standardised here"** — the premise item 3 of the closing plan rested on | Circular: the standardisation *is* the cap. Measured on the raw chemreps file, **2.558% of ChEMBL 35 is above 64 heavy atoms**, about 63,000 molecules tailing to 508. The decision it supported (keep the cap) survived re-derivation, but on a different and better reason — `max_tokens: 128` binds first, and 73.0% of the molecules the atom cap discards exceed the decoder's context anyway, leaving a yield of 0.87%. A conclusion reached from a false premise is not a conclusion. |
+| 29 | **"9 of 20 scored entries landed inside their intervals"** — the final run's headline registration score, published in `overnight-2026-10-30.md` and `report.md` | Twenty-**six** intervals were registered, not twenty. The six that were missing are the 50–54 / 55–59 / 60–64 sub-bands of registration (2) on both metrics, which §4b of `final-run-plan.md` calls "the registration **of record** for large molecules". `band_analysis.py`'s default `--bands` list has no such split and the driver passed none, so stage 4b produced only the pooled 50+ row. `score_job4.py` printed those three bands as "absent" and did not fail, and nobody read the word as a failure. Recomputed free of charge from the dump already on disk, all six miss **high**, monotonically in size: +0.40 / +8.53 / +20.13 points on recovery and +2.14 / +6.53 / +22.71 on structure, the last at 6.6 SE. The corrected score is **9 of 26**, and the six rows are the sharpest evidence for the run's own directional finding. **The defaults of the tool that scores a registration are part of the registration.** Found in review, not by any guard. |
 
 ## Registrations that were mis-specified rather than wrong
 
@@ -64,7 +65,7 @@ digits is not evidence of absence, however good the p-value looks.
 | 23 | **A prediction computed for one model and registered on another** (stage 12, night 5) | The two accounts' constants came from the 100k arm while the run specified `small_1m`, so the registration was void before the GPU started. The run was still informative; the registration was not. |
 | 24 | **A metric chosen on its error bar alone** (the 30–39 band) | It did not clear, because three fifths of it is molecules that do not respond. An error bar is a necessary condition for choosing a metric, not a sufficient one. |
 | 25 | **A result quoted at a temperature the project no longer uses** | The size mix's exchange rate was 2.3 small molecules per large one at T=1.0 and **1.28** at the adopted T=0.6, with the whole-protocol penalty falling from −1.13 points to −0.28. The only case where a stale setting made a result look *worse* than it is. |
-| 26 | **Registered intervals that did not tile the line** (item 1, night 7) | The registration assigned 0.76–0.82, 0.86–0.92, an "uninformative" 0.82–0.86 and a third branch below 0.72 — leaving **0.72–0.76 unassigned**, which is where the result landed (0.7553). The verdict was clear anyway, but it required a judgement made after seeing the number, which is the thing a registration exists to prevent. "Flat if below 0.82" would have cost nothing. |
+| 26 | **Registered intervals that did not tile the line** (item 1, night 7; and again, item 2, night 8) | **Night 7:** the registration assigned 0.76–0.82, 0.86–0.92, an "uninformative" 0.82–0.86 and a third branch below 0.72 — leaving **0.72–0.76 unassigned**, which is where the result landed (0.7553). The verdict was clear anyway, but it required a judgement made after seeing the number, which is the thing a registration exists to prevent. "Flat if below 0.82" would have cost nothing. **Night 8 repeated it:** rec@60 registered in 0.88–0.95 with "below 0.85" as saturation, leaving **0.85–0.88 unnamed**, and the measurement came in at 0.8789 — 0.11 points under the floor, a sixth of the 1.6-point threshold. One entry covers both because it is one mistake made twice; cite it by night. |
 
 ## The claim this ledger's method killed on schedule
 
@@ -76,7 +77,7 @@ digits is not evidence of absence, however good the p-value looks.
 
 ## The pattern
 
-Twenty-eight entries, five causes:
+Twenty-nine entries, five causes:
 
 1. **Cross-run comparison.** Every claim that broke in the first two nights was
    a comparison *between* runs; every claim that survived was measured *within*
@@ -100,6 +101,9 @@ Twenty-eight entries, five causes:
 4. **Point-estimate registrations of noisy quantities.** Entries 22 and 23.
    Register the interval. Entry 26 is the refinement: adjacent intervals have
    to tile the line, or scoring still needs a judgement made after the fact.
+   Entry 29 is the third form: the registered bands have to be the bands the
+   scoring tool is actually asked for, because its defaults are part of the
+   registration.
 5. **A premise that restates the design.** Entry 28 — "nothing above 64 heavy
    atoms exists in ChEMBL as standardised here" — was true only because the
    standardisation imposed the cap, and it was load-bearing for a decision

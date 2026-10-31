@@ -1,8 +1,8 @@
 # Inverting Morgan fingerprints: the complete report
 
 **Morg2SMILES — generative recovery of SMILES strings from Morgan (ECFP)
-fingerprints. 2026-10-09 to 2026-10-31, one Apple M2, nine overnight sessions,
-roughly 118 hours of GPU time.**
+fingerprints. 2026-10-08 to 2026-10-31, one Apple M2, a phase-1 gate and nine
+overnight sessions, 118.7 hours of training time.**
 
 ---
 
@@ -18,13 +18,13 @@ subjects:
 |---|---|
 | [results.md](results.md) | each measured law, with its domain, error bar and producing script |
 | [methodology.md](methodology.md) | the conventions, and the ones that have cost this project claims |
-| [retractions.md](retractions.md) | all 28 withdrawn claims and the five causes behind them |
+| [retractions.md](retractions.md) | all 29 withdrawn claims and the five causes behind them |
 | `overnight-*.md` | the primary record, including the wrong turns, in order |
 
 Where this report and a night log disagree, the night log is the contemporaneous
 record and this document is the corrected reading. Every number here carries the
-convention it was measured in, because two of them differ by about four points
-and conflating them has voided two pre-registrations ([§3.7](#37-two-recovery-conventions-and-why-it-matters)).
+convention it was measured in, because the two conventions in use differ by
+about four points and conflating them has voided two pre-registrations ([§3.7](#37-two-recovery-conventions-and-why-it-matters)).
 
 **One domain statement governs the whole document.** Everything here was
 measured on ChEMBL 35 molecules of **3 to 64 heavy atoms** with stereochemistry
@@ -59,12 +59,12 @@ cold.
 | **k** | the **budget**: how many distinct candidate molecules the model is allowed to propose per query. The oracle checks all k. |
 | **recovery@k**, `rec@k` | the primary metric: the fraction of queries for which at least one of k candidates has the query's fingerprint. `rec@1` is the first-guess rate; `rec@60` allows sixty guesses. |
 | **structure_accuracy@k** | the stricter metric: is one of the candidates the query's *own* molecule, rather than a different molecule with the same fingerprint? |
-| **deficit** | `1 − rec@k`, the shortfall. The laws here are fitted in deficit because it has no ceiling, while recovery is bounded by 1 and flattens near it. |
+| **deficit** | `1 − rec(k)`, the shortfall at budget `k`. The laws here are fitted in the deficit because it has no ceiling, while recovery is bounded by 1 and flattens near it. |
 | **fp_unseen** | the memorisation-proof slice: queries whose fingerprint appears in **no** model's training data. A retrieval baseline scores exactly 0.0000 on it. Every headline number is on this slice. |
 | **band** | a size bucket of queries, e.g. 30–34 heavy atoms. Results are reported per band because the whole-protocol average hides everything. |
 | **protocol** | one fixed evaluation instrument — a query set, a k, and sampling settings. Three were used, and their numbers are **not** comparable with each other ([§3.6](#36-the-protocols)). |
 | **saturated** | a measurement so close to its ceiling of 1.0 that it can no longer distinguish anything. Several of this project's later whole-protocol numbers are saturated by design. |
-| **consensus ranking** | ordering candidates by how many of the model's samples spell the same molecule. Costs nothing and is worth +22 points of `rec@1`. |
+| **consensus ranking** | ordering candidates by how many of the model's samples spell the same molecule. Costs nothing and is worth +22 points of `rec@1`. It is the project's adopted ranking, so **every `rec@1` in this report names its ranking** — consensus or the unranked generation order — exactly as it names its budget convention. The two differ by 16 points. |
 | **temperature**, `T` | how randomly the decoder samples. `T=0.6` was adopted throughout. |
 
 **Training**
@@ -77,20 +77,37 @@ cold.
 | **capacity** | model size. 8.0M parameters was the workhorse; 15.1M was tested; 25.7M was infeasible on this hardware. |
 | **cell** | one (corpus, steps, capacity, temperature) combination that was trained and scored — the unit a law is fitted across. |
 
-**The four exponents.** Each says how fast the deficit falls when one thing
+**The scaling law, written down.** Two of the four quantities below are
+derivatives, so the function they are derivatives *of* has to be stated. The law
+fitted in this project is **additively separable**:
+
+> `rec@60  ≈  f(log₂ distinct molecules)  +  g(log₂ passes)`
+
+`f` and `g` are the two unknown functions. **`f′` and `g′` are their slopes** —
+what one doubling of molecules, or of passes, is worth in points of recovery —
+and **`g′ / f′` is the exchange rate between the two kinds of spending.**
+"Additivity" is the assumption that the two terms simply add, with no
+interaction term: that a pass is worth the same whatever the corpus size. That
+assumption is what [§5.13](#513-the-final-run-full-chembl-at-six-passes) breaks.
+
+**The four exponents.** Each says how fast the shortfall falls when one thing
 doubles. Larger means the spending works harder.
 
-| symbol | what doubles | measured |
-|---|---|---|
-| **b** | the inference budget `k` | 0.144–0.396 |
-| **c** | training steps (= passes, on a fixed corpus) | 0.37–1.29, and it is a *local slope* that bends |
-| **f′** | distinct training molecules | +22.09 points of `rec@60` per doubling |
-| **g′** | passes over a fixed corpus | +22.28 to +26.30 points per doubling |
+| symbol | what doubles | form | measured |
+|---|---|---|---|
+| **b** | the inference budget `k` | exponent of a power law in the deficit | 0.144–0.396 |
+| **c** | training steps (= passes, on a fixed corpus) | same form, in steps | 0.37–1.29, and a *local slope* that bends |
+| **f′** | distinct training molecules | slope of `f`, in points per doubling | +22.09 points of `rec@60` |
+| **g′** | passes over a fixed corpus | slope of `g`, in points per doubling | +22.28 to +26.30 points |
 
-`b` and `c` are exponents in a power law; `f′` and `g′` are quoted in points of
-recovery per doubling, because that is how the corpus question was asked. A
-quantity **transports** when it holds in a cell it was not fitted on — the main
-thing this project tested, and the main thing that failed.
+The two pairs are in different units because they were asked as different
+questions: `b` and `c` describe the *shape* of a curve and so are dimensionless
+exponents, while `f′` and `g′` were commissioned to answer "what is another
+doubling of data worth?" and so are quoted in points. §5.13 converts between
+them where it needs to.
+
+A quantity **transports** when it still holds in a cell it was not fitted on —
+the main thing this project tested, and the main thing that failed.
 
 ---
 
@@ -134,18 +151,32 @@ everything here and whole-corpus averages conceal it.
 ### 1.3 What was found
 
 **At drug-like size the molecule can be put back almost completely.** The final
-model — 8.0M parameters, all 1.88M training molecules, six passes over them —
-recovers **69.6% of molecules on the first guess and 95.0% within sixty**, on
-2,321 held-out fingerprints of **30–64 heavy atoms**. On the easier unrestricted
-protocol an earlier model reaches **91.6% within twenty guesses**, with over
-three in four on the first ([§5.1](#51-headline)). Among the failures the
-closest proposal averages 0.976 Tanimoto similarity, so even the misses are
-near misses.
+model — 8.0M parameters, all 1.88M training molecules, six passes over them — on
+2,321 held-out fingerprints of **30–64 heavy atoms**:
 
-One caution about that headline, because it reads better than it is: the
-30–64 set is **dominated by its smallest band** — 1,189 of its 2,321 queries are
-30–34 heavy atoms — so 95.0% is not "95% of large molecules". Read per band, the
-same model goes **97.6% at 30–34, 90.3% at 40–49 and 79.5% at 50–64.**
+| | first guess (`rec@1`) | within 60 guesses (`rec@60`) |
+|---|---|---|
+| **consensus ranking** (adopted) | **85.9%** | 95.0% |
+| generation order (unranked) | 69.6% | 95.0% |
+
+The two `rec@1` figures differ by 16 points, which is why this report names the
+ranking on every one of them (§3.5, §5.9). Ranking cannot affect `rec@60` here,
+because the budget is the whole candidate list. On the easier unrestricted
+protocol an earlier model reaches **91.6% within twenty guesses**
+([§5.1](#51-headline)).
+
+One caution about the 95.0%, because it reads better than it is: the 30–64 set
+is **dominated by its smallest band** — 1,189 of its 2,321 queries are 30–34
+heavy atoms — so it is not "95% of large molecules". Read per band, the same
+model goes **97.6% at 30–34, 96.0% at 35–39, 90.3% at 40–49 and 79.5% at
+50–64** (`rec@60`, generation order, raw slots).
+
+The failures are *near*-failures but not near enough to explain the cliff. The
+closest proposal to a missed target averages **0.79** Tanimoto and 29% of misses
+exceed 0.9 — and strikingly, that near-miss share *rises* with size, from 17% at
+30–34 to 58% at 50–64, while recovery falls. Proximity is not the binding
+constraint; [§5.12](#512-the-size-cliff-what-it-is-and-what-it-is-not) shows why
+near-misses are not the explanation.
 
 **Performance is governed by two power laws and a cliff.**
 
@@ -157,15 +188,19 @@ as
 
 where `k` is the number of guesses allowed, `b` is the exponent being measured
 (bigger means extra guesses help more), and `A` is the fitted deficit
-extrapolated back to a single guess. The fit is excellent — correlation
-|r| ≥ 0.991 — across nine separately trained cells, with `b` between 0.144 and
-0.396 ([§5.2](#52-the-budget-deficit-is-a-power-law-in-k)).
+extrapolated back to a single guess. The fit is excellent: |r| ≥ 0.991 with `b`
+in 0.144–0.396 across the eight cells it was first fitted on, and |r| ≥ 0.985
+with `b` in 0.299–0.385 on the ninth
+([§5.2](#52-the-budget-deficit-is-a-power-law-in-k),
+[§5.13](#513-the-final-run-full-chembl-at-six-passes)).
 
 *Spending at training.* The deficit falls as a power law in **training steps**
 too, and about **3.1× faster** per doubling. These are the two different things
 one can buy, and they are priced differently: budget is paid on every query
-forever, training once. The crossover is around **ten thousand queries** — below
-it, buy guesses; above it, train longer
+forever, training once. The crossover depends on the model: about **ten thousand queries** for the
+cell it was first measured on, and **55,000–122,000** for the final one, because
+training got cheaper per point faster than budget did. Below the crossover, buy
+guesses; above it, train longer
 ([§5.4](#54-where-the-two-kinds-of-spend-cross-over)). A *third* axis, the
 number of distinct training molecules, is measured separately as `f′` and is
 worth +22.09 points of `rec@60` per doubling
@@ -176,53 +211,74 @@ atoms, 36.6% at 50–64 for the model that was current when it was characterised
 **The cause is combinatorial, not informational**, which is the single most
 useful finding here. It is *not* that large fingerprints are ambiguous: of 206
 misses, two were cases of a different molecule sharing the fingerprint. It is
-that the decoder proposes a cloud of roughly twenty plausible molecules at any
-size, and recovery asks whether that cloud happens to contain an exact
-**preimage** — a molecule whose fingerprint matches — which becomes
-exponentially less likely as molecules grow.
+that the decoder proposes a cloud of plausible molecules of roughly fixed size
+at any molecular size — about twenty slots, of which 12 to 21 are distinct valid
+molecules depending on the model (§3.5) — and recovery asks whether that cloud
+happens to contain an exact **preimage**, a molecule whose fingerprint matches.
+That becomes exponentially less likely as molecules grow.
 
-The sharper version is **concentration**. The number of preimages the model
-draws barely changes with size, but their *distribution across queries* changes
-enormously: in the final run **18.9% of 50–64 queries draw no preimage at all**
-while the successful ones draw several each. The population splits into
-fingerprints the model can reach and fingerprints it cannot. Extra budget
+The sharper version is **concentration**, and it switches on with size. Across
+the whole 30–64 protocol the model's preimages are spread *more* evenly over
+queries than chance would give (95.8% recovery against a Poisson 83.6%); at
+50–64 that inverts (81.1% against 94.4%). There, **18.9% of queries draw no
+preimage at all** while the successful ones draw 3.5 each, so the population
+splits into fingerprints the model can reach and fingerprints it cannot. Extra budget
 therefore spends most of itself re-finding molecules on queries that were
 already solved, which is why nothing tried here dissolves the cliff — the final
 run pushed it back roughly fiftyfold and left its shape intact
 ([§5.12](#512-the-size-cliff-what-it-is-and-what-it-is-not),
 [§5.13](#513-the-final-run-full-chembl-at-six-passes)).
 
-### 1.4 The final run's headline result is a failed prediction
+### 1.4 The final run beat its own registration, and the misses have a direction
 
-Before the last run was launched, five predictions were written into its config
-file as numeric intervals, and the code that would score them was written while
-it trained. Of **20 scored predictions, 9 landed inside their intervals.**
+Before the last run was launched, **five registrations** were written into its
+config file, and the code that would score them was written while it trained.
+One of the five was declared in advance to be a ceiling reading and is reported
+rather than scored; one was registered as questions against target numbers
+rather than as intervals. The remaining three unfold into **26 band × metric
+intervals**, and **9 of the 26 landed inside their interval.**
 
 The failures are informative because they are **not random — they have a
-direction.** Where the task is hard the model beat its prediction; where the
-task was already near its ceiling it fell slightly short:
+direction, and the direction has a gradient.** Where the task is hard the model
+beat its prediction, by more the harder the task got; where the task was already
+near its ceiling it fell slightly short:
 
-| | predicted | measured | |
-|---|---|---|---|
-| 50–64, first-guess recovery | 0.3283–0.4401 | **0.5984** | 15.8 points **better** |
-| 50–64, recovery within 60 | 0.6310–0.6912 | **0.7615** | 7.0 points **better** |
-| 40–49, first-guess recovery | 0.6705–0.7445 | **0.7842** | 4.0 points **better** |
-| 30–34, first-guess exact structure | 0.8808–0.9129 | **0.8671** | 1.4 points **worse** |
+| band | metric | predicted | measured | |
+|---|---|---|---|---|
+| 50–54 | `rec@60`, generation | 0.7325–0.7997 | 0.8037 | 0.4 pts **better** |
+| 55–59 | `rec@60`, generation | 0.5804–0.6696 | 0.7549 | 8.5 pts **better** |
+| **60–64** | `rec@60`, generation | 0.3841–0.4785 | **0.6798** | **20.1 pts better** (6.1 SE) |
+| 50–64 | `rec@1`, consensus | 0.3283–0.4401 | 0.5984 | 15.8 pts **better** |
+| 40–49 | `rec@1`, consensus | 0.6705–0.7445 | 0.7842 | 4.0 pts **better** |
+| 30–34 | `struct@1`, consensus | 0.8808–0.9129 | 0.8671 | 1.4 pts **worse** |
 
-Those predictions came from the scaling laws above, which were fitted on short
-runs where the size cliff is at its most severe. Projected onto a run five times
-longer, **they over-predicted how severe the cliff would remain.** Both
-directions of error are the same mistake seen from two sides, and the practical
-consequence is that every size extrapolation in this report should be read as an
-*upper bound* on the cliff's severity.
+Read the top three rows together: **0.4 → 8.5 → 20.1 points as the molecules get
+bigger.** Those predictions came from the scaling laws above, fitted on short
+runs where the size cliff is at its most severe, and projected onto a run five
+times longer. The further out the extrapolation reached, the more it
+over-predicted the cliff — monotonically. Every size extrapolation in this
+report should therefore be read as an *upper bound* on the cliff's severity.
 
-Two quantities that had looked like constants also broke the first time they
-were tested on a second corpus. The exchange rate between the two training axes,
-`g′ / f′`, had been 1.52–1.68 and measured **1.322**; and the step exponent's
-size structure reproduced in the easy bands but not the hard ones. Together
-these say that extra passes and extra molecules **partly substitute for each
-other rather than simply adding up** — the first direct counter-evidence to this
-report's own additive scaling law
+Of the eleven misses outside the 50–64 instrument, ten run with size in exactly
+this way. The one exception is the pooled 35+ `rec@1`, which missed high by half
+a point — inside the noise.
+
+Those first three rows deserve one admission. The plan calls them "the
+registration **of record** for large molecules", and they were **not measured
+when the run was scored**: the band table was built with the tool's default band
+list, which has no 50–54/55–59/60–64 split, so only the pooled 50–64 row was
+scored and the headline was reported as "9 of 20". They cost nothing to compute
+from the dump that was already on disk. They are the sharpest result in the
+section, and a reader would never have seen them.
+
+Two things that had looked invariant also broke the first time they were tested
+on a second corpus. The exchange rate between the two training axes, `g′ / f′`,
+had been 1.52–1.68 and measured **1.322**. And the step exponent `c`, whose
+value falls with molecular size, reproduced that size pattern in the easy bands
+while coming in 2.1× too high in the hardest one. The first of these says
+directly that extra passes and extra molecules **partly substitute for each
+other rather than simply adding up** — counter-evidence to the additive law
+stated in the glossary above
 ([§5.6](#56-the-corpus-axis-f--2209-points-per-doubling-flat)–[§5.7](#57-the-passes-axis-and-why-neither-axis-closes-the-cliff)).
 It rests on a single pair of runs with no error bar, which is exactly why
 measuring that error bar is item 2 of [§9](#9-next-steps).
@@ -237,12 +293,12 @@ at temperature 0.6 is worth +1.99 points, essentially all of it on molecules
 above 35 heavy atoms ([§5.10](#510-decoding-t06-top_p-10-everywhere)). Model
 capacity cuts a constant *fraction* of the deficit rather than changing the
 curve's shape ([§5.8](#58-capacity-cuts-a-constant-fraction-of-the-deficit)).
-And the ratio `b ÷ rec@60` has now held across nine cells, meaning every
-intervention tried here **slides the model along one curve rather than bending
-it** ([§5.5](#55-nothing-changes-the-shape-of-the-budget-curve)). Twelve
+And the ratio `b ÷ rec@60` held across the eight cells it was fitted on and in
+five of six bands of the ninth, meaning every intervention tried here **slides
+the model along one curve rather than bending it** ([§5.5](#55-nothing-changes-the-shape-of-the-budget-curve)). Twelve
 directions were tested and are dead ([§6](#6-what-is-dead)).
 
-**The method is part of the result.** Twenty-eight claims were published in this
+**The method is part of the result.** Twenty-nine claims were published in this
 project and later withdrawn, traceable to five recurring causes, all logged in
 [retractions.md](retractions.md). The dominant pattern is stark: **every claim
 that broke was a comparison *between* training runs; every claim that survived
@@ -275,14 +331,15 @@ one-way: the hash is not invertible, the fold discards collisions, and the
 molecule is considered gone.
 
 This project tests how true that is. The question is not whether the mapping is
-*information-theoretically* invertible — it very nearly is, as §2.1's own
-measurement shows below — but whether a learned model can actually perform the
+*information-theoretically* invertible — it very nearly is, as the next
+paragraph shows — but whether a learned model can actually perform the
 inversion, and what governs how well.
 
 The information available is more than one would guess. On the 1M-molecule
-shard, 943,177 distinct fingerprints describe 950,967 distinct molecules, so
-**98.6% of molecules are the only molecule in the corpus with their
-fingerprint**. Folding 2,048 bits loses 1.46% of distinct atom environments and
+shard, 943,177 distinct fingerprints describe 950,967 distinct molecules. Those
+two totals are a ratio of 99.2%, but the statistic that matters is counted per
+*molecule* rather than per fingerprint: **98.6% of molecules are the only
+molecule in the corpus with their fingerprint**. Folding 2,048 bits loses 1.46% of distinct atom environments and
 affects half of all molecules, but rarely enough to make two molecules collide.
 The representation is close to a lossless molecular identifier at this corpus
 size, and the interesting question is therefore about the model rather than
@@ -373,10 +430,14 @@ Four shards were built, and their relationship is load-bearing:
 
 | shard | train | valid | test |
 |---|---|---|---|
-| 10k | 11,669 total | — | — |
-| 100k | 90,682 | — | — |
-| 1m | 900,917 | 45,528 clean | untouched |
-| full | 1,881,996 | 104,555 | 104,555 |
+| 10k | 11,669 | not split — used only for smoke tests | — |
+| 100k | 90,682 | not recorded separately | — |
+| 1m | 900,917 | 45,528 *clean* | untouched |
+| full | 1,881,996 | 104,555 | untouched |
+
+"Clean" means held out of **every** model's training set, not just this shard's,
+which is what makes one shared evaluation set possible at all (§3.6). The test
+splits exist and have never been read.
 
 **The 10k, 100k and 1M shards are nested** — drawn in order from one fixed
 shuffle, each splitting within itself — so a molecule held out of the 100k shard
@@ -422,6 +483,9 @@ Two sizes were used throughout:
 | **8.0M** (the workhorse) | 256 | 8 | 4 + 4 | 7,951,945–7,963,767 | 0.90–1.37 |
 | 15.1M | 320 | 8 | 5 + 5 | 15,123,953 | 1.91–2.66 |
 | ~~25.7M~~ | 384 | — | 6 + 6 | ~25.7M | **6.58** — infeasible |
+
+The last column is a range because the rate depends on the shard; §3.10 gives
+the per-shard figures that every cost estimate in this report is built from.
 
 Parameter counts differ by 0.15% between otherwise identical 8.0M configs
 because vocabulary size depends on the shard (73 tokens for 100k, 119 for the
@@ -509,7 +573,7 @@ different protocols, so the cap is named wherever a number is quoted.
 Three evaluation instruments, and their numbers are **not comparable to each
 other**:
 
-| | common protocol | large-molecule protocol | the 50+ instrument |
+| | the common protocol | the 30+ protocol | the 50+ instrument |
 |---|---|---|---|
 | molecules | 2,000 random held-out | 2,400 drawn from 30+ heavy atoms | 1,000 drawn from 50+ |
 | `fp_unseen` | 1,956 | 2,321 | 893 |
@@ -517,12 +581,17 @@ other**:
 | `max_oversample` | 10 | 12 | 10 |
 | invocation | `--eval-n 2000 --eval-k 20` | `--eval-n 2400 --min-heavy-atoms 30 --eval-k 60 --max-oversample 12` | `--eval-n 1000 --min-heavy-atoms 50 --eval-k 60 --max-oversample 10` |
 
+**These three names are used throughout and nothing else is.** The 30+ protocol
+has also been called the "large" or "large-molecule" protocol in the night logs,
+and the 50+ instrument the "dedicated" or "893-query" one; this report uses one
+name each.
+
 **Each protocol is blind in its own direction.** The common protocol is 63%
 molecules under 30 heavy atoms, so it cannot describe an intervention acting on
 part of the size distribution: it reported the size-weighted training mix as a
 flat −1.13 points, which is the average of +4.60 above 35 atoms and −3.11 below
 24, and it hid a 4.18-point loss from count fingerprints behind p = 0.32. The
-large protocol has the power where the common one has none, and its "all" column
+30+ protocol has the power where the common one has none, and its "all" column
 means *all molecules in that protocol* — 30+ heavy atoms — not all molecules. Its
 own 50+ band is only 127 queries, which is the sample size that produced two of
 this project's overturned nulls, hence the third instrument.
@@ -623,9 +692,9 @@ Five rules, each earned by being broken:
 4. **The registered intervals must tile the line.** Night 8 registered rec@60 in
    0.88–0.95 with "below 0.85" as saturation, leaving **0.85–0.88 unnamed**. The
    measurement came in at **0.8789** — 0.11 points under the floor, a sixth of
-   the 1.6-point threshold — so the reading had to be constructed after the fact
-   (entry 26). "Uninformative" is a legitimate branch provided it is named in
-   advance.
+   the 1.6-point threshold — so the reading had to be constructed after the fact.
+   Night 7 had already made the same mistake at 0.72–0.76; both are entry 26.
+   "Uninformative" is a legitimate branch provided it is named in advance.
 5. **Register the slope, not the level, whenever the metric is bounded.**
    Recovery is bounded by 1, so a threshold on the level conflates *the curve
    bent* with *the curve ran out of room*. Night 8's level test cleared 0.85
@@ -692,7 +761,7 @@ A cap that is never exercised in testing is an assertion, not a guard.
 ### 3.11 Reproducing CI
 
 ```bash
-pytest -q                               # 499 tests; the 5 needing a shard self-skip
+pytest -q                               # 501 tests; the 5 needing a shard self-skip
 ruff check src tests scripts
 ruff format --check src tests scripts
 python scripts/check_md.py              # documentation references, not run by CI
@@ -708,9 +777,11 @@ tree, not on the files you touched: checking per-file is how CI stayed red from
 
 ## 4. The experimental programme
 
-Nine sessions. The column that matters is the last one.
+Nine sessions. The column that matters is the last one. "Session" is wall-clock
+for the whole night including scoring and analysis, which is why it sums to more
+than the 118.7 h of training time in §1.1 and §10.1.
 
-| # | date | GPU | what it was for | what it actually produced |
+| # | date | session | what it was for | what it actually produced |
 |---|---|---|---|---|
 | — | 10-08 | 4.2 h | Phase 1: can a conditional decoder reconstruct unseen molecules at all? | `rec@20` 0.5367 on `fp_unseen` against a baseline of exactly 0.0000. Gate passed by the whole margin. |
 | 1 | 10-09 | 15 h | Where is the ceiling — data, compute or capacity? | "10× data is worth +30.4 points" — **wrong**, the runs differed in compute too. Also: three measurement fixes made first, and two guards that did not hold. |
@@ -748,8 +819,14 @@ fixed seed, molecule budget.
 
 **Over 91% of held-out Morgan fingerprints can be inverted exactly within 20
 guesses by an 8M-parameter model trained overnight on a laptop, and more than
-three in four on the first guess.** Mean best Tanimoto is 0.976, so even the
-failures are near misses.
+three in four on the first guess.** The `rec@1` figures in the table above are
+in consensus ranking, this project's adopted order (§3.5).
+
+Mean best Tanimoto over *all* queries is 0.976, but that number is dominated by
+the exact hits, which score 1.0, and it says nothing about the failures. The
+figure for the failures is the one §5.12 uses, and it is much lower — see
+[§5.12](#512-the-size-cliff-what-it-is-and-what-it-is-not), where near-misses
+are ruled out as the explanation of the size cliff.
 
 The baseline is zero **by construction** on `fp_unseen`, so the primary metric
 cannot be gamed by memorisation.
@@ -757,7 +834,7 @@ cannot be gamed by memorisation.
 ### 5.2 The budget deficit is a power law in k
 
 `1 − rec(k) = A·k^−b`, fitted over a twelvefold range of k, **|r| ≥ 0.991 in
-every size band**. `small_1m` at T=0.6 on the large protocol:
+every size band**. `small_1m` at T=0.6 on the 30+ protocol:
 
 | band | b |
 |---|---|
@@ -790,7 +867,8 @@ rungs it predicted 0.232 for a cell it had never seen, which measured **0.2491**
 inside a registered 0.21–0.26. Against that, an independence model — each draw
 an independent trial at the model's own first-slot rate — predicted 0.9986 at
 35+ against a measured 0.6890, **wrong by 31 points**, and was wrong by a wide
-margin four times (entry 10). The decoder re-proposes from a neighbourhood that
+margin four times. (Entry 10 of the ledger records the retraction this caused;
+its own headline figure is the rec@100 version of the same error.) The decoder re-proposes from a neighbourhood that
 barely moves as the budget grows.
 
 One caveat the numbers themselves demand: a power law with no visible floor and
@@ -849,17 +927,28 @@ Budget is charged on every query forever, training once. Cutting the deficit by 
 factor f needs `f^(−1/b)` times the budget or `f^(−1/c)` times the steps, so
 there is a query count above which the longer run is cheaper:
 
-| band | queries for a ×0.75 cut | for a ×0.5 cut |
-|---|---|---|
-| 35–39 | 20,900 | 13,300 |
-| 40–49 | 16,900 | 8,000 |
-| 50+ | 16,600 | 4,100 |
-| 35+ | 17,900 | 9,000 |
+Priced on `small_1m` (1.337 s/step), and then on the final run — the two
+columns of each pair are the queries above which training longer is the cheaper
+way to buy the same cut:
 
-**Below roughly ten thousand queries, buy budget; above it, train longer.** This
-project's own protocols are 2,000 and 2,400 queries — an order of magnitude
-below the crossover — so "brute force is affordable" is true *for a benchmark*
-and is the wrong advice for anyone inverting fingerprints at scale.
+| band | `small_1m` ×0.75 | ×0.5 | **final run** ×0.75 | ×0.5 |
+|---|---|---|---|---|
+| 35–39 | 20,900 | 13,300 | 104,995 | 68,550 |
+| 40–49 | 16,900 | 8,000 | 95,198 | 55,271 |
+| 50+ | 16,600 | 4,100 | 121,634 | 72,493 |
+| 35+ | 17,900 | 9,000 | 102,621 | 62,062 |
+| all | — | — | 100,226 | 61,210 |
+
+**Buy budget below the crossover, train longer above it — but the crossover is a
+property of the model, not of the task.** It moved up roughly sixfold between
+these two cells, from ~10,000 queries to ~55,000–120,000, because training got
+cheaper per point faster than budget did. Quote it against a named cell or not
+at all.
+
+Either way this project's own protocols, at 2,000 and 2,400 queries, sit one to
+two orders of magnitude below it: "brute force is affordable" is true *for a
+benchmark* and is the wrong advice for anyone inverting fingerprints at scale.
+The final-run figures are from `step_curve_pair_30plus.json`.
 
 ### 5.5 Nothing changes the shape of the budget curve
 
@@ -875,11 +964,19 @@ mix, then capacity, then training length — each of which moved the exponent by
 almost exactly the amount its recovery level accounts for.
 
 The one place the instinct was right, under a different label: `A` is the deficit
-the law extrapolates back to k=1, and above 50 heavy atoms it sits at **1.01,
-1.00, 1.00, 1.02** across four cells. **No model in this project, at any corpus
-or training length, ever finds a 50-atom molecule on its first proposal.** There
-the exponent really is the only quantity anything can move, because the other is
+the law extrapolates back to k=1, and above 50 heavy atoms it sat at **1.01,
+1.00, 1.00, 1.02** across the four cells available when this was measured. In
+those cells no model could find a 50-atom molecule on its first proposal, so the
+exponent really was the only quantity anything could move — the other was
 against its ceiling.
+
+**The ninth cell is where that stopped being true.** The final run's `A` at 50+
+is **0.70**, and its first-guess recovery at 50–64 is 0.3150 in generation order
+and 0.5984 in consensus
+([§5.13](#513-the-final-run-full-chembl-at-six-passes)). The ceiling at `k=1`
+was a property of the models available, not of the task, and enough training
+moved it. This is one of the better before/after contrasts in the report and it
+was originally written here as a universal.
 
 ### 5.6 The corpus axis: f′ = +22.09 points per doubling, flat
 
@@ -909,8 +1006,11 @@ small molecules, which gain least.
 decomposition that inferred +35.03 for this segment overstated it by 13 points,
 60% of its measured value (entry 27). What survives from that decomposition is
 the *near-cancellation*: at constant steps a corpus doubling is a passes
-halving, so +22.09 against −23.55 nets +1.37, and **the corpus axis at constant
-steps is a terrible instrument** — a small difference of two large numbers. The
+halving, so the two slopes predict +22.09 − 23.55 = **−1.46** points per
+doubling, while the measured net on that segment was **+1.37**. Both sit inside
+the project's own 1.6-point threshold (§3.8), which is the whole problem:
+**the corpus axis at constant steps is a sub-threshold difference of two
+23-point numbers**, and therefore a terrible instrument. The
 "8.4× convexity" three nights rested on was that cancellation, not a property of
 the corpus.
 
@@ -920,7 +1020,7 @@ evidence for it, since a number pushed to a floor it was predicted to be below
 agrees without evidence.
 
 **f′ is itself size-dependent, and falls off in the same direction the cliff
-does.** On the dedicated 893-query instrument:
+does.** On the 50+ instrument:
 
 | band | n | 900,917 | 1,881,996 | per doubling | SE |
 |---|---|---|---|---|---|
@@ -993,6 +1093,8 @@ is not a budget anyone has.
 
 15.1M against 8.0M parameters, same shard, at two step counts — the closed 2×2:
 
+Read on `rec@60`, 30+ protocol, 2,321 queries, bootstrap CIs:
+
 | | deficit ratio, 15.1M / 8.0M | 95% CI |
 |---|---|---|
 | at 8,508 steps | 0.808 | [0.778, 0.837] |
@@ -1003,7 +1105,9 @@ straddles zero across a 2.48-fold change in steps — so the 21,117-step figure
 was not a lower bound.
 
 The most useful thing in the comparison is that the *same* comparison is worth
-+1.33 or +7.11 points:
++1.33 or +7.11 points. **This is the same finding read on the other
+instrument** — `rec@20` on the common protocol, 1,956 queries — so the ratios
+differ from the table above while the conclusion does not:
 
 | steps | 8.0M rec@20 | 15.1M rec@20 | gain | deficit ratio |
 |---|---|---|---|---|
@@ -1036,6 +1140,10 @@ parameters), so **capacity is the wrong lever on this hardware.**
 Rank candidates by how many of the model's samples spell the same molecule. No
 extra oracle call, no extra sampling — the count falls out of samples already
 drawn.
+
+`small_1m` on the common protocol, 1,956 fingerprint-unseen queries, k=20,
+T=1.0, molecule budget — one checkpoint re-ranked five ways, so the candidates
+are identical and only the order changes:
 
 | ordering | rec@1 | rec@5 |
 |---|---|---|
@@ -1071,7 +1179,9 @@ against +0.75 below.** The gain rises monotonically across six size bands, from
 under half a point below 24 atoms to nearly ten above 50.
 
 Pushing further buys nothing. Tested where it was most likely to fail — 893
-queries at 50–64 heavy atoms, the worst-validity band in the corpus — T=0.3
+queries at 50–64 heavy atoms, which is the corpus's worst-validity band
+(measured in [night 6](overnight-2026-10-17.md); this report carries no
+validity-by-band table) — T=0.3
 moves recovery by **−0.34 to +1.34 points** depending on model and budget, every
 interval straddling zero.
 
@@ -1096,7 +1206,7 @@ than bits. On the 1M shard they cut fingerprint ambiguity **5.6×** — 1.40% to
 39 → 5 — and the reduction factor is flat in size, so counts take a 50-atom
 molecule back to roughly a 20-atom molecule's ambiguity under binary bits.
 
-**Recovery does not follow.** On the large protocol `count_fp_100k` is **4.18
+**Recovery does not follow.** On the 30+ protocol `count_fp_100k` is **4.18
 points worse** than its binary twin over 2,321 queries, −6.81 at 30–34, −1.41 at
 35+, and it costs validity too (0.566 against 0.673).
 
@@ -1111,6 +1221,34 @@ twice — once at p = 0.32 on a protocol that could not see it, which was hiding
 *loss* rather than the gain re-opening was meant to find (entry 12), and once
 properly.
 
+### 5.11a Training-side size re-weighting is a trade, and cooled it is nearly free
+
+Referenced three times above and never described, so stated here for
+completeness: the "size-weighted training mix" over-samples molecules of 30+
+heavy atoms during training, at the cost of showing the model fewer small ones.
+It accounts for four runs in the inventory (§10.1).
+
+| | T=1.0 | at the adopted T=0.6 |
+|---|---|---|
+| small molecules given up per large one gained | 2.34 | **1.28** |
+| whole-protocol net | −1.13 points | **−0.28 points** |
+| gain above 35 heavy atoms | +4.60 | **+5.29** |
+
+−0.28 points is indistinguishable from zero against the 1.6-point threshold
+(§3.8), so **at this project's decode setting the mix is close to free**: it buys
++5.29 points where the cliff is, for no measurable whole-protocol cost. It is
+also the worked example of §3.6's protocol blindness, since that −1.13 is the
+average of +4.60 above 35 atoms and −3.11 below 24.
+
+Two limits. **The exposure is already spent** — a second, harder dose (threshold
+35, factor 6) bought +0.14 points above 35 atoms over the first, a tenth of its
+error bar. And **the exposure response is a slope, not a law**: the per-band
+gaps fit log₂ exposure at +4.21 points per doubling (r = 0.988), and run
+backwards the *rate* replicates at +3.62, but **every band-level prediction
+fails** — one of six lands within 2 points. Losing exposure hurts much more than
+gaining it helps, around a threshold where 82% of the protocol's queries sit.
+Full detail in [results.md §2.8](results.md#28-training-side-size-re-weighting-is-a-trade-and-cooled-it-is-nearly-free).
+
 ### 5.12 The size cliff: what it is, and what it is not
 
 Recovery falls from 0.981 below 15 heavy atoms to 0.366 at 50–64, and from 0.953
@@ -1124,13 +1262,18 @@ Four dead explanations, each measured:
   runs out of slots. "It runs out of guesses" is the intuitive story and it is
   false.
 - **Not ranking.** The mean rank of a hit drifts only 4.4 → 8.4 across the range.
-- **Not near-misses.** Best Tanimoto on a miss is 0.69 at 35–39, 0.64 at 40–49,
-  0.57 above 50 — nowhere near as fast a decline as recovery's 0.28 → 0.10 →
-  0.02.
+- **Not near-misses.** On the 100k cell these four bullets were measured on,
+  best Tanimoto among misses is 0.69 at 35–39, 0.64 at 40–49 and 0.57 above 50,
+  while that same cell's recovery runs 0.28 → 0.10 → 0.02. Proximity decays far
+  more slowly than recovery does, so the failures are *nearly* right and getting
+  nearer does not make them right. The final run reproduces the pattern at a much
+  higher level — 0.75 / 0.78 / 0.86 among misses, with the share of misses above
+  0.9 Tanimoto *rising* with size to 58% at 50–64 — which is the same conclusion
+  from the other end.
 - **Not ambiguity.** Of 206 misses, **2** are fingerprint collisions.
 
-What is left is **combinatorial**. At every size the decoder proposes about
-twenty molecules roughly 0.65 Tanimoto from the target, and recovery asks
+What is left is **combinatorial**. At every size the decoder fills its twenty
+slots with molecules roughly 0.65 Tanimoto from the target, and recovery asks
 whether that cloud contains an exact preimage — exponentially less likely the
 bigger the molecule. Two predictions of that account held: both interventions
 that work above 35 atoms work by putting more right-sized molecules in the
@@ -1220,20 +1363,46 @@ convention:
 
 The two independent reads of 50–64 agree. Compared **within one convention**, as
 §3.7 requires: in the molecule budget, 0.8110 on the 127 queries inside the 30+
-protocol against 0.7615 on the dedicated 893-query instrument — 4.95 points
+protocol against 0.7615 on the 50+ instrument — 4.95 points
 apart against a combined SE of 3.76, so **1.3 SE**. In raw slots the same pair
 reads 0.7953 against 0.7402, 1.4 SE. The two protocols are blind in opposite
 directions (§3.6) and they do not disagree.
 
 #### The registration missed, with a direction
 
-9 of 20 scored entries landed inside their intervals. **Every miss on a hard
-band is high; every miss on a saturated or pooled band is low.** The largest:
-50+ consensus rec@1 registered 0.3283–0.4401 and measured **0.5984** (+15.8 pts,
-3.6 SE); the 50+ instrument's rec@60 registered 0.6310–0.6912 and measured
-**0.7615** (+7.0 pts, 4.9 SE); structure@60 there +7.8 pts. Against that,
-30–34 struct@1 came in 1.37 points *under* its floor and the pooled 30–39 one
-point under.
+**9 of 26 intervals landed inside.** Of the 17 misses, 16 run with size — high
+on the hard bands, low on the saturated and pooled ones — and the single
+exception is the pooled 35+ `rec@1`, which missed high by 0.53 points, 0.5 SE,
+inside the noise.
+
+The sub-bands of the 50–64 instrument are the clearest statement of the
+gradient, and they are reported here for the first time (see the note below):
+
+| band | n | metric | registered | measured | miss |
+|---|---|---|---|---|---|
+| 50–54 | 433 | `rec@60` | 0.7325–0.7997 | 0.8037 | +0.40 pts (0.2 SE) |
+| 55–59 | 257 | `rec@60` | 0.5804–0.6696 | 0.7549 | +8.53 pts (3.2 SE) |
+| 60–64 | 203 | `rec@60` | 0.3841–0.4785 | **0.6798** | **+20.13 pts (6.1 SE)** |
+| 50–54 | 433 | `struct@60` | 0.6482–0.7222 | 0.7436 | +2.14 pts (1.0 SE) |
+| 55–59 | 257 | `struct@60` | 0.4979–0.5884 | 0.6537 | +6.53 pts (2.2 SE) |
+| 60–64 | 203 | `struct@60` | 0.2682–0.3542 | **0.5813** | **+22.71 pts (6.6 SE)** |
+
+**The miss grows monotonically with molecular size on both metrics.** Elsewhere:
+50–64 consensus `rec@1` registered 0.3283–0.4401 and measured 0.5984 (+15.8 pts,
+3.6 SE); 30–34 `struct@1` came in 1.37 points *under* its floor and the pooled
+30–39 one point under.
+
+> **A disclosure about these six rows.** `final-run-plan.md` §4b registers them
+> and calls them "the registration **of record** for large molecules", and they
+> were **not scored when the run was analysed.** `band_analysis.py`'s default
+> band list has no 50–54/55–59/60–64 split, so the driver produced only the
+> pooled 50–64 row and the result was published as "9 of 20" without noting that
+> 26 intervals had been registered. Computing them needed no GPU — the
+> per-query dump was already on disk — and they turn out to be the sharpest
+> evidence in the section. A registration is not scored because it was written
+> down; **the default arguments of the tool that scores it are part of the
+> registration**, and that is a new entry in §7's list of ways to get this
+> wrong.
 
 So **the size extrapolation was too steep.** The laws of §5.2–§5.7 were fitted
 where the cliff is severe and projected onto a run five times longer than any
@@ -1261,11 +1430,18 @@ this project has never measured the error bar on an exponent from a single pair:
 | `c` per band | 1.092 / 1.083 / 0.770 / 0.381 | 1.058 / 1.080 / **0.970** / **0.802** | easy bands only |
 | `g′` at 50+ | +26.30 | **+22.28** | 4.02 lower on the larger corpus |
 | `g′ / f′` at 50+ | 1.52–1.68 | **1.322** | miss low |
+| `c ÷ b` (§5.3's "3.1× steeper") | 2.54–3.39 | 2.25–2.90, all-slice **2.75** | holds, at the low edge |
 
-Four consequences, and the last is the expensive one.
+Five consequences, and the last is the expensive one.
 
 **The budget law transports to a ninth cell** — `b` inside its range in every
 band, |r| ≥ 0.985. It is the most robust quantity in the project.
+
+Note the direction of the change, though, because it is independent evidence for
+this section's main finding: the final run's `b` at 50+ is **0.299** against the
+0.144 of §5.2, so the *band structure* of `b` flattened with scale even as its
+range held. Extra guesses now help large molecules roughly twice as much as they
+did — the same flattening that made the size extrapolations too steep.
 
 **`c` is confirmed a local slope, not a law.** The plan recorded in advance that the
 honest expectation for that row was a miss. It missed high. A slope read at
@@ -1288,7 +1464,7 @@ What survives is `b ÷ rec@60`: interventions still slide the model along one
 curve rather than bending it (§5.5). What does not survive is the claim that a
 doubling costs the same on either axis regardless of corpus.
 
-#### The cliff, pushed back fifty-fold and unchanged in shape
+#### The cliff, pushed back by orders of magnitude and unchanged in shape
 
 | band | k for 0.9 | k for 0.95 | k for 0.99 |
 |---|---|---|---|
@@ -1298,14 +1474,36 @@ doubling costs the same on either axis regardless of corpus.
 | 50+ | 654 | 6,640 | 1,444,900 |
 
 Extrapolations and lower bounds, every one. 30–34 reaching 0.9 in a single slot
-is new. 50+ needing 654 is the cliff surviving everything: ~50× cheaper than a
-fortnight earlier, still three orders of magnitude from the easy bands.
+is new, and 50+ needing 654 is the cliff surviving everything while getting
+enormously cheaper: the same quantity was 93,923 on the previous best cell and
+1.0 × 10⁷ on §5.2's. **No single ratio is quoted here on purpose.** Both ends of
+any such ratio are extrapolations from a fit measured only to k=60, so their
+quotient compounds two extrapolations and is unstable across cells — it ranges
+from ~10² to ~10⁹ depending on which pair is chosen. The defensible statement is
+the measured one: `rec@60` at 50–64 went from 0.2251 to 0.7402 on the 893-query
+instrument, and the extrapolated price fell by at least two orders of magnitude.
+An earlier draft said "~50× cheaper", which traces to nothing.
 
-And §5.12's mechanism holds exactly. Preimages per query *rise* with size
-(1.63 → 2.87 from 30–34 to 50+) while **18.9% of 50+ queries draw none at all**,
-and the Poisson comparison shows proposals concentrated on fewer queries than
-chance in every band. Six passes made the cliff much smaller without changing
-what it is: concentration, not scarcity.
+And §5.12's mechanism holds, but the final run sharpens it rather than simply
+confirming it. Preimages per query *rise* with size (1.63 → 2.87 from 30–34 to
+50+), and the Poisson comparison — measured recovery against what the same
+number of preimages would give if they fell independently across queries —
+**separates the bands rather than condemning all of them**:
+
+| band | n | preimages / query | measured rec | if Poisson | drawing none |
+|---|---|---|---|---|---|
+| 30–34 | 1,189 | 1.63 | 0.9823 | 0.8036 | 1.8% |
+| 35–39 | 625 | 1.77 | 0.9664 | 0.8291 | 3.4% |
+| 40–49 | 380 | 2.10 | 0.9184 | 0.8775 | 8.2% |
+| **50–64** | 127 | 2.87 | **0.8110** | **0.9435** | **18.9%** |
+| all | 2,321 | 1.81 | 0.9582 | 0.8364 | 4.2% |
+
+Below 50 atoms the model's preimages are spread **more evenly across queries
+than chance**, which is the opposite of concentration: measured recovery beats
+the Poisson expectation in every band. At 50–64 it inverts. **Concentration is
+not a general property of the decoder; it switches on with size**, and that is a
+stronger and more specific claim than §5.12 could make from one cell. Six passes
+made the cliff much smaller without changing what it is at the far end.
 
 One thing the run did settle that no earlier session could. The collision rate
 at 50+ — recoveries made by a *different* molecule with the same fingerprint,
@@ -1323,7 +1521,7 @@ Claims tested and refused, so they are not re-opened by accident:
 | claim | how it died |
 |---|---|
 | the size defect needs a size token on the encoder | no size defect left to fix at k=60: truncation 5.1 atoms, 89.8% of 50+ queries get a right-sized proposal, closest within 0.2 atoms in every band |
-| the 50+ capacity gain is a decode artefact of T=0.6 | cooling to T=0.3 moves it by +1.01 points [−0.90, +2.91] |
+| the 50+ capacity gain is a decode artefact of T=0.6 | cooling to T=0.3 moves it by +1.01 points [−0.90, +2.91] — the same difference-in-differences that §3.9 rule 1 cites as decided-in-advance |
 | validity is the binding constraint on large molecules | cooling raises validity and recovery nets zero |
 | successive samples are independent draws | the deficit is a power law in k with a size-dependent exponent; independence predicted 0.9986 at 35+ against a measured 0.6890 |
 | splitting a fixed budget across models beats spending it on the best one | measured and dead, at both k=20 and k=60 |
@@ -1340,7 +1538,7 @@ Claims tested and refused, so they are not re-opened by accident:
 ## 7. Methodological findings
 
 This is the most transferable part of the project, and it is the reason the
-retractions ledger is kept long on purpose. **Twenty-eight claims were published
+retractions ledger is kept long on purpose. **Twenty-nine claims were published
 here and withdrawn.** Five causes account for all of them.
 
 ### 7.1 Cross-run comparison
@@ -1385,7 +1583,14 @@ because three fifths of it does not respond.
 
 Register the interval. Then make the intervals **tile the line**, or scoring
 still needs a judgement made after the fact — night 8's result landed in a
-0.85–0.88 gap nobody had named. And register the **slope, not the level**,
+0.85–0.88 gap nobody had named, and night 7's in a 0.72–0.76 one (entry 26
+covers both).
+
+A third form of the same failure appeared only in review: **the tool's default
+arguments are part of the registration.** Six intervals the plan called "the
+registration of record for large molecules" went unscored because the band table
+was built with a default band list that did not contain them (§5.13). Nothing
+flagged it, because every interval that *was* computed scored cleanly. And register the **slope, not the level**,
 whenever the metric is bounded, or the test cannot distinguish *the curve bent*
 from *the curve ran out of room*.
 
@@ -1438,7 +1643,7 @@ In the order a sceptical reader would ask.
   licence to extrapolate to PubChem's 10⁸. Both earlier attempts to do so are
   withdrawn.
 - **The far end of the size cliff rests on thin samples.** 50–64 is 127 queries
-  on the 30+ protocol and 893 on the dedicated one; 127 is the sample size that
+  on the 30+ protocol and 893 on the 50+ instrument; 127 is the sample size that
   produced two overturned nulls. The 60+ question is closed as **unanswerable**
   from this corpus rather than answered.
 - **Two recovery conventions** differ by about 4 points at k=60, and comparisons
@@ -1516,17 +1721,18 @@ large-model × large-corpus cell is empty, and it is exactly the cell where §5.
 suggests the small-scale laws are least trustworthy. Needs different hardware
 before it is worth planning.
 
-**6. Close the recovery/structure gap at 50+.** Recovery 0.7402 against structure
-0.6428 is a 9.7-point gap, far wider than the 1–2 points elsewhere. Some is
-collisions (item 4); the remainder is the model proposing the right fingerprint
-by a wrong molecule in a way the easy bands do not show. Not yet a hypothesis,
-which is why it is last — but it is the clearest unexplained number in the
-report.
+**6. Nothing — this slot is deliberately empty.** An earlier draft listed the
+recovery/structure gap at 50+ (0.7402 against 0.6428) as "the clearest
+unexplained number in the report". It is not unexplained: the gap is **exactly**
+the collision rate, to five decimal places — 0.7402 × (1 − 0.13162) = 0.642777
+against a measured 0.642777. There is no residual, so the whole of it is item 4
+above, and the only open question is whether a richer fingerprint shrinks it.
+The slot is kept, rather than deleted, because inventing an open question out of
+an identity is a failure mode worth leaving visible.
 
-**What not to do.** §6 lists twelve measured-and-dead directions. The
-pre-registration rules in §3.9 and the five recurring causes in §7 exist so they
-are not repeated; the newest of them is §5.13's own, that a registered command
-which has never been executed is a registration of intent rather than procedure.
+**What not to do.** §6 lists twelve measured-and-dead directions, and the
+pre-registration rules in §3.9 and the five recurring causes in §7 exist so the
+method failures are not repeated either.
 
 ---
 
@@ -1578,7 +1784,7 @@ Every training run on disk, from `results/leaderboard.jsonl`. Per-run numbers ar
 
 | script | authority on |
 |---|---|
-| `compare_checkpoints.py` | the common and large protocols; the only cross-run comparisons |
+| `compare_checkpoints.py` | the common and 30+ protocols; the only cross-run comparisons |
 | `band_analysis.py` | **every rec@60 in the molecule-budget convention**, per band |
 | `miss_anatomy.py` | rec@k in raw slots; the cloud, truncation and preimage counts |
 | `budget_curve.py` | the budget power law `b`, and the inverted prices |

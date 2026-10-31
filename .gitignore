@@ -238,3 +238,5 @@ dist/
 !/results/overnight9/step_curve_pair_50plus.json
 !/results/overnight9/job4_scored.json
 !/results/overnight9/stage6_scored.json
+!/results/overnight9/b50_subbands_recovery.json
+!/results/overnight9/b50_subbands_structure.json

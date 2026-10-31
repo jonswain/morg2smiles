@@ -34,7 +34,7 @@ documents are:
 | **[docs/report.md](docs/report.md)** | the one self-contained account of the whole experiment — background, methods, findings, limits, next steps. **Start here if you are reading only one thing.** |
 | **[docs/results.md](docs/results.md)** | every measured law, with its domain, its error bar and the script that produced it |
 | **[docs/methodology.md](docs/methodology.md)** | the conventions, starting with the two recovery conventions that differ by points and have voided two pre-registrations |
-| **[docs/retractions.md](docs/retractions.md)** | all 28 withdrawn claims and the five causes behind them |
+| **[docs/retractions.md](docs/retractions.md)** | all 29 withdrawn claims and the five causes behind them |
 | **[docs/next-steps-2026-10-19.md](docs/next-steps-2026-10-19.md)** | the plan to done, and the extensions parked below the line |
 
 The `docs/overnight-*.md` files are the primary record and are kept for
@@ -894,7 +894,7 @@ would ask:
   architecture were not.
 
 [docs/retractions.md](docs/retractions.md) is the longer and more useful version
-of this section: 28 claims this project published and withdrew, and the five
+of this section: 29 claims this project published and withdrew, and the five
 causes behind them.
 
 ## Prior art, including my own
@@ -1095,7 +1095,7 @@ the session that produced these numbers is
 ## Development
 
 ```bash
-pytest -q                          # 499 tests, offline; the 5 needing a shard self-skip
+pytest -q                          # 501 tests, offline; the 5 needing a shard self-skip
 ruff check src tests scripts
 ruff format --check src tests scripts   # drop --check to rewrite in place
 python scripts/check_md.py         # docs: links, #anchors, and cross-document §n

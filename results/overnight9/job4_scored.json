@@ -1,6 +1,39 @@
 [
   {
     "registration": "(2) 50+ protocol, rec@60",
+    "band": "50-54",
+    "n": 433,
+    "lo": 0.7325434609836181,
+    "hi": 0.7997339169088453,
+    "measured": 0.8036951501154734,
+    "se_points": 1.9088299488397416,
+    "verdict": "MISS HIGH",
+    "miss_points": 0.3961233206628112
+  },
+  {
+    "registration": "(2) 50+ protocol, rec@60",
+    "band": "55-59",
+    "n": 257,
+    "lo": 0.5804030559510569,
+    "hi": 0.6695834088511342,
+    "measured": 0.754863813229572,
+    "se_points": 2.6833137413425763,
+    "verdict": "MISS HIGH",
+    "miss_points": 8.528040437843776
+  },
+  {
+    "registration": "(2) 50+ protocol, rec@60",
+    "band": "60-64",
+    "n": 203,
+    "lo": 0.38411997292105593,
+    "hi": 0.4785032834826261,
+    "measured": 0.6798029556650246,
+    "se_points": 3.274554060070049,
+    "verdict": "MISS HIGH",
+    "miss_points": 20.129967218239848
+  },
+  {
+    "registration": "(2) 50+ protocol, rec@60",
     "band": "50+",
     "n": 893,
     "lo": 0.6310115801256998,
@@ -9,6 +42,39 @@
     "se_points": 1.4261561193549825,
     "verdict": "MISS HIGH",
     "miss_points": 7.029929882811025
+  },
+  {
+    "registration": "(2) 50+ protocol, struct@60",
+    "band": "50-54",
+    "n": 433,
+    "lo": 0.648237132990885,
+    "hi": 0.7222335235377689,
+    "measured": 0.74364896073903,
+    "se_points": 2.09825168580172,
+    "verdict": "MISS HIGH",
+    "miss_points": 2.1415437201261045
+  },
+  {
+    "registration": "(2) 50+ protocol, struct@60",
+    "band": "55-59",
+    "n": 257,
+    "lo": 0.4978727742473591,
+    "hi": 0.5884046811249367,
+    "measured": 0.6536964980544747,
+    "se_points": 2.9679047521987894,
+    "verdict": "MISS HIGH",
+    "miss_points": 6.5291816929538005
+  },
+  {
+    "registration": "(2) 50+ protocol, struct@60",
+    "band": "60-64",
+    "n": 203,
+    "lo": 0.2681803061659284,
+    "hi": 0.3541774231306612,
+    "measured": 0.5812807881773399,
+    "se_points": 3.4626325691629627,
+    "verdict": "MISS HIGH",
+    "miss_points": 22.710336504667865
   },
   {
     "registration": "(2) 50+ protocol, struct@60",

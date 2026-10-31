@@ -1,0 +1,44 @@
+{
+  "k": 60,
+  "order": "generation",
+  "metric": "structure",
+  "budget": "molecules",
+  "n_fp_unseen": 893,
+  "runs": [
+    "small_full_6p"
+  ],
+  "bands": {
+    "50-54": {
+      "n_queries": 433,
+      "share_of_protocol": 0.48488241881298993,
+      "per_run": {
+        "small_full_6p": 0.74364896073903
+      },
+      "pairs": {}
+    },
+    "55-59": {
+      "n_queries": 257,
+      "share_of_protocol": 0.2877939529675252,
+      "per_run": {
+        "small_full_6p": 0.6536964980544747
+      },
+      "pairs": {}
+    },
+    "60-64": {
+      "n_queries": 203,
+      "share_of_protocol": 0.22732362821948487,
+      "per_run": {
+        "small_full_6p": 0.5812807881773399
+      },
+      "pairs": {}
+    },
+    "50+": {
+      "n_queries": 893,
+      "share_of_protocol": 1.0,
+      "per_run": {
+        "small_full_6p": 0.6808510638297872
+      },
+      "pairs": {}
+    }
+  }
+}

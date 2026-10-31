@@ -33,7 +33,7 @@ PAIRS = [
     (
         "(2) 50+ protocol, rec@60",
         "results/overnight8/job4_registration_6p_recovery.json",
-        "results/overnight9/b50_full_6p.json",
+        "results/overnight9/b50_subbands_recovery.json",
         60,
         "generation",
         "50+ (893 queries)",
@@ -41,7 +41,7 @@ PAIRS = [
     (
         "(2) 50+ protocol, struct@60",
         "results/overnight8/job4_registration_6p_structure.json",
-        "results/overnight9/b50_full_6p_structure.json",
+        "results/overnight9/b50_subbands_structure.json",
         60,
         "generation",
         "50+ (893 queries)",

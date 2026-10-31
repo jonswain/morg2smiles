@@ -142,3 +142,32 @@ class TestCheckSections:
         p = tmp_path / "r.md"
         p.write_text("## 1 A\n\nwhich the additive law of §2.9 assumes it does not\n")
         assert len(check_sections([p])) == 1
+
+
+class TestRecordsAboutAnotherDocument:
+    """A review of report.md uses report.md's section numbers, not its own.
+
+    Checking `docs/reviews/` produced 180 false positives, all of them the
+    checker misreading a reference that was correct for its subject.
+    """
+
+    def test_a_review_is_skipped_by_both_checks(self, monkeypatch, tmp_path):
+        import scripts.check_md as mod
+
+        monkeypatch.setattr(mod, "ROOT", tmp_path)
+        d = tmp_path / "docs" / "reviews"
+        d.mkdir(parents=True)
+        p = d / "round-1-review.md"
+        p.write_text("# Review\n\n§5.13 is wrong, see [limits](#8-limitations)\n")
+        assert mod.check_sections([p]) == []
+        assert mod.check_links([p]) == []
+
+    def test_an_ordinary_doc_is_still_checked(self, monkeypatch, tmp_path):
+        import scripts.check_md as mod
+
+        monkeypatch.setattr(mod, "ROOT", tmp_path)
+        d = tmp_path / "docs"
+        d.mkdir(parents=True)
+        p = d / "report.md"
+        p.write_text("## 1 A\n\nsee §9 of the thing\n")
+        assert len(mod.check_sections([p])) == 1
