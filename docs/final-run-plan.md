@@ -451,7 +451,7 @@ number each answer is compared to, and what each comparison would mean**:
 | `c` per band | the 2×2's k=60 column (1.092 / 1.083 / 0.770 / 0.381 for 30–34 / 35–39 / 40–49 / 50+) | the exponent's size dependence is a property of the decoding problem rather than of a corpus |
 | `b` from `budget_curve.py` | **0.144–0.396** (results.md §2.1) | the budget law transports, as it has to every cell so far |
 | `b ÷ rec@60` | **0.320–0.380** | the eighth confirmation that interventions slide a model along one curve rather than bending it; a value outside it would be the first evidence of a second dial |
-| `g′` at 50+ on the full shard | the 1M shard's **+26.30** per passes doubling | g′ is corpus-invariant. A lower value on the larger corpus would mean passes and molecules substitute rather than add, which the additive law of §2.9 assumes they do not |
+| `g′` at 50+ on the full shard | the 1M shard's **+26.30** per passes doubling | g′ is corpus-invariant. A lower value on the larger corpus would mean passes and molecules substitute rather than add, which the additive law of `results.md` §2.9 assumes they do not |
 | `g′ / f′` at 50+ | **1.52–1.68** | the exchange rate is size- *and* corpus-invariant, tested on a second corpus for the first time |
 
 **The honest expectation for the first row is a miss.** `c` is a local slope and

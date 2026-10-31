@@ -692,12 +692,14 @@ A cap that is never exercised in testing is an assertion, not a guard.
 ### 3.11 Reproducing CI
 
 ```bash
-pytest -q                               # 478 tests; the 5 needing a shard self-skip
+pytest -q                               # 499 tests; the 5 needing a shard self-skip
 ruff check src tests scripts
 ruff format --check src tests scripts
+python scripts/check_md.py              # documentation references, not run by CI
 ```
 
-CI runs exactly these on Python 3.11 and 3.12 and **`format` gates `pytest`**,
+The first three are what CI runs, on Python 3.11 and 3.12, and **`format` gates
+`pytest`**,
 so a formatting miss hides every test result behind it. Run them on the whole
 tree, not on the files you touched: checking per-file is how CI stayed red from
 2026-10-17 to 2026-10-19 with the test step never executing.
@@ -1586,3 +1588,4 @@ Every training run on disk, from `results/leaderboard.jsonl`. Per-run numbers ar
 | `job4_registration.py` | the final run's registered intervals |
 | `score_job4.py` | scoring those intervals, with a convention guard |
 | `score_stage6.py` | scoring the final run's exponents from the matched pair |
+| `check_md.py` | the documentation's own references: links, anchors, and a `§n` that means another document |
