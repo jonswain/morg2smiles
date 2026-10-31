@@ -26,11 +26,12 @@ has the rest of the fine print.
 
 ### Start here
 
-Five and a half thousand lines of night log are not a result. These four
+Five and a half thousand lines of night log are not a result. These five
 documents are:
 
 | document | what it is for |
 |---|---|
+| **[docs/report.md](docs/report.md)** | the one self-contained account of the whole experiment — background, methods, findings, limits, next steps. **Start here if you are reading only one thing.** |
 | **[docs/results.md](docs/results.md)** | every measured law, with its domain, its error bar and the script that produced it |
 | **[docs/methodology.md](docs/methodology.md)** | the conventions, starting with the two recovery conventions that differ by points and have voided two pre-registrations |
 | **[docs/retractions.md](docs/retractions.md)** | all 28 withdrawn claims and the five causes behind them |
@@ -601,10 +602,11 @@ are the difference between this repo's early numbers and its current ones, and
 
 ## Scale
 
-Development is on an Apple M2 (MPS). The largest run here is 1,881,996
-molecules — all of ChEMBL 35 after filtering — at 8M parameters for 17,772
-steps in 5.3 h; the largest by compute is 21,117 steps on 909,800 molecules in
-7.8 h. Capacity tops out earlier than data does: scaling is linear in wall
+Development is on an Apple M2 (MPS). The largest run here is the final one:
+1,881,996 molecules — all of ChEMBL 35 after filtering — at 8M parameters for
+**88,218 steps (6.00 passes) in 25.4 h**, 27.9 h including scoring. Nine
+sessions come to 118.7 h of recorded run time in total. Capacity tops out earlier than
+data does: scaling is linear in wall
 clock to 15M params and superlinear beyond, so the 8M model is doing the work
 throughout. Nothing is MPS-specific — device selection is `mps → cuda → cpu`
 and configs are portable. The 103M-compound PubChem round-trip that motivated
@@ -631,14 +633,26 @@ temperature 1.0 — held fixed across every night so the rows stay comparable.
 within 20 guesses at the protocol's settings, and three in four on the first
 guess.** Mean best Tanimoto is 0.976, so even the failures are near misses.
 
-One run is deliberately absent from the table: `small_full_1p2`, the
-1,881,996-molecule constant-passes cell, was scored at T=0.6 rather than 1.0,
-and this table's whole purpose is that the temperature never moves. On its own
-terms it reaches `rec@20` **0.8609** against `small_1m_matched`'s 0.6825, both
-re-scored together in the same job, and it is **not** the best model here —
-`small_1m` at 21,117 steps on a tenth of the data beats it, because at these
-budgets a pass is still worth more than a molecule. See
-[night 7](docs/overnight-2026-10-20.md).
+**Two runs are deliberately absent from the table, including the best model in
+the repo.** This table's whole purpose is that the protocol never moves, and
+neither run was scored on it.
+
+`small_full_1p2`, the 1,881,996-molecule constant-passes cell, was scored at
+T=0.6 rather than 1.0. On its own terms it reaches `rec@20` **0.8609** against
+`small_1m_matched`'s 0.6825, both re-scored together in the same job, and it is
+**not** the best model here — `small_1m` at 21,117 steps on a tenth of the data
+beats it, because at those budgets a pass was still worth more than a molecule.
+See [night 7](docs/overnight-2026-10-20.md).
+
+`small_full_6p`, **the final run and the strongest model this project
+produced** — 1,881,996 molecules, 88,218 steps, 6.00 passes — was scored at
+T=0.6 on the two size-restricted protocols rather than the common one, because
+by night 9 the common protocol's `rec@20` was saturated and could not resolve
+anything. On the 30+ protocol (2,321 fingerprint-unseen queries, k=60) it
+reaches **rec@1 0.6963 and rec@60 0.9496**; on the 893-query 50+ instrument,
+**0.3180 and 0.7402**. Those are not comparable with the rows above, in either
+direction. See [night 9](docs/overnight-2026-10-30.md) and
+[§5.13 of the report](docs/report.md#513-the-final-run-full-chembl-at-six-passes).
 
 Candidates are ranked by **consensus**: how many of the model's samples spell
 the same molecule. Sampling the same answer by several routes turns out to be a
@@ -845,7 +859,7 @@ would ask:
   atoms — so it is a real exclusion; but the 128-token decoder context would
   discard three quarters of those anyway, so widening the domain means a longer
   context and a retrain, not a bigger cap.
-* **Scale.** 8M parameters, ≤1.88M molecules, ≤21,117 steps, one laptop GPU.
+* **Scale.** 8M parameters, ≤1.88M molecules, ≤88,218 steps, one laptop GPU.
   The corpus slope is +22.09 points per doubling measured over 90.7k–1.88M; it
   is **not** a licence to extrapolate to PubChem's 10⁸, and both earlier
   attempts to do so are withdrawn.
@@ -862,8 +876,19 @@ would ask:
 * **The test split has never been touched.** Everything reported anywhere in
   this project is validation, so no number here has survived a truly untouched
   set.
-* **The final full-ChEMBL run has not been made.** `small_full` (8,508 steps)
-  and `small_full_1p2` (17,772) are both short of a full-length schedule.
+* **Where the step axis stops is still not known.** The final run's oracle
+  selected its **last** checkpoint, so 6.00 passes over full ChEMBL had not
+  exhausted it. The only bend ever located was measured at 30–74 passes on
+  100k molecules, and night 9 showed the step exponent does not transport
+  between those regimes.
+* **The scaling laws over-predicted the size cliff.** Fitted at small scale,
+  they under-promised the final run's hard bands by 7–16 points and
+  over-promised its saturated ones by ~1. Treat every size extrapolation in
+  this repo as an upper bound on the cliff's severity.
+* **`g′ / f′` is not corpus-invariant, on one pair with no error bar.** 1.322
+  measured against a registered 1.52–1.68. That is counter-evidence to this
+  repo's own additive scaling law, and it is a single matched pair — the error
+  bar on an exponent has never been measured here.
 * **One architecture, one fingerprint.** Morgan r=2, 2,048 folded binary bits,
   one encoder–decoder shape. Counts were ablated; radius, bit width and
   architecture were not.
@@ -968,13 +993,39 @@ insight on a laptop, which is why
 is extensions rather than a backlog. Each entry says what would settle it and
 what it would cost; none of them is required for the project's claims to stand.
 
+**The programme is complete.** The final run — all 1,881,996 molecules, 88,218
+steps, 6.00 passes, 27.9 h — closed item 4 and the last of the five criteria in
+[the closing plan's definition of done](docs/next-steps-2026-10-19.md#definition-of-done)
+on 2026-10-31. It reaches **rec@1 0.6963 and rec@60 0.9496** on the 30+
+protocol and **0.3180 / 0.7402** on the 50+ instrument, and its oracle selected
+its own last checkpoint, so the step axis had not been exhausted when the
+registered budget ended it.
+
+Its pre-registration **missed, with a direction**: high on every hard band by up
+to 15.8 points, low on every saturated one by about 1. The scaling laws in this
+repo were fitted where the size cliff is severe and over-predicted its severity
+five times further out. Two quantities registered as invariants also failed
+their first test on a second corpus, `g′ / f′` among them — the first
+counter-evidence to this repo's own additive scaling law, on a single pair with
+no error bar. That is the most interesting result of the final session and the
+reason item 2 below is now the cheapest thing worth doing.
+
+The whole experiment is written up in **[docs/report.md](docs/report.md)**;
+the session that produced these numbers is
+[night 9](docs/overnight-2026-10-30.md).
+
 ### Extensions, in rough order of expected value
 
-1. **How far do steps go?** Every run that completed its schedule was still
-   improving, and 30 epochs of 90k molecules showed no overfitting at all —
-   probably because SMILES randomisation makes every epoch a fresh target
-   string. 10.6×/decade cannot continue, but nothing here has found where it
-   stops, and it is the cheapest untested lever.
+1. **How far do steps go?** Still the leading question, and night 8 and night 9
+   between them sharpened rather than settled it. Night 8 **found a bend** on
+   100k molecules — the deficit exponent falls 0.911 → 0.701 — but at 30–74
+   passes, and night 9 showed that exponent does not transport to 1.2–6 passes
+   on the full corpus (0.986 measured there, above the whole 100k range). The
+   final run's oracle then selected its last checkpoint, so the full corpus was
+   still paying at 6.00 passes. A 12-pass run — 176,436 steps, ~50 h — would
+   put a third point on the full-shard axis and is the only way to locate the
+   bend where it matters. Register the **slope** against the measured +22.28
+   points per passes doubling at 50+, not a level.
 2. ~~**What a bigger corpus is actually worth.**~~ **Measured.** The sweep ran
    at constant **passes** rather than constant steps, which is what breaks the
    `steps × batch = corpus × passes` lock: 900,917 → 1,881,996 distinct
@@ -1008,13 +1059,15 @@ what it would cost; none of them is required for the project's claims to stand.
    unanimously solved. **It is a capability ceiling on large molecules, not an
    information limit.**
 
-   What would move it is not settled. A full-ChEMBL run at 3 passes is now
-   priced — fitted in deficit rather than in points, which returns >1.0 in four
-   of six bands — at rec@60 **0.92** whole-protocol but only **0.56** at 50–64,
-   so even 1.88M molecules and 44,112 steps leave the far end of the cliff
-   standing. That run is item 4 of the closing plan and has not been made; what
-   has, is `small_full` at 8,508 steps and `small_full_1p2` at 17,772, neither
-   of which is a full-length run.
+   What would move it is now measured, and the forecast above was wrong in the
+   informative direction. The projection here — rec@60 **0.92** whole-protocol
+   but only **0.56** at 50–64 — was priced for 3 passes; the run that was made
+   went to **6.00 passes / 88,218 steps** and returned rec@60 **0.9496**
+   whole-protocol and **0.7402** on the 893-query 50+ instrument. The far end of
+   the cliff is still standing, but it is roughly 50× cheaper than this
+   paragraph assumed, because every size extrapolation in this repo was fitted
+   where the cliff is severe. See
+   [night 9](docs/overnight-2026-10-30.md).
 5. ~~**Is capacity's cut a property of the step, or of where the 8M run
    stopped?**~~ **Done, and it is neither.** The fourth cell of the capacity ×
    steps 2×2 — `medium_1m_8k`, 15.1M parameters at 8,508 steps, pre-registered
@@ -1042,7 +1095,7 @@ what it would cost; none of them is required for the project's claims to stand.
 ## Development
 
 ```bash
-pytest -q                          # 464 tests, offline; the 5 needing a shard self-skip
+pytest -q                          # 478 tests, offline; the 5 needing a shard self-skip
 ruff check src tests scripts
 ruff format --check src tests scripts   # drop --check to rewrite in place
 ```

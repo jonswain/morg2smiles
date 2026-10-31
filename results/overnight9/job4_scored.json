@@ -1,0 +1,222 @@
+[
+  {
+    "registration": "(2) 50+ protocol, rec@60",
+    "band": "50+",
+    "n": 893,
+    "lo": 0.6310115801256998,
+    "hi": 0.6911788646657308,
+    "measured": 0.761478163493841,
+    "se_points": 1.4261561193549825,
+    "verdict": "MISS HIGH",
+    "miss_points": 7.029929882811025
+  },
+  {
+    "registration": "(2) 50+ protocol, struct@60",
+    "band": "50+",
+    "n": 893,
+    "lo": 0.5402883576681453,
+    "hi": 0.6025206729031383,
+    "measured": 0.6808510638297872,
+    "se_points": 1.5599009814083762,
+    "verdict": "MISS HIGH",
+    "miss_points": 7.833039092664896
+  },
+  {
+    "registration": "(3) 30+ protocol, rec@1 consensus",
+    "band": "30-34",
+    "n": 1189,
+    "lo": 0.9073187519556389,
+    "hi": 0.935363501207403,
+    "measured": 0.9083263246425568,
+    "se_points": 0.8368591034277624,
+    "verdict": "HIT",
+    "miss_points": 0.0
+  },
+  {
+    "registration": "(3) 30+ protocol, rec@1 consensus",
+    "band": "35-39",
+    "n": 625,
+    "lo": 0.8467276539202271,
+    "hi": 0.8916196580300372,
+    "measured": 0.864,
+    "se_points": 1.3711542582802274,
+    "verdict": "HIT",
+    "miss_points": 0.0
+  },
+  {
+    "registration": "(3) 30+ protocol, rec@1 consensus",
+    "band": "40-49",
+    "n": 380,
+    "lo": 0.670455945503085,
+    "hi": 0.7445262747114372,
+    "measured": 0.7842105263157895,
+    "se_points": 2.1102779608090416,
+    "verdict": "MISS HIGH",
+    "miss_points": 3.9684251604352294
+  },
+  {
+    "registration": "(3) 30+ protocol, rec@1 consensus",
+    "band": "50+",
+    "n": 127,
+    "lo": 0.3282970259885581,
+    "hi": 0.44010634319856856,
+    "measured": 0.5984251968503937,
+    "se_points": 4.3499704101171295,
+    "verdict": "MISS HIGH",
+    "miss_points": 15.831885365182519
+  },
+  {
+    "registration": "(3) 30+ protocol, rec@1 consensus",
+    "band": "30-39",
+    "n": 1814,
+    "lo": 0.8898657508104756,
+    "hi": 0.918069169636326,
+    "measured": 0.8930540242557883,
+    "se_points": 0.7256086447059058,
+    "verdict": "HIT",
+    "miss_points": 0.0
+  },
+  {
+    "registration": "(3) 30+ protocol, rec@1 consensus",
+    "band": "35+",
+    "n": 1132,
+    "lo": 0.7538277274095937,
+    "hi": 0.8020724016698877,
+    "measured": 0.8074204946996466,
+    "se_points": 1.1720110447575933,
+    "verdict": "MISS HIGH",
+    "miss_points": 0.5348093029758916
+  },
+  {
+    "registration": "(3) 30+ protocol, rec@1 consensus",
+    "band": "all",
+    "n": 2321,
+    "lo": 0.8404749648239425,
+    "hi": 0.8731884268016669,
+    "measured": 0.8591124515295131,
+    "se_points": 0.7221438926017353,
+    "verdict": "HIT",
+    "miss_points": 0.0
+  },
+  {
+    "registration": "(3) 30+ protocol, struct@1 consensus",
+    "band": "30-34",
+    "n": 1189,
+    "lo": 0.8808240602830926,
+    "hi": 0.9129278550556924,
+    "measured": 0.8671152228763667,
+    "se_points": 0.9844305758789081,
+    "verdict": "MISS LOW",
+    "miss_points": -1.3708837406725904
+  },
+  {
+    "registration": "(3) 30+ protocol, struct@1 consensus",
+    "band": "35-39",
+    "n": 625,
+    "lo": 0.8026459980965756,
+    "hi": 0.8532028668419296,
+    "measured": 0.8112,
+    "se_points": 1.5653986584892678,
+    "verdict": "HIT",
+    "miss_points": 0.0
+  },
+  {
+    "registration": "(3) 30+ protocol, struct@1 consensus",
+    "band": "40-49",
+    "n": 380,
+    "lo": 0.6210069541653057,
+    "hi": 0.6971391809170188,
+    "measured": 0.718421052631579,
+    "se_points": 2.307266802764651,
+    "verdict": "MISS HIGH",
+    "miss_points": 2.1281871714560197
+  },
+  {
+    "registration": "(3) 30+ protocol, struct@1 consensus",
+    "band": "50+",
+    "n": 127,
+    "lo": 0.23306316866333404,
+    "hi": 0.3337982773390002,
+    "measured": 0.4330708661417323,
+    "se_points": 4.396853662474019,
+    "verdict": "MISS HIGH",
+    "miss_points": 9.92725888027321
+  },
+  {
+    "registration": "(3) 30+ protocol, struct@1 consensus",
+    "band": "30-39",
+    "n": 1814,
+    "lo": 0.8578251705172913,
+    "hi": 0.8899793709462577,
+    "measured": 0.8478500551267916,
+    "se_points": 0.843289678297492,
+    "verdict": "MISS LOW",
+    "miss_points": -0.9975115390499778
+  },
+  {
+    "registration": "(3) 30+ protocol, struct@1 consensus",
+    "band": "35+",
+    "n": 1132,
+    "lo": 0.7025347430883989,
+    "hi": 0.7537184391832291,
+    "measured": 0.7376325088339223,
+    "se_points": 1.30753048172786,
+    "verdict": "HIT",
+    "miss_points": 0.0
+  },
+  {
+    "registration": "(3) 30+ protocol, struct@1 consensus",
+    "band": "all",
+    "n": 2321,
+    "lo": 0.802517940666641,
+    "hi": 0.8383866512506267,
+    "measured": 0.8039638087031452,
+    "se_points": 0.824040975101206,
+    "verdict": "HIT",
+    "miss_points": 0.0
+  },
+  {
+    "registration": "(4) 30+ protocol, rec@60",
+    "band": "40-49",
+    "n": 380,
+    "lo": 0.91399285460883,
+    "hi": 0.9522029504846329,
+    "measured": 0.9184210526315789,
+    "se_points": 1.4041650704682824,
+    "verdict": "HIT",
+    "miss_points": 0.0
+  },
+  {
+    "registration": "(4) 30+ protocol, rec@60",
+    "band": "35+",
+    "n": 1132,
+    "lo": 0.9367963424267445,
+    "hi": 0.9598515393715987,
+    "measured": 0.9328621908127208,
+    "se_points": 0.7438221637931518,
+    "verdict": "MISS LOW",
+    "miss_points": -0.3934151614023662
+  },
+  {
+    "registration": "(4) 30+ protocol, struct@60",
+    "band": "40-49",
+    "n": 380,
+    "lo": 0.8946493536190099,
+    "hi": 0.9374990855567326,
+    "measured": 0.9078947368421053,
+    "se_points": 1.4834338157456244,
+    "verdict": "HIT",
+    "miss_points": 0.0
+  },
+  {
+    "registration": "(4) 30+ protocol, struct@60",
+    "band": "35+",
+    "n": 1132,
+    "lo": 0.9226875931100336,
+    "hi": 0.9486245035387273,
+    "measured": 0.9178445229681979,
+    "se_points": 0.8161680839229628,
+    "verdict": "MISS LOW",
+    "miss_points": -0.48430701418357147
+  }
+]

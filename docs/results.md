@@ -50,8 +50,21 @@ every size band. `small_1m` at T=0.6 on the large protocol, read at k=20:
 | all | 0.317 |
 
 Domain: 5 ≤ k ≤ 60, measured; extrapolation beyond that is an extrapolation.
-Script: `scripts/budget_curve.py`. Inverting the fits gives the brute-force
-price, and it is a measurement rather than a guess up to k=60:
+Script: `scripts/budget_curve.py`.
+
+**The law now transports to a ninth cell.** The final run on full ChEMBL at
+6.00 passes returns `b` in **0.299–0.385** in every band (|r| ≥ 0.985), inside
+the 0.144–0.396 range pre-registered from this table, and `b ÷ rec@60` inside
+0.320–0.380 in five of six bands. `b` is the most robust quantity in this
+project, and the invariant means every intervention tried here slides the model
+along one curve rather than bending it. Note the direction of the change,
+though: the final run's `b` at 50+ is **0.299** against the 0.144 above, so the
+*band structure* of `b` flattened with scale even as its range held — the same
+flattening that made night 9's size extrapolations too steep. Source:
+[night 9](overnight-2026-10-30.md).
+
+Inverting the fits gives the brute-force price, and it is a measurement rather
+than a guess up to k=60:
 
 | band | k for rec 0.90 | k for 0.95 |
 |---|---|---|
@@ -344,6 +357,23 @@ the ratio's is about 0.2 and that spread is inside it: **consistent with
 size-invariant, not measured to be.** Testing it needs a third passes point at
 50+, which does not exist.
 
+**Night 9 created that point, and the exchange rate did not transport.** The
+final run gives a second passes point at 50+ on the *full* shard — 1.2087
+against 6.00 passes, 893 queries, same protocol — and measures `g′ = +22.28`
+per passes doubling against the +26.30 above, with `g′ / f′ = 1.322` against
+the registered 1.52–1.68. Both are misses in the same direction: **a doubling
+of passes buys less on the larger corpus, so passes and molecules partially
+substitute rather than purely add.** That is the first direct counter-evidence
+to the additive separability this section rests on.
+
+Treat it as one matched pair on one corpus. The error bar on an exponent read
+from a single pair has never been measured in this project — which is why §8 of
+[final-run-plan.md](final-run-plan.md) registered these as targets rather than
+intervals, and why measuring that noise floor with two seeds is now the
+cheapest open item. Until it exists, **the additive law is weakened, not
+withdrawn.** Scripts: `scripts/step_curve.py --pair`, `scripts/score_stage6.py`.
+Source: [night 9](overnight-2026-10-30.md).
+
 **On structure accuracy both slopes are about a fifth smaller**, and the gap
 widens with size — the opposite direction from the two cases that prompted the
 read-both rule:
@@ -460,6 +490,7 @@ Claims tested and refused, so they are not re-opened by accident:
 | `docs/overnight-2026-10-17.md` | the capacity × steps 2×2, the corpus axis, the step law |
 | `docs/overnight-2026-10-20.md` | f′ at constant passes, and both slopes at 50+ |
 | `docs/overnight-2026-10-24.md` | step saturation, and the bend in the step law |
+| `docs/overnight-2026-10-30.md` | the final run; `b` to a ninth cell, and `g′ / f′` failing to transport |
 | `docs/report.md` | all of the above as one account, with the methods and the limits |
 
 Every claim this project published and later withdrew is listed in

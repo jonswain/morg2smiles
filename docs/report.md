@@ -37,8 +37,66 @@ corpus — see [§8](#8-limitations).
 
 ## 1. Summary
 
-*(Written last; see [§5.13](#513-the-final-run-full-chembl-at-six-passes) for the
-final run and [§9](#9-next-steps) for what it leaves open.)*
+A Morgan fingerprint discards the molecule it describes. This project asked how
+much of it can be put back, and answered with a fingerprint-conditioned
+encoder–decoder transformer trained on ChEMBL on one laptop over nine sessions
+and 118.7 hours of recorded run time.
+
+**It can be put back almost completely at drug-like size.** 8.0M parameters,
+all 1.88M training molecules, six passes: **rec@1 = 0.6963 and rec@60 = 0.9496**
+on 2,321 held-out fingerprints of 30+ heavy atoms, none of them in any training
+set, against a retrieval baseline of exactly 0.0000 by construction. At the
+common protocol the earlier 1M-molecule model reaches **rec@20 = 0.9162** with
+over three in four molecules recovered on the first guess (§5.1). Mean best
+Tanimoto among the failures is 0.976, so even the misses are near misses.
+
+**What governs it is two power laws and a cliff.** The recovery deficit falls as
+`1 − rec(k) = A·k^−b` in the oracle budget (|r| ≥ 0.991, nine cells, `b` in
+0.144–0.396) and as a steeper law in training steps, with the step exponent
+~3.1× the budget exponent — so compute is the better buy above roughly 100,000
+queries and the oracle budget below it (§5.2–§5.4). Both axes decay in the same
+direction: performance falls sharply with molecular size, and **the size cliff
+is combinatorial, not informational.** Preimages per query *rise* with size
+while 18.9% of 50+ queries draw none at all; proposals are concentrated on
+fewer queries than chance in every band. More budget buys more draws from the
+same concentrated distribution, which is why nothing tried here dissolves the
+cliff and the final run only pushed it back ~50-fold (§5.12, §5.13).
+
+**The final run's main result is a miss.** Five pre-registrations were scored
+mechanically by code written before the numbers existed: 9 of 20 entries landed
+inside their intervals, and the misses have a direction — **high on every hard
+band, low on every saturated one**, by up to 15.8 points at 50+. The scaling
+laws were fitted where the cliff is severe and over-predicted its severity five
+times further out. Two quantities registered as invariants also failed on their
+first test against a second corpus: `g′ / f′` came in at 1.322 against a
+registered 1.52–1.68, and the step exponent's size dependence transports in the
+easy bands and not the hard ones. That is the first direct counter-evidence to
+this report's own additive scaling law (§5.6–§5.7), and it rests on one pair
+with no error bar — which is why putting an error bar on an exponent is item 2
+of §9.
+
+**What also survived is worth as much as what broke.** Consensus ranking buys
++22 points of rec@1 for free (§5.9); T=0.6 is worth +1.99 points, all of it
+above 35 heavy atoms (§5.10); capacity cuts a constant fraction of the deficit
+rather than changing its shape (§5.8); and `b ÷ rec@60` has now held in nine
+cells, meaning every intervention tried here slides the model along one curve
+rather than bending it (§5.5). Twelve directions were measured and are dead
+(§6).
+
+**And the method is part of the result.** 28 claims in this project were
+withdrawn, traceable to five causes, all logged
+([retractions.md](retractions.md)). Every claim that broke was a comparison
+*between* training runs; every claim that survived was measured *within* one
+(§7.1). Three of the nine sessions existed only to correct the previous one's
+headline. Six method failures and the six pre-registration rules they produced
+are in §3.9 and §7 — including the one this project could not write its way out
+of: **writing the guard did not stop the overclaim** (§7.6).
+
+What this does not establish is in §8, and what it leaves open is in §9. The
+leading question is simply where the step axis stops: the oracle selected the
+*final* checkpoint of the final run, so six passes over full ChEMBL had not
+exhausted it, and the only bend ever located sits in a regime §5.13 shows does
+not transport.
 
 ---
 
@@ -498,7 +556,7 @@ Nine sessions. The column that matters is the last one.
 | 6 | 10-17/19 | 35 h | Capacity, and what moves the budget exponent | **It was training length, not capacity** — night 5's headline named a variable that never moved. Capacity cuts a **constant fraction** of the deficit, independent of training length, declining from 25.4% at 30–34 to 3.9% at 50+. The step law is **3.1× steeper** than the budget law. |
 | 7 | 10-20 | 6 h | f′ at constant passes | **f′ = +22.09 points per corpus doubling**, measured with nothing subtracted. The convex branch is **falsified by 12 SE**. Both scaling axes decay in the direction the cliff does. |
 | 8 | 10-24/25 | 19 h | Step saturation, the third point | **Saturation is real, on the slope**: the deficit exponent falls 0.911 → 0.701. The registered *level* test could not detect it, and the bend sits 24 passes out of the regime it was commissioned to inform. |
-| 9 | 10-30/31 | 24 h | The final run | [§5.13](#513-the-final-run-full-chembl-at-six-passes) |
+| 9 | 10-30/31 | 28 h | The final run | **Full ChEMBL, 6 passes: rec@1 0.6963 and rec@60 0.9496 on the 30+ protocol, 0.3180 and 0.7402 at 50+.** The registration missed *high* on every hard band and *low* on the saturated ones — the size extrapolation was too steep. `g′ / f′` is **not** corpus-invariant, the first counter-evidence to the additive law. [§5.13](#513-the-final-run-full-chembl-at-six-passes) |
 
 Two patterns in that table are the project's real output. **Every claim that
 broke in the first two nights was a comparison *between* runs; every claim that
@@ -730,8 +788,14 @@ within the range this hardware can reach.
 The ratio sits at 1.52–1.68 while both slopes halve, which looks like a
 size-invariant exchange rate near 1.55. Each slope's SE is about 2.2 points, so
 the ratio's is about 0.2 and that spread is inside it: **consistent with
-size-invariant, not measured to be.** Testing it needs a third passes point at
-50+, which does not exist.
+size-invariant, not measured to be.** Testing it needed a second passes point
+at 50+ on another corpus, which did not exist when this was written.
+
+**The final run created that point, and the exchange rate did not transport**
+— `g′ = +22.28` and `g′ / f′ = 1.322` on the full shard, against the +26.30 and
+1.56 above. See [§5.13](#513-the-final-run-full-chembl-at-six-passes), which is
+where this section's assumption of additive separability meets its first
+counter-evidence.
 
 **On structure accuracy both slopes are about a fifth smaller**, and the gap
 widens with size — the opposite direction from the two cases that prompted the
@@ -951,9 +1015,120 @@ dissolved.**
 
 ### 5.13 The final run: full ChEMBL at six passes
 
-*(Pending — the run is in progress. This section will carry the registered
-intervals, the measurement, and the verdict scored by
-[`scripts/score_job4.py`](../scripts/score_job4.py).)*
+The last experiment: 8.0M parameters, all 1,881,996 training molecules, batch
+128, **88,218 steps = 6.00 passes**, cosine to zero, 25.4 h of training and
+27.9 h end to end. It stopped on the registered step budget, not the clock.
+Scored by [`scripts/score_job4.py`](../scripts/score_job4.py) and
+[`scripts/score_stage6.py`](../scripts/score_stage6.py), both written before the
+run finished. Full account in
+[overnight-2026-10-30.md](overnight-2026-10-30.md).
+
+**The oracle selected the final checkpoint.** In the eight previous sessions the
+selector usually preferred an earlier one; here it took step 88,218. The step
+axis was still paying when the budget ended the run, and this report does not
+measure where it stops.
+
+Against the same protocol, same shard, same queries at 1.2087 passes — the only
+clean before/after this programme has on the full corpus (raw-slot convention
+throughout, §3.7):
+
+| | 30+ protocol (2,321) | 50+ instrument (893) |
+|---|---|---|
+| rec@1 | 0.2783 → **0.6963** | 0.0258 → **0.3180** |
+| rec@20 | 0.6829 → **0.9302** | 0.1501 → **0.6685** |
+| rec@60 | 0.7553 → **0.9496** | 0.2251 → **0.7402** |
+| structure@60 | 0.7376 → **0.9375** | 0.1624 → **0.6428** |
+| collision rate among hits | 0.023 → 0.013 | 0.279 → **0.132** |
+| mean fp hit rank | 7.0 → 2.5 | 16.3 → **6.6** |
+
+#### The registration missed, with a direction
+
+9 of 20 scored entries landed inside their intervals. **Every miss on a hard
+band is high; every miss on a saturated or pooled band is low.** The largest:
+50+ consensus rec@1 registered 0.3283–0.4401 and measured **0.5984** (+15.8 pts,
+3.6 SE); the 50+ instrument's rec@60 registered 0.6310–0.6912 and measured
+**0.7615** (+7.0 pts, 4.9 SE); structure@60 there +7.8 pts. Against that,
+30–34 struct@1 came in 1.37 points *under* its floor and the pooled 30–39 one
+point under.
+
+So **the size extrapolation was too steep.** The laws of §5.2–§5.7 were fitted
+where the cliff is severe and projected onto a run five times longer than any
+that fitted them; the cliff flattened faster than they predicted. Both
+directions of miss are the same error in the same model.
+
+Registration (1), the all-slice rec@60, was declared a ceiling reading in
+advance and is reported rather than scored: 0.9582 against a registered
+0.9634–0.9767, an interval narrower than the metric's own 1.6-point threshold
+(§3.8). It resolves nothing, which is what §3.9's sixth rule predicted and why
+the weight was placed on rec@1, the hard bands and structure accuracy before the
+number existed.
+
+#### What the exponents say
+
+Registered in §8 of [final-run-plan.md](final-run-plan.md) before the numbers
+existed, as questions against specific targets rather than intervals, because
+this project has never measured the error bar on an exponent from a single pair:
+
+| quantity | target | measured | |
+|---|---|---|---|
+| `b` (budget law) | 0.144–0.396 | 0.299–0.385, **every band** | holds |
+| `b ÷ rec@60` | 0.320–0.380 | 5 of 6 inside; 35–39 at 0.401 | essentially holds |
+| `c` at k=60 | 0.7008–0.9113 | **0.986** | miss high, as registered to expect |
+| `c` per band | 1.092 / 1.083 / 0.770 / 0.381 | 1.058 / 1.080 / **0.970** / **0.802** | easy bands only |
+| `g′` at 50+ | +26.30 | **+22.28** | 4.02 lower on the larger corpus |
+| `g′ / f′` at 50+ | 1.52–1.68 | **1.322** | miss low |
+
+Four consequences, and the last is the expensive one.
+
+**The budget law transports to a ninth cell** — `b` inside its range in every
+band, |r| ≥ 0.985. It is the most robust quantity in the project.
+
+**`c` is confirmed a local slope, not a law.** §8 recorded in advance that the
+honest expectation for that row was a miss. It missed high. A slope read at
+30–74 passes on 100k molecules does not hold at 1.2–6 passes on 1.9M.
+
+**`c`'s size dependence is corpus-dependent, not a property of decoding.** The
+registered reading of a match was that the exponent's size structure belongs to
+the problem; instead the two easy bands reproduce the 100k exponents to within
+3% while 40–49 comes in 1.26× and 50+ **2.11×** higher. It transports where the
+task is easy and not where it is hard — the same flattening the registration
+misses showed, measured independently.
+
+**The exchange rate between the two axes is not corpus-invariant.** `g′` at 50+
+fell from +26.30 on the 1M shard to +22.28 on the full shard; against the 1M
+shard's `f′` of +16.86 the ratio is 1.322 where 1.52–1.68 was registered. §8
+named what a miss would mean in advance: **passes and molecules substitute
+rather than purely add.** This is the first direct counter-evidence to the
+additive law of §5.6–§5.7, and it is one pair, on one corpus, with no error bar.
+What survives is `b ÷ rec@60`: interventions still slide the model along one
+curve rather than bending it (§5.5). What does not survive is the claim that a
+doubling costs the same on either axis regardless of corpus.
+
+#### The cliff, pushed back fifty-fold and unchanged in shape
+
+| band | k for 0.9 | k for 0.95 | k for 0.99 |
+|---|---|---|---|
+| 30–34 | **1** | 9 | 669 |
+| 35–39 | 5 | 30 | 1,929 |
+| 40–49 | 50 | 437 | 66,912 |
+| 50+ | 654 | 6,640 | 1,444,900 |
+
+Extrapolations and lower bounds, every one. 30–34 reaching 0.9 in a single slot
+is new. 50+ needing 654 is the cliff surviving everything: ~50× cheaper than a
+fortnight earlier, still three orders of magnitude from the easy bands.
+
+And §5.12's mechanism holds exactly. Preimages per query *rise* with size
+(1.63 → 2.87 from 30–34 to 50+) while **18.9% of 50+ queries draw none at all**,
+and the Poisson comparison shows proposals concentrated on fewer queries than
+chance in every band. Six passes made the cliff much smaller without changing
+what it is: concentration, not scarcity.
+
+One thing the run did settle that no earlier session could. The collision rate
+at 50+ — recoveries made by a *different* molecule with the same fingerprint,
+the irreducible part of the task — **halved, 0.279 → 0.132**. Earlier models
+were too weak at 50+ to distinguish the irreducible floor from their own
+failure. At six passes the floor is visible, and 13.2% of 50+ recoveries are not
+a modelling problem at all.
 
 ---
 
@@ -1104,7 +1279,67 @@ In the order a sceptical reader would ask.
 
 ## 9. Next steps
 
-*(Pending the final run — see [§5.13](#513-the-final-run-full-chembl-at-six-passes).)*
+Ordered by what they would decide, not by cost. Each is written as this project
+writes them: the question, the instrument, and the number it would be read
+against — because an experiment whose reading is chosen afterwards is §7.4.
+
+**1. Where does the step axis stop? (~50 h, one run)** The oracle took the final
+checkpoint of the final run, so 6.00 passes had not exhausted the full corpus.
+Night 8 found a bend, but at 30–74 passes on 100k molecules, and §5.13 showed
+`c` does not transport between those regimes. The bend on the full corpus has
+never been located. A 12-pass run — 176,436 steps, roughly 50 h on this hardware
+— would put a third point on the full-shard passes axis and is the only way to
+find it. Register the **slope** between 6 and 12 passes against the measured
++22.28 per doubling at 50+, not a level, per §3.9's fifth rule. This is the
+single most informative run left and it needs no new code.
+
+**2. Put an error bar on an exponent (~6 h, two short runs).** Every exponent in
+§5.13 is from one pair, and §8 of the plan registered targets rather than
+intervals precisely because the noise floor has never been measured. Two
+same-config runs at different seeds, scored by the same matched pair, would give
+the first `sd` on `c` — and would say whether `g′ / f′` dropping from ~1.56 to
+1.322 is a corpus effect or a one-pair artefact. **Until this exists, the
+counter-evidence against the additive law in §5.13 should not be promoted to a
+finding.** Cheapest item here and it gates the most interesting one.
+
+**3. Attack concentration directly, not with budget (~8 h).** §5.12 and §5.13
+agree the cliff is concentration: 18.9% of 50+ queries draw no preimage at all
+while preimages per query *rise* with size. Every intervention tried so far buys
+more draws from the same distribution, which §5.5 shows slides along one curve.
+Untested: decoding that is diverse by construction rather than by temperature —
+diverse beam search, or sampling without replacement over the set-encoder
+attention. Register against the **"none" column** (0.189 at 50+), not against
+recovery, since the mechanism is the claim. Note that two nearby ideas are
+already dead (§6): size-conditional decode temperature, and ensembling
+independently seeded models.
+
+**4. Break the collisions, or accept them (~10 h).** 13.2% of 50+ recoveries are
+a different molecule with the same fingerprint — an irreducible fraction of the
+task as posed, now measurable for the first time (§5.13). Richer fingerprints
+(counts, chirality, radius 3, 4,096 bits) would shrink it. §5.11 found count
+information *does not reach recovery* at small scale, but that was measured on a
+model far from this one's strength, and §5.13 is a standing warning about
+transporting small-scale readings. Register against the collision rate at 50+
+(0.132), with recovery as the secondary read.
+
+**5. The untested cell: capacity on the full corpus (~60 h, needs more memory).**
+§5.8 says capacity cuts a constant fraction of the deficit, measured at 100k and
+1M. 25.7M parameters was infeasible on this hardware (§3.3), so the
+large-model × large-corpus cell is empty, and it is exactly the cell where §5.13
+suggests the small-scale laws are least trustworthy. Needs different hardware
+before it is worth planning.
+
+**6. Close the recovery/structure gap at 50+.** Recovery 0.7402 against structure
+0.6428 is a 9.7-point gap, far wider than the 1–2 points elsewhere. Some is
+collisions (item 4); the remainder is the model proposing the right fingerprint
+by a wrong molecule in a way the easy bands do not show. Not yet a hypothesis,
+which is why it is last — but it is the clearest unexplained number in the
+report.
+
+**What not to do.** §6 lists twelve measured-and-dead directions. The
+pre-registration rules in §3.9 and the six method failures in §7 exist so they
+are not repeated; the newest of them is §5.13's own, that a registered command
+which has never been executed is a registration of intent rather than procedure.
 
 ---
 
@@ -1136,7 +1371,7 @@ Every training run on disk, from `results/leaderboard.jsonl`. Per-run numbers ar
 | `small_100k_1p2` | 7.95M | 100k | 856 | 0.39 | the floor check |
 | `small_full_1p2` | 7.96M | full | 17,772 | 5.27 | **f′ at constant passes** |
 | `small_100k_52k` | 7.95M | 100k | 52,500 | 17.20 | step saturation |
-| `small_full_6p` | 7.96M | full | 88,218 | — | **the final run** |
+| `small_full_6p` | 7.96M | full | 88,218 | 25.36 | **the final run** |
 
 `base_1m` (25.7M parameters) is kept in the repo as a record of what was tried:
 6.58 s/step, 20.5–25.7 h for two epochs, not an overnight run on this hardware.

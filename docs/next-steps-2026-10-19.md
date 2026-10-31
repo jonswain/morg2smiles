@@ -13,6 +13,22 @@ than by momentum.
 
 ## Definition of done
 
+> **Closed 2026-10-31. All five criteria are met.** Item 1 was answered on night
+> 7 (`f′ = +22.09` per corpus doubling, measured at constant passes); item 2 on
+> night 8 (the bend in the step law, found on the slope after the registered
+> level test failed to detect it); item 3 by documenting the 64-atom cap as a
+> deliberate boundary before the final shard was built; item 4 by the final run
+> on 2026-10-30/31 — 1,881,996 molecules, 88,218 steps, 6.00 passes, with its
+> five-part pre-registration scored mechanically
+> ([night 9](overnight-2026-10-30.md)); item 5 by
+> [report.md](report.md), which is the self-contained account, with
+> [results.md](results.md) and the README brought into line with it.
+>
+> Note that item 4's prediction **missed, with a direction** — high on every
+> hard band, low on every saturated one. That satisfies the criterion as
+> written, which asks for a pre-registered prediction reported per size band
+> and explicitly does *not* require beating a number. The miss is the finding.
+
 The project is done when all five of these are true:
 
 1. **The corpus question is answered directly**, not inferred under an

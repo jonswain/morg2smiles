@@ -1,0 +1,68 @@
+{
+  "k": 1,
+  "order": "consensus",
+  "metric": "structure",
+  "budget": "molecules",
+  "n_fp_unseen": 2321,
+  "runs": [
+    "small_full_6p"
+  ],
+  "bands": {
+    "30-34": {
+      "n_queries": 1189,
+      "share_of_protocol": 0.5122791900043084,
+      "per_run": {
+        "small_full_6p": 0.8671152228763667
+      },
+      "pairs": {}
+    },
+    "35-39": {
+      "n_queries": 625,
+      "share_of_protocol": 0.26928048255062476,
+      "per_run": {
+        "small_full_6p": 0.8112
+      },
+      "pairs": {}
+    },
+    "40-49": {
+      "n_queries": 380,
+      "share_of_protocol": 0.16372253339077983,
+      "per_run": {
+        "small_full_6p": 0.718421052631579
+      },
+      "pairs": {}
+    },
+    "50+": {
+      "n_queries": 127,
+      "share_of_protocol": 0.05471779405428694,
+      "per_run": {
+        "small_full_6p": 0.4330708661417323
+      },
+      "pairs": {}
+    },
+    "30-39": {
+      "n_queries": 1814,
+      "share_of_protocol": 0.7815596725549332,
+      "per_run": {
+        "small_full_6p": 0.8478500551267916
+      },
+      "pairs": {}
+    },
+    "35+": {
+      "n_queries": 1132,
+      "share_of_protocol": 0.4877208099956915,
+      "per_run": {
+        "small_full_6p": 0.7376325088339223
+      },
+      "pairs": {}
+    },
+    "all": {
+      "n_queries": 2321,
+      "share_of_protocol": 1.0,
+      "per_run": {
+        "small_full_6p": 0.8039638087031452
+      },
+      "pairs": {}
+    }
+  }
+}

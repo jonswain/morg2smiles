@@ -1,0 +1,129 @@
+{
+  "protocol": {
+    "eval_n": 2400,
+    "seed": 0,
+    "budget": "molecules",
+    "eval_k": 60,
+    "max_oversample": 12.0,
+    "temperature": 0.6,
+    "top_p": 1.0,
+    "pool_shard": "data/shards/1m",
+    "split": "valid",
+    "n_fp_unseen": 2321,
+    "fp_config": "morgan r=2 binary folded/2048",
+    "training_union_size": 1989502,
+    "shards_excluded": [
+      "data/shards/100k",
+      "data/shards/1m",
+      "data/shards/full"
+    ],
+    "min_heavy_atoms": 30,
+    "max_heavy_atoms": null
+  },
+  "runs": {
+    "small_full_6p": {
+      "checkpoint": "checkpoints/small_full_6p/best.pt",
+      "train_shard": "data/shards/full",
+      "n_parameters": 7963767,
+      "trained_epoch": 6,
+      "trained_step": 88218,
+      "model_config": {
+        "d_model": 256,
+        "n_heads": 8,
+        "d_ff": 1024,
+        "n_encoder_layers": 4,
+        "n_decoder_layers": 4,
+        "dropout": 0.1,
+        "max_tokens": 128,
+        "vocab_size": 119,
+        "fp_vocab_size": 2048
+      },
+      "report": {
+        "ks": [
+          1,
+          5,
+          20
+        ],
+        "budget": "molecules",
+        "slices": {
+          "all": {
+            "n_queries": 2400,
+            "recovery_at_k": {
+              "1": 0.7079166666666666,
+              "5": 0.8983333333333333,
+              "20": 0.9425
+            },
+            "structure_accuracy_at_k": {
+              "1": 0.63875,
+              "5": 0.8633333333333333,
+              "20": 0.9208333333333333
+            },
+            "recovery_at_k_consensus": {
+              "1": 0.8591666666666666,
+              "5": 0.9395833333333333,
+              "20": 0.9508333333333333
+            },
+            "structure_accuracy_at_k_consensus": {
+              "1": 0.7825,
+              "5": 0.9125,
+              "20": 0.93625
+            },
+            "validity": 0.9722448198777853,
+            "duplicate_rate": 0.9026838126172818,
+            "unique_valid_per_query": 29.392916666666668,
+            "mean_samples_per_query": 615.15,
+            "mean_candidates_per_query": 422.54875,
+            "mean_scored_per_query": 29.392916666666668,
+            "budget_filled_rate": 0.47291666666666665,
+            "mean_best_tanimoto": 0.9920879666665123,
+            "mean_hit_rank": 1.5732235701906412
+          },
+          "fp_unseen": {
+            "n_queries": 2321,
+            "recovery_at_k": {
+              "1": 0.7065919862128393,
+              "5": 0.8974579922447221,
+              "20": 0.941835415769065
+            },
+            "structure_accuracy_at_k": {
+              "1": 0.6557518311072813,
+              "5": 0.8754847048685911,
+              "20": 0.9284791038345541
+            },
+            "recovery_at_k_consensus": {
+              "1": 0.8591124515295131,
+              "5": 0.9388194743644981,
+              "20": 0.950452391210685
+            },
+            "structure_accuracy_at_k_consensus": {
+              "1": 0.8039638087031452,
+              "5": 0.925463162429987,
+              "20": 0.942697113313227
+            },
+            "validity": 0.9724316181459213,
+            "duplicate_rate": 0.9047368629840334,
+            "unique_valid_per_query": 28.673847479534682,
+            "mean_samples_per_query": 619.7759586385179,
+            "mean_candidates_per_query": 423.57561395950023,
+            "mean_scored_per_query": 28.673847479534682,
+            "budget_filled_rate": 0.46230073244291253,
+            "mean_best_tanimoto": 0.9918426004115404,
+            "mean_hit_rank": 1.5713004484304933
+          }
+        },
+        "primary_metric": 0.941835415769065,
+        "primary_metric_name": "recovery@20 (fp_unseen)",
+        "fp_unseen_fraction": 0.9670833333333333,
+        "elapsed_seconds": 6637.7869917918,
+        "queries_per_second": 0.36156628752441267,
+        "candidates_per_second": 152.77938283558117,
+        "generation": {
+          "k": 60,
+          "budget": "molecules",
+          "seed": 0,
+          "max_oversample": 12.0
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,14 @@
+[10-30 18:50:44] === night 9 start, git b9f2045, 1980 min to deadline ===
+[10-30 18:50:44] stage 1: small_full_6p, 8.0M params, full shard, 88,218 steps, 6.00 passes
+[10-31 20:18:56] stage 1 exit=0, step budget of 88218 reached / 25.36 h
+[10-31 20:18:56] stage 2: small_full_6p at T=0.6, k=60, large protocol (30+, 2,400 queries)
+[10-31 22:13:38] stage 2 exit=0
+[10-31 22:13:38] stage 3: small_full_6p on the 50+ protocol, k=60, T=0.6
+[10-31 22:43:10] stage 3 exit=0
+[10-31 22:43:26] stage 4 30+ band tables exit=0
+[10-31 22:43:30] stage 4b 50+ band tables exit=0
+[10-31 22:43:42] stage 5 anatomy and budget curve exit=0
+[10-31 22:43:42] stage 5b step exponent exit=1
+[10-31 22:43:42] === night 9 done, 307 min to spare ===
+[10-31 22:43:42] score the registration against configs/small_full_6p.yaml -- five entries,
+[10-31 22:43:42] intervals that tile, both metrics. The headline rec@60 is a ceiling reading.
