@@ -175,7 +175,7 @@ From `scripts/analyse_recoverability.py` on the 10k shard (11,669 molecules):
 | folded count 2048 | 11,668 | 0.9998 | 49.8 |
 | unfolded binary | 11,667 | 0.9997 | 50.5 |
 
-Folding to 2048 bits loses 1.46% of atom environments and affects 50% of
+Folding to 2048 bits collides some atom environments and affects 50% of
 molecules; at 4096 bits that falls to 0.48% and 21%.
 
 **That table is measured on 11,669 molecules, and both conclusions drawn from

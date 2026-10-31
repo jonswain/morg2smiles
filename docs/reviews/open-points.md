@@ -11,6 +11,12 @@ Round 3's reviewer must return a verdict on every row that is not `fixed`.
 | round | blocker | major | minor | total numbered |
 |---|---|---|---|---|
 | 1 | 4 | 10 | 3 | 16 (+28 line edits, 17 consistency, ~70 comprehensibility) |
+| 2 | 3 | 12 | 2 | 17 (+20 line edits, comprehensibility log) |
+
+**Round 2 found more `major` points than round 1, not fewer.** Two of its three
+blockers were defects the round-1 revision introduced, including the convention
+collision committed in the same commit that documented it as having happened
+five times. The count going up is the measurement working.
 
 ## Register
 
@@ -36,3 +42,28 @@ Round 3's reviewer must return a verdict on every row that is not `fixed`.
 | R1-N | 1 | naming | five names for three protocols | `fixed` | one name each, swept; aliases noted once in §3.6 |
 | R1-A7 | 1 | addition | add the existing size-cliff figure to §5.12 | `deferred` | `plot_size_cliff.py` predates the final run; what the figure should show is a judgement better made with round 2 in hand |
 | R1-A8 | 1 | addition | validity-by-band table | `open` | a few minutes of CPU over the dumps; §5.10's argument turns on validity and no band-level figures exist |
+
+## Round 2
+
+| id | severity | point | status | where resolved |
+|---|---|---|---|---|
+| R2-01 | blocker | §1.3's headline table mixes conventions within a row; "16 points" subtracts across them | `fixed` | convention is now a **column**; +15.3 within the molecule budget |
+| R2-02 | blocker | "Tanimoto" never defined, yet carries §5.12's central result | `fixed` | glossary row under "The task" |
+| R2-03 | blocker | the "fiftyfold" retracted in §5.13 is still asserted in §1.3 | `fixed` | replaced with the measured 0.2251 → 0.7402 |
+| R2-04 | major | `b` range attributed to eight cells (it is one cell's bands); §5.5's invariant is 35+ only | `fixed` | both corrected |
+| R2-05 | major | §5.12's final-run Tanimoto triple skips 35–39, faking monotonicity | `fixed` | all four bands, non-monotonicity stated |
+| R2-06 | major | "near-miss share rises with size" is not monotone | `fixed` | 17/24/22/58 given |
+| R2-07 | major | 0.981 and 0.366 rest on n=54 and n=41, unlabelled; and the band is 50–69 | `fixed` | cell, protocol, both n, correct band |
+| R2-08 | major | "full-k rate 1.000 in every band" misleading in the adopted convention | `fixed` | 46% molecule-budget fill, 28.7 distinct/query |
+| R2-09 | major | "about twenty slots" is a k=20 figure presented as general | `fixed` | cells named, 28.7 given for the final run |
+| R2-10 | major | registration tables name no convention | `fixed` | "molecule budget" on both, plus a note on the mismatch with the before/after table |
+| R2-11 | major | the `c` per-band targets are unsourced | `fixed` | sourced inline to the 100k 2×2 at k=60 |
+| R2-12 | major | glossary gives +22 and 16 for one effect | `fixed` | +22 and +15.3, each against a named cell |
+| R2-13 | major | statistical vocabulary and night numbering used before introduction | `fixed` (part) / `rejected` (part) | four-row Statistics glossary added; **declined** moving §4 ahead of §3 or dating every "night N" — stated as a judgement in `round-2-response.md` |
+| R2-14 | major | "entry N" never introduced | `fixed` | clause in the authority table |
+| R2-15 | major | the five registrations never enumerated, so "9 of 26" is uncheckable | `fixed` | inventory table at the head of §5.13, with the 9/13/4 split |
+| R2-16 | minor | §5.9's seed-pooling gain omits its 3× cost | `fixed` | cost stated and contrasted |
+| R2-17 | minor | §5.11a's placement and self-diagnosing opening | `fixed` (part) / `rejected` (part) | opening rewritten; **declined** the renumber — ~40 cross-references and two heavily-cited anchors to fix a `minor` |
+| R2-L | line edits | 20 items | `fixed` | all applied; see `round-2-response.md` |
+| R2-X | factual | "1.46% of distinct atom environments" traces to nothing | `fixed` | **removed** from `report.md` and `README.md`, replaced by the measured 950,967 → 943,177 |
+| R2-A | addition | `preimages_per_hit` column for §5.13's concentration table | `open` | free from `budget_curve_full_6p.json` |

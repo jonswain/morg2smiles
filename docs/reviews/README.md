@@ -15,6 +15,7 @@ whether its points were genuinely addressed.
 | round | review | author response |
 |---|---|---|
 | 1 | [round-1-review.md](round-1-review.md) | [round-1-response.md](round-1-response.md) |
+| 2 | [round-2-review.md](round-2-review.md) | [round-2-response.md](round-2-response.md) |
 
 [open-points.md](open-points.md) is the running register: every numbered point
 from every round, its severity, and whether it was fixed, rejected with a
