@@ -86,7 +86,7 @@ Twenty-eight entries, five causes:
    distorts.
 
    Entry 20's specific form — a prediction computed in one recovery convention
-   and scored in another — has now been caught four times, and night 7 found
+   and scored in another — has now been caught five times, and night 7 found
    the structural reason it recurs. `compare_checkpoints.py` computes
    `ks = [n for n in (1, 5, 20, 100) if n <= eval_k]`, so an `--eval-k 60` run
    reports rec@1/5/20 *under a 60-slot budget* and **never prints rec@60**.

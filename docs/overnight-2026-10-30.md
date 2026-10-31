@@ -96,10 +96,18 @@ Per-band, and this is the flattening in one place:
 | 40–49 | 380 | 0.5447 | 0.9026 | 0.8842 | 0.020 | 3.6 |
 | 50+ | 127 | 0.3150 | 0.7953 | 0.6929 | 0.129 | 6.9 |
 
-The two independent reads of 50+ agree: 0.7953 on the 127 queries inside the
-30+ protocol and 0.7615 on the 893-query instrument (band convention, both),
-a 3.4-point spread against a combined SE near 3.8. The protocols are blind in
-opposite directions and they do not disagree.
+The two independent reads of 50+ agree, compared **within one convention** as
+§1 of [methodology.md](methodology.md) requires. In the molecule budget: 0.8110
+on the 127 queries inside the 30+ protocol against 0.7615 on the 893-query
+instrument, 4.95 points apart against a combined SE of 3.76 — **1.3 SE**. In raw
+slots: 0.7953 against 0.7402, 1.4 SE. The protocols are blind in opposite
+directions and they do not disagree.
+
+(The first draft of this paragraph compared 0.7953 against 0.7615 — raw slots
+against molecule budget. That is the convention collision of
+[methodology §1](methodology.md#1-recovery-has-two-conventions-and-they-differ-by-points),
+caught for the fifth time, here by proof-reading rather than by a guard. The
+conclusion is unchanged in either convention, which is luck and not a defence.)
 
 ## Stage 6: the exponents, on the protocol rather than the trace
 
