@@ -189,12 +189,14 @@ share theirs with at least one other:
 | 11,669 (the table above) | 0.05% | 0.09% | 0.00% |
 | 100,000 | 0.24% | 0.44% | 0.65% |
 | 300,000 | 0.64% | 1.20% | 2.50% |
-| **950,967 (the 1M shard)** | **1.40%** | **2.65%** | **6.13%** |
+| 950,967 (the 1M shard) | 1.40% | 2.65% | 6.13% |
+| **1,986,551 (all of ChEMBL)** | **2.01%** | **3.66%** | **8.00%** |
 
-So on the corpus the models are actually trained and scored against, ambiguity
-is 30× what the 10k shard suggested, and it rises six-fold across the size
-distribution — 1.02% below 24 heavy atoms to 6.13% at 50–59, with one
-fingerprint in the shard shared by 39 distinct molecules. All of these are
+So on the whole corpus **97.99% of molecules are the only molecule with their
+fingerprint**, ambiguity is 67× what the 10k shard suggested, and it rises
+five-fold across the size distribution — 1.50% below 24 heavy atoms to 8.00% at
+50–59 and 8.88% above 60, with one
+fingerprint shared by 51 distinct molecules. All of these are
 lower bounds for the decoder, which can propose any molecule and is not limited
 to preimages that happen to be in ChEMBL.
 
