@@ -274,7 +274,7 @@ in-training oracle evaluations account for the rest. Common protocol:
 | | steps | corpus | epochs | rec@1 | rec@20 | validity |
 |---|---|---|---|---|---|---|
 | `small_100k_3ep` | 2,127 | 90,682 | 3 | 0.0046 | **0.0603** | 0.262 |
-| `small_1m` | 21,117 | 909,800 | 3 | 0.5302 | **0.8947** | 0.903 |
+| `small_1m` | 21,117 | 900,917 | 3 | 0.5302 | **0.8947** | 0.903 |
 
 The run is healthy and simply undertrained. Its curve climbs monotonically —
 0.0000 at step 709, 0.0321 at 1,418, 0.0621 at 2,127, on the in-training
@@ -305,7 +305,7 @@ and differ tenfold in corpus:
 | run | corpus | steps | rec@20 |
 |---|---|---|---|
 | `small_100k_long` | 90,682 | 21,117 | 0.8446 |
-| `small_1m` | 909,800 | 21,117 | **0.8947** |
+| `small_1m` | 900,917 | 21,117 | **0.8947** |
 
 **A decade more data is worth +5.0 points at matched compute**, against +24.9
 points for 2.5× the compute on a fixed corpus. Repetition rate differs between

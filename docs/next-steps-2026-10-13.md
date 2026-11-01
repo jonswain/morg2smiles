@@ -11,7 +11,7 @@ measurements that will go stale as soon as anything else runs.
 
 ## Where things stand
 
-Best model is `small_1m`: 7.96M parameters, 21,117 steps, 909,800 training
+Best model is `small_1m`: 7.96M parameters, 21,117 steps, 900,917 training
 molecules. On the common protocol — 2,000 held-out molecules, 1,956 of them
 fingerprint-unseen, held out of all three shards, `fp_unseen` computed against
 the union of 1,989,502 training fingerprints:

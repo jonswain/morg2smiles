@@ -12,7 +12,7 @@ compares differed in **two** things:
 | run | train molecules | optimiser steps |
 |---|---|---|
 | `small_100k` | 90,682 | 8,508 |
-| `small_1m` | 909,800 | **21,117** |
+| `small_1m` | 900,917 | **21,117** |
 
 Ten times the data *and* two and a half times the compute. Attributing the whole
 30-point gap to data was a claim the experiment could not support.
@@ -57,12 +57,12 @@ One common protocol: 2,000 held-out molecules (1,956 fingerprint-unseen) in
 
 | run | params | steps | data | rec@1 | rec@5 | **rec@20** | struct@20 | validity | uniq/q | tanimoto | hit rank |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| `small_1m` | 7.96M | 21,117 | 909,800 | 0.5302 | 0.7996 | **0.8926** | 0.8834 | 0.903 | 12.6 | 0.974 | 1.72 |
+| `small_1m` | 7.96M | 21,117 | 900,917 | 0.5302 | 0.7996 | **0.8926** | 0.8834 | 0.903 | 12.6 | 0.974 | 1.72 |
 | `small_100k_long` | 7.95M | 21,117 | 90,682 | 0.4519 | 0.7214 | **0.8384** | 0.8252 | 0.887 | 14.2 | 0.961 | 2.23 |
 | `small_full` | 7.96M | 8,508 | 1,881,996 | 0.3113 | 0.5808 | **0.7347** | 0.7224 | 0.820 | 18.7 | 0.929 | 3.34 |
-| `small_1m_matched` | 7.96M | 8,508 | 909,800 | 0.2091 | 0.4755 | **0.6299** | 0.6161 | 0.794 | 20.4 | 0.898 | 4.08 |
+| `small_1m_matched` | 7.96M | 8,508 | 900,917 | 0.2091 | 0.4755 | **0.6299** | 0.6161 | 0.794 | 20.4 | 0.898 | 4.08 |
 | `small_100k` | 7.95M | 8,508 | 90,682 | 0.1800 | 0.4182 | **0.5890** | 0.5787 | 0.794 | 21.3 | 0.884 | 4.69 |
-| `medium_1m` | 15.12M | 2,500 | 909,800 | 0.0527 | 0.1554 | **0.2735** | 0.2669 | 0.520 | 18.7 | 0.722 | 6.75 |
+| `medium_1m` | 15.12M | 2,500 | 900,917 | 0.0527 | 0.1554 | **0.2735** | 0.2669 | 0.520 | 18.7 | 0.722 | 6.75 |
 
 This table contains **two** clean matched-compute data comparisons, because
 `small_100k` and `small_full` both ran exactly 8,508 steps with their cosine
@@ -82,13 +82,13 @@ the common protocol:
 | corpus | passes over each molecule | rec@20 | error ratio to previous | per decade |
 |---|---|---|---|---|
 | 90,682 | 12.01 | 0.5890 | — | — |
-| 909,800 | 1.20 | **0.6299** | 1.111× | 1.11× |
+| 900,917 | 1.20 | **0.6299** | 1.111× | 1.11× |
 | 1,881,996 | 0.58 | 0.7347 | 1.395× | **2.87×** |
 
 The curve is **convex**: returns to corpus size *accelerate*. No plausible
 data-scaling law does that, and the obvious candidate explanation fails — the
 full-shard run sees only 1,089,024 distinct molecules against the 1M run's
-909,800, a factor of 1.20, for +10.5 points.
+900,917, a factor of 1.20, for +10.5 points.
 
 The uncontrolled variable is in the third column, and it is not possible to
 control it:
@@ -98,8 +98,8 @@ control it:
 That is an identity. At a fixed step budget, corpus size and repetition rate are
 perfectly anti-correlated, so every one of these comparisons varies both:
 
-| 8,508 steps | 90,682 → 909,800 → 1,881,996 molecules | 12.0 → 1.2 → 0.58 passes |
-| 21,117 steps | 90,682 → 909,800 molecules | 29.8 → 3.0 passes |
+| 8,508 steps | 90,682 → 900,917 → 1,881,996 molecules | 12.0 → 1.2 → 0.58 passes |
+| 21,117 steps | 90,682 → 900,917 molecules | 29.8 → 3.0 passes |
 
 **"Data's contribution at fixed compute" is therefore not a well-posed quantity
 in this design, and the 1.45×/decade figure should not be used.** In both pairs
@@ -181,7 +181,7 @@ answer.
 ### A prediction, recorded before the measurement
 
 The 8,508-step data axis rests on two points, so "1.39× per decade" is a slope
-through two measurements rather than a fit. A third point at 909,800 molecules —
+through two measurements rather than a fit. A third point at 900,917 molecules —
 the same 8,508 steps, horizon 8,508 — tests it, and is running as this is
 written (`configs/small_1m_matched.yaml`, launched 05:23).
 

@@ -622,10 +622,10 @@ temperature 1.0 — held fixed across every night so the rows stay comparable.
 
 | | data | steps | rec@1 | rec@5 | **rec@20** | struct@20 | validity |
 |---|---|---|---|---|---|---|---|
-| **8M, ChEMBL 1M** | 909,800 | 21,117 | 0.7526 | 0.8676 | **0.8962** | 0.8860 | 0.921 |
+| **8M, ChEMBL 1M** | 900,917 | 21,117 | 0.7526 | 0.8676 | **0.8962** | 0.8860 | 0.921 |
 | 8M, ChEMBL 100k, long | 90,682 | 21,117 | 0.6764 | 0.8057 | 0.8476 | 0.8338 | 0.908 |
 | 8M, ChEMBL full | 1,881,996 | 8,508 | 0.5700 | 0.6917 | 0.7444 | 0.7342 | 0.827 |
-| 8M, ChEMBL 1M, short | 909,800 | 8,508 | 0.4407 | 0.5874 | 0.6401 | 0.6278 | 0.795 |
+| 8M, ChEMBL 1M, short | 900,917 | 8,508 | 0.4407 | 0.5874 | 0.6401 | 0.6278 | 0.795 |
 | 8M, ChEMBL 100k | 90,682 | 8,508 | 0.3793 | 0.5297 | 0.5992 | 0.5879 | 0.790 |
 | retrieval baseline | — | — | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 1.000 |
 
@@ -822,7 +822,7 @@ same correction to the novel-scaffold penalty — it falls 12.7 → 4.2 points o
 budget `steps × batch = corpus × passes` is an identity, so a larger shard
 always comes with proportionally fewer passes over each molecule, and the two
 cannot be separated. Measured at 8,508 steps the corpus direction is convex —
-0.5992, 0.6401, 0.7444 for 90,682, 909,800 and 1,881,996 molecules, steps of
+0.5992, 0.6401, 0.7444 for 90,682, 900,917 and 1,881,996 molecules, steps of
 +4.1 and +10.4 points at 5.0 and 11.6 paired standard errors, so the shape is
 real and not noise — which is not a shape any data-scaling law produces, and is
 the trace of those two effects moving oppositely. An earlier version of this

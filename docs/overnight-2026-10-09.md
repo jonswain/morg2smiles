@@ -6,6 +6,20 @@ wrong numbers if they had not been caught.
 
 Results are appended at the end, after the runs finished.
 
+> **Correction, 2026-11-01.** This document originally gave the 1M shard's
+> training split as 909,800 molecules. The correct figure is **900,917**
+> (`data/shards/1m/meta.json` and `train.smi` agree; the shard is
+> 900,917 / 50,050 / 50,050 from 1,001,017 standardised molecules). The wrong
+> number was transcribed here and then copied into `overnight-2026-10-10.md`,
+> `overnight-2026-10-14.md`, `next-steps-2026-10-13.md` and the README's results
+> table, where it survived three weeks. It is corrected in all of them.
+>
+> No conclusion depended on it: `f′`'s published 1.0628 doublings was computed
+> from the correct value, and night 1's "10× data" is 9.9× rather than 10.0×.
+> One sentence below was wrong twice over and is now right, since the nested
+> shards make the union of all training fingerprints at this point exactly the
+> 1M shard's 900,917.
+
 ## The question
 
 Phase 1 ended with an 8M-parameter model recovering `recovery@20` 0.5367 on
@@ -225,7 +239,7 @@ stage 4  scaffolds   08:56 -> 09:10
 
 One common protocol, 2,000 held-out molecules (1,967 fingerprint-unseen) drawn
 from neither model's training set, `fp_unseen` computed against the union of all
-909,800 training fingerprints, identical seed, budget and k. **These are the only
+900,917 training fingerprints, identical seed, budget and k. **These are the only
 numbers in this document that compare across runs.**
 
 | run | params | trained | rec@1 | rec@5 | **rec@20** | struct@20 | validity | mean hit rank |
@@ -308,7 +322,7 @@ seen*. A memorisation story predicts the opposite — a larger training set cove
 more scaffolds, so the novel slice should get harder and the penalty should grow.
 
 `small_1m` recovers 84% of fingerprints whose scaffold appears nowhere in
-909,800 training molecules. That is the number that speaks to behaviour on
+900,917 training molecules. That is the number that speaks to behaviour on
 chemistry a user actually brings.
 
 ### What the night did not answer
