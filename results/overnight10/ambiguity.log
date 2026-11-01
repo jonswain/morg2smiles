@@ -1,0 +1,8 @@
+[11-01 15:08:25] waiting for pid 7473 before starting
+[11-01 16:26:26] pid 7473 gone, starting
+[11-01 16:26:26] === fingerprint ambiguity on data/shards/full (train+valid) ===
+[11-01 16:26:26] stage 1: binary, r=2, 2048 bits
+[11-01 16:34:01] stage 1 exit=0
+[11-01 16:34:01] stage 2: counts, same shard and bands
+[11-01 16:42:12] stage 2 exit=0
+[11-01 16:42:12] === done; score against the registration in this script's header ===

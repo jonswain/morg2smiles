@@ -8,9 +8,9 @@
 
 Generative recovery of SMILES strings from Morgan (ECFP) fingerprints.
 
-**Over 91% of held-out Morgan fingerprints can be inverted exactly within 20
-guesses** by an 8M-parameter model trained overnight on a laptop, and **more
-than three in four on the *first* guess**.
+**More than 97% of held-out Morgan fingerprints can be inverted exactly within
+20 guesses** by an 8M-parameter model trained on a laptop, and **more than nine
+in ten on the *first* guess**.
 
 Morgan fingerprints are normally treated as one-way: hash atom environments
 into bits, and the molecule is gone. This project tests how true that is, by
@@ -210,7 +210,8 @@ What follows is the opposite of what was written here before:
    molecule".
 2. **Count fingerprints do carry real information**, and the +0.0002 was an
    artefact of the same 11,669 molecules. On the 1M shard, counts cut ambiguity
-   **5.6×** — 1.40% to 0.25% overall, 6.13% to 1.11% at 50–59 heavy atoms, and
+   **5.6×** on the 1M shard and 4.4× on the whole corpus — 1.40% to 0.25%
+   overall there, 6.13% to 1.11% at 50–59 heavy atoms, and
    the largest group of molecules sharing a fingerprint from 39 to 5. The
    reduction factor is flat in size, so counts are not specifically a
    large-molecule fix; they take a 50-atom molecule back to roughly the
@@ -622,16 +623,21 @@ temperature 1.0 — held fixed across every night so the rows stay comparable.
 
 | | data | steps | rec@1 | rec@5 | **rec@20** | struct@20 | validity |
 |---|---|---|---|---|---|---|---|
-| **8M, ChEMBL 1M** | 900,917 | 21,117 | 0.7526 | 0.8676 | **0.8962** | 0.8860 | 0.921 |
+| **8M, ChEMBL full, 6 passes** | 1,881,996 | 88,218 | 0.9044 | 0.9576 | **0.9673** | 0.9622 | 0.973 |
+| 8M, ChEMBL 1M | 900,917 | 21,117 | 0.7526 | 0.8676 | 0.8962 | 0.8860 | 0.921 |
 | 8M, ChEMBL 100k, long | 90,682 | 21,117 | 0.6764 | 0.8057 | 0.8476 | 0.8338 | 0.908 |
 | 8M, ChEMBL full | 1,881,996 | 8,508 | 0.5700 | 0.6917 | 0.7444 | 0.7342 | 0.827 |
 | 8M, ChEMBL 1M, short | 900,917 | 8,508 | 0.4407 | 0.5874 | 0.6401 | 0.6278 | 0.795 |
 | 8M, ChEMBL 100k | 90,682 | 8,508 | 0.3793 | 0.5297 | 0.5992 | 0.5879 | 0.790 |
 | retrieval baseline | — | — | 0.0000 | 0.0000 | 0.0000 | 0.0000 | 1.000 |
 
-**Nearly nine in ten held-out Morgan fingerprints can be inverted exactly
-within 20 guesses at the protocol's settings, and three in four on the first
-guess.** Mean best Tanimoto is 0.976, so even the failures are near misses.
+**More than nineteen in twenty held-out Morgan fingerprints can be inverted
+exactly within 20 guesses at the protocol's settings, and nine in ten on the first
+guess.** Among the failures the closest proposal averages 0.79 Tanimoto and 29%
+are above 0.9, so they are near misses — but proximity is not what makes the
+cliff, and [the report's §5.12](docs/report.md#512-the-size-cliff-what-it-is-and-what-it-is-not)
+rules it out as the explanation. The 0.976 this line used to quote is a mean over
+*all* queries, dominated by the exact hits scoring 1.0.
 
 **Two runs are deliberately absent from the table, including the best model in
 the repo.** This table's whole purpose is that the protocol never moves, and

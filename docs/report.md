@@ -194,9 +194,10 @@ molecule to a computer, and it is normally treated as one-way: the molecule
 cannot be read back out. This project asked **how much of the molecule a
 learned model can put back**, and what governs how well.
 
-The answer matters because the information is mostly still there. On the
-million-molecule corpus, 98.6% of molecules are the only molecule with their
-fingerprint — so the obstacle is the model, not the descriptor
+The answer matters because the information is mostly still there. Across the
+whole corpus, **97.99% of molecules are the only molecule with their
+fingerprint** — so the obstacle is the model, not the descriptor. That figure
+falls to 92% above 50 heavy atoms, and it falls as the corpus grows
 ([§2.1](#21-the-problem)).
 
 The tool is a **fingerprint-conditioned encoder–decoder transformer**: it reads
@@ -242,8 +243,8 @@ produced, so the order cannot matter.
 The third row is the same model in the other recovery convention, shown here
 rather than buried: on this cell the two differ by 1.1 points at `rec@1` and
 **0.86** at `rec@60`, and **subtracting across them is this project's most
-repeated error** (§3.7, §7.2). On the common
-protocol an earlier model reaches **91.6% within twenty guesses**
+repeated error** (§3.7, §7.2). On the unrestricted common protocol the same model reaches **97.3% within
+twenty guesses and 90.7% on the first**, measured after the programme closed
 ([§5.1](#51-headline)).
 
 One caution about the 95.0%, because it reads better than it is: the 30–64 set
@@ -428,16 +429,30 @@ paragraph shows — but whether a learned model can actually perform the
 inversion, and what governs how well.
 
 The information available is more than one would guess. On the 1M-molecule
-shard, 943,177 distinct fingerprints describe 950,967 distinct molecules. Those
-two totals are a ratio of 99.2%, but the statistic that matters is counted per
-*molecule* rather than per fingerprint: **98.6% of molecules are the only
-molecule in the corpus with their fingerprint**. Folding to 2,048 bits does
-collide distinct atom environments, and at this corpus size it costs little: the
-7,790 molecules that are *not* uniquely identified are 1.4% of the corpus, rising
-to 6.13% at 50–59 heavy atoms (§5.11). How much of that is folding and how much
-is genuine substructure degeneracy is not measured here.
-The representation is close to a lossless molecular identifier at this corpus
-size, and the interesting question is therefore about the model rather than
+shard, 943,177 distinct fingerprints describe 950,967 distinct molecules, and on
+the whole corpus 1,962,548 fingerprints describe 1,986,551 molecules.
+
+Two statistics get confused here and they differ. Per *fingerprint*, the two
+whole-corpus totals are a ratio of 98.8%. Per *molecule* — which is the one that
+answers "if I publish this fingerprint, is my molecule determined?" — **97.99%
+of molecules are the only molecule in the corpus with their fingerprint**, so
+**2.01% share one**. The per-molecule figure is lower because a collision group
+of three contributes two "excess" molecules but three ambiguous ones.
+
+**Ambiguity grows with the corpus, and the growth itself is a local slope.**
+11,669 molecules gave 0.03% sharing a fingerprint; 950,967 gave 1.40%; the full
+1,986,551 gives 2.01%. The exponent across the first pair is 0.87 and across the
+second 0.49, so it nearly halved — extrapolating the first would have predicted
+2.2–3.2% for the full corpus, which was registered in advance and **missed low**.
+Per band the whole-corpus rate runs 1.50% below 24 heavy atoms to **8.00% at
+50–59 and 8.88% above 60**. Count fingerprints cut the rate 4.4×, down from 5.6×
+on the 1M shard, so counts also buy less as the corpus grows. How much of the
+remainder is folding and how much is genuine substructure degeneracy is not
+measured here. Script: `scripts/fingerprint_ambiguity.py`; registration and
+scoring in `scripts/ambiguity_full.sh`.
+
+The representation is therefore close to a lossless molecular identifier at
+corpus sizes of this order, and the interesting question is therefore about the model rather than
 about the descriptor.
 
 That framing was itself a finding rather than an assumption, and an early
@@ -918,15 +933,37 @@ fixed seed, molecule budget.
 
 | model | rec@1 | rec@20 | struct@20 | validity |
 |---|---|---|---|---|
-| 8M, ChEMBL 1M, 21,117 steps, T=1.0 | 0.7526 | **0.8962** | 0.8860 | 0.921 |
-| the same at the adopted T=0.6 | 0.7730 | **0.9162** | — | — |
-| three-temperature vote, still 20 oracle calls | — | **0.9279** | — | — |
+| **8M, ChEMBL full, 88,218 steps, T=0.6** | **0.9075** | **0.9729** | **0.9657** | 0.981 |
+| the same at T=1.0 | 0.9044 | 0.9673 | 0.9622 | 0.973 |
+| 8M, ChEMBL 1M, 21,117 steps, T=1.0 | 0.7526 | 0.8962 | 0.8860 | 0.921 |
+| the same at T=0.6 | 0.7730 | 0.9162 | — | — |
+| three-temperature vote on that model, still 20 oracle calls | — | 0.9279 | — | — |
 | retrieval baseline | 0.0000 | 0.0000 | 0.0000 | 1.000 |
 
-**Over 91% of held-out Morgan fingerprints can be inverted exactly within 20
-guesses by an 8M-parameter model trained overnight on a laptop, and more than
-three in four on the first guess.** The `rec@1` figures in the table above are
-in consensus ranking, this project's adopted order (§3.5).
+**More than 97% of held-out Morgan fingerprints can be inverted exactly within
+20 guesses by an 8M-parameter model trained for a day on a laptop, and 91% on
+the first guess.** Insisting on the query's *own* molecule rather than any
+molecule with its fingerprint costs about a point: 0.9657 at k=20. The `rec@1`
+figures are in consensus ranking, this project's adopted order (§3.5); in
+generation order the top row's `rec@1` is 0.8175 and its `rec@20` is unchanged,
+because at k=20 the budget holds every candidate the model produced.
+
+The top two rows were measured after the programme closed, because the final run
+had only ever been scored on the size-restricted protocols — the common protocol
+was saturating, which is why it was abandoned, and the consequence was that the
+project's best model had no number comparable with its own earlier ones. It now
+does. Two things it shows that the earlier rows could not:
+
+- **The free tricks fade.** Consensus ranking is worth +22.2 points of `rec@1`
+  on the 1M model and **+12.9** on the final one at the same temperature;
+  cooling to T=0.6 is worth +2.0 points of `rec@20` on the 1M model and **+0.6**
+  on the final one. Both buy ordering rather than reach (§5.5), so both shrink as
+  the model stops needing them.
+- **Better models explore less, further than §3.5 measured.** The final model
+  proposes **7.8** distinct valid molecules per query at k=20, against 12.6 for
+  the 1M model and 21.3 for the 100k one, filling under 40% of its own budget.
+  Any constant calibrated on candidate counts is therefore even less portable
+  than §7.2 says.
 
 Mean best Tanimoto over *all* queries is 0.976, but that number is dominated by
 the exact hits, which score 1.0, and it says nothing about the failures. The
@@ -1364,7 +1401,8 @@ hurts not-X** — and the missing measurement was the cost side, which is flat.
 ### 5.11 Count fingerprints carry information that does not reach recovery
 
 Counts retain substructure multiplicity, so they carry strictly more information
-than bits. On the 1M shard they cut fingerprint ambiguity **5.6×** — 1.40% to
+than bits. On the 1M shard they cut fingerprint ambiguity **5.6×**, and on the
+whole corpus **4.4×** (§2.1), so the advantage shrinks as the corpus grows — 1.40% to
 0.25% overall, 6.13% to 1.11% at 50–59 heavy atoms, largest collision group
 39 → 5 — and the reduction factor is flat in size, so counts take a 50-atom
 molecule back to roughly a 20-atom molecule's ambiguity under binary bits.

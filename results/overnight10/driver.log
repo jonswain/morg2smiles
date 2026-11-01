@@ -1,0 +1,6 @@
+[11-01 14:53:19] === scoring small_full_6p on the COMMON protocol, so the best model has a comparable headline ===
+[11-01 14:53:19] stage 1: T=0.6 (the adopted setting; gives the headline and the size-cliff dumps)
+[11-01 15:39:56] stage 1 exit=0
+[11-01 15:39:56] stage 2: T=1.0 (the frozen comparability protocol, for the table row)
+[11-01 16:25:30] stage 2 exit=0
+[11-01 16:25:30] === done ===

@@ -1,0 +1,78 @@
+{
+  "shard": "data/shards/full",
+  "splits": "train,valid",
+  "fingerprint": {
+    "radius": 2,
+    "n_bits": 2048,
+    "counts": false,
+    "folded": true
+  },
+  "n_input_smiles": 1986551,
+  "n_distinct_molecules": 1986551,
+  "n_distinct_fingerprints": 1962548,
+  "bands": {
+    "0-24": {
+      "molecules": 696251,
+      "ambiguous": 10477,
+      "ambiguous_rate": 0.01504773422228478,
+      "mean_group_size": 1.0336042605324804,
+      "max_group_size": 51
+    },
+    "25-29": {
+      "molecules": 522376,
+      "ambiguous": 8371,
+      "ambiguous_rate": 0.01602485565952494,
+      "mean_group_size": 1.0314084107998835,
+      "max_group_size": 51
+    },
+    "30-34": {
+      "molecules": 392300,
+      "ambiguous": 7251,
+      "ambiguous_rate": 0.018483303594188122,
+      "mean_group_size": 1.0382003568697424,
+      "max_group_size": 51
+    },
+    "35-39": {
+      "molecules": 200830,
+      "ambiguous": 4659,
+      "ambiguous_rate": 0.023198725290046306,
+      "mean_group_size": 1.0522979634516756,
+      "max_group_size": 51
+    },
+    "40-49": {
+      "molecules": 128235,
+      "ambiguous": 5260,
+      "ambiguous_rate": 0.04101844270285024,
+      "mean_group_size": 1.0992708698873161,
+      "max_group_size": 51
+    },
+    "50-59": {
+      "molecules": 35865,
+      "ambiguous": 2869,
+      "ambiguous_rate": 0.07999442353269204,
+      "mean_group_size": 1.189293182768716,
+      "max_group_size": 19
+    },
+    "60+": {
+      "molecules": 10694,
+      "ambiguous": 950,
+      "ambiguous_rate": 0.08883486066953432,
+      "mean_group_size": 1.1862726762670657,
+      "max_group_size": 17
+    },
+    "35+": {
+      "molecules": 375624,
+      "ambiguous": 13738,
+      "ambiguous_rate": 0.036573807850403595,
+      "mean_group_size": 1.0852288458671437,
+      "max_group_size": 51
+    },
+    "all": {
+      "molecules": 1986551,
+      "ambiguous": 39837,
+      "ambiguous_rate": 0.020053348743626517,
+      "mean_group_size": 1.043695832626497,
+      "max_group_size": 51
+    }
+  }
+}

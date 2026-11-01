@@ -1,0 +1,214 @@
+{
+  "protocol": {
+    "eval_n": 2000,
+    "seed": 0,
+    "budget": "molecules",
+    "eval_k": 20,
+    "max_oversample": 10.0,
+    "temperature": 0.6,
+    "top_p": 1.0,
+    "pool_shard": "data/shards/1m",
+    "split": "valid",
+    "n_fp_unseen": 1956,
+    "fp_config": "morgan r=2 binary folded/2048",
+    "training_union_size": 1989502,
+    "shards_excluded": [
+      "data/shards/100k",
+      "data/shards/1m",
+      "data/shards/full"
+    ],
+    "min_heavy_atoms": null,
+    "max_heavy_atoms": null
+  },
+  "runs": {
+    "small_full_6p": {
+      "checkpoint": "checkpoints/small_full_6p/best.pt",
+      "train_shard": "data/shards/full",
+      "n_parameters": 7963767,
+      "trained_epoch": 6,
+      "trained_step": 88218,
+      "model_config": {
+        "d_model": 256,
+        "n_heads": 8,
+        "d_ff": 1024,
+        "n_encoder_layers": 4,
+        "n_decoder_layers": 4,
+        "dropout": 0.1,
+        "max_tokens": 128,
+        "vocab_size": 119,
+        "fp_vocab_size": 2048
+      },
+      "report": {
+        "ks": [
+          1,
+          5,
+          20
+        ],
+        "budget": "molecules",
+        "slices": {
+          "all": {
+            "n_queries": 2000,
+            "recovery_at_k": {
+              "1": 0.817,
+              "5": 0.949,
+              "20": 0.973
+            },
+            "structure_accuracy_at_k": {
+              "1": 0.7755,
+              "5": 0.925,
+              "20": 0.962
+            },
+            "recovery_at_k_consensus": {
+              "1": 0.908,
+              "5": 0.9645,
+              "20": 0.973
+            },
+            "structure_accuracy_at_k_consensus": {
+              "1": 0.8675,
+              "5": 0.9445,
+              "20": 0.9615
+            },
+            "validity": 0.9812292778363555,
+            "duplicate_rate": 0.9166783599472399,
+            "unique_valid_per_query": 8.0505,
+            "mean_samples_per_query": 179.37,
+            "mean_candidates_per_query": 124.7155,
+            "mean_scored_per_query": 8.0505,
+            "budget_filled_rate": 0.1865,
+            "mean_best_tanimoto": 0.9943461975997795,
+            "mean_hit_rank": 0.49128205128205127
+          },
+          "fp_unseen": {
+            "n_queries": 1956,
+            "recovery_at_k": {
+              "1": 0.8174846625766872,
+              "5": 0.9483640081799591,
+              "20": 0.9729038854805726
+            },
+            "structure_accuracy_at_k": {
+              "1": 0.7903885480572597,
+              "5": 0.9355828220858896,
+              "20": 0.9662576687116564
+            },
+            "recovery_at_k_consensus": {
+              "1": 0.9074642126789366,
+              "5": 0.9642126789366053,
+              "20": 0.9729038854805726
+            },
+            "structure_accuracy_at_k_consensus": {
+              "1": 0.8824130879345603,
+              "5": 0.9534764826175869,
+              "20": 0.9657464212678937
+            },
+            "validity": 0.9810742250326763,
+            "duplicate_rate": 0.9187103761945674,
+            "unique_valid_per_query": 7.830265848670757,
+            "mean_samples_per_query": 180.95092024539878,
+            "mean_candidates_per_query": 125.5577709611452,
+            "mean_scored_per_query": 7.830265848670757,
+            "budget_filled_rate": 0.1768916155419223,
+            "mean_best_tanimoto": 0.9942749336398563,
+            "mean_hit_rank": 0.49659150498164656
+          }
+        },
+        "primary_metric": 0.9729038854805726,
+        "primary_metric_name": "recovery@20 (fp_unseen)",
+        "fp_unseen_fraction": 0.978,
+        "elapsed_seconds": 1187.4274654998444,
+        "queries_per_second": 1.6843134070156491,
+        "candidates_per_second": 210.05998871266019,
+        "generation": {
+          "k": 20,
+          "budget": "molecules",
+          "seed": 0,
+          "max_oversample": 10.0
+        }
+      }
+    }
+  },
+  "baseline": {
+    "ks": [
+      1,
+      5,
+      20
+    ],
+    "budget": "molecules",
+    "slices": {
+      "all": {
+        "n_queries": 2000,
+        "recovery_at_k": {
+          "1": 0.022,
+          "5": 0.022,
+          "20": 0.022
+        },
+        "structure_accuracy_at_k": {
+          "1": 0.0,
+          "5": 0.0,
+          "20": 0.0
+        },
+        "recovery_at_k_consensus": {
+          "1": 0.022,
+          "5": 0.022,
+          "20": 0.022
+        },
+        "structure_accuracy_at_k_consensus": {
+          "1": 0.0,
+          "5": 0.0,
+          "20": 0.0
+        },
+        "validity": 1.0,
+        "duplicate_rate": 0.0,
+        "unique_valid_per_query": 20,
+        "mean_samples_per_query": null,
+        "mean_candidates_per_query": 20,
+        "mean_scored_per_query": 20,
+        "budget_filled_rate": 1,
+        "mean_best_tanimoto": 0.7671981207311166,
+        "mean_hit_rank": 0
+      },
+      "fp_unseen": {
+        "n_queries": 1956,
+        "recovery_at_k": {
+          "1": 0.0,
+          "5": 0.0,
+          "20": 0.0
+        },
+        "structure_accuracy_at_k": {
+          "1": 0.0,
+          "5": 0.0,
+          "20": 0.0
+        },
+        "recovery_at_k_consensus": {
+          "1": 0.0,
+          "5": 0.0,
+          "20": 0.0
+        },
+        "structure_accuracy_at_k_consensus": {
+          "1": 0.0,
+          "5": 0.0,
+          "20": 0.0
+        },
+        "validity": 1.0,
+        "duplicate_rate": 0.0,
+        "unique_valid_per_query": 20,
+        "mean_samples_per_query": null,
+        "mean_candidates_per_query": 20,
+        "mean_scored_per_query": 20,
+        "budget_filled_rate": 1,
+        "mean_best_tanimoto": 0.7619612686412235,
+        "mean_hit_rank": null
+      }
+    },
+    "primary_metric": 0.0,
+    "primary_metric_name": "recovery@20 (fp_unseen)",
+    "fp_unseen_fraction": 0.978,
+    "elapsed_seconds": 935.142422999721,
+    "queries_per_second": 2.138711655904201,
+    "candidates_per_second": 42.77423311808402,
+    "generation": {
+      "k": 20,
+      "method": "nearest_neighbour",
+      "n_index": 1989502
+    }
+  }
+}

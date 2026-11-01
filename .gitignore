@@ -242,3 +242,11 @@ dist/
 !/results/overnight9/b50_subbands_structure.json
 !/results/overnight9/validity_by_band_30plus.json
 !/results/overnight9/validity_by_band_50plus.json
+!/results/overnight10/
+/results/overnight10/*
+!/results/overnight10/driver.log
+!/results/overnight10/ambiguity.log
+!/results/overnight10/comparison_common_t06_6p.json
+!/results/overnight10/comparison_common_t10_6p.json
+!/results/overnight10/fingerprint_ambiguity_full.json
+!/results/overnight10/fingerprint_ambiguity_full_counts.json

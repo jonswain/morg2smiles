@@ -268,6 +268,71 @@ class TestValidityByBand:
         assert "0.930 → 0.728" in report and "0.721 → 0.596" in report
 
 
+class TestWholeCorpusAmbiguity:
+    """§2.1's ambiguity figures, measured on the whole corpus rather than half."""
+
+    def test_the_whole_corpus_rate_and_the_per_molecule_distinction(self, report):
+        d = dump("results/overnight10/fingerprint_ambiguity_full.json")
+        mols, fps = d["n_distinct_molecules"], d["n_distinct_fingerprints"]
+        assert (mols, fps) == (1986551, 1962548)
+        rate = d["bands"]["all"]["ambiguous_rate"] * 100
+        assert f"{100 - rate:.2f}%" == "97.99%"
+        assert f"{rate:.2f}%" == "2.01%"
+        assert "**97.99%\n of molecules" in report or "97.99%" in report
+        assert "**2.01% share one**" in report
+        # Per fingerprint is a different, higher number; both must be stated.
+        assert f"{100 * fps / mols:.1f}%" == "98.8%"
+        assert "98.8%" in report
+
+    def test_ambiguity_rises_with_size(self, report):
+        b = dump("results/overnight10/fingerprint_ambiguity_full.json")["bands"]
+        assert f"{b['50-59']['ambiguous_rate'] * 100:.2f}%" == "8.00%"
+        assert f"{b['60+']['ambiguous_rate'] * 100:.2f}%" == "8.88%"
+        assert f"{b['0-24']['ambiguous_rate'] * 100:.2f}%" == "1.50%"
+        assert "8.00% at\n50–59 and 8.88% above 60" in report
+
+    def test_the_growth_exponent_is_a_local_slope(self, report):
+        import math
+
+        small, mid = (11669, 0.0003), (950967, 0.0140)
+        full = dump("results/overnight10/fingerprint_ambiguity_full.json")
+        n_full = full["n_distinct_molecules"]
+        r_full = full["bands"]["all"]["ambiguous_rate"]
+        e1 = math.log(mid[1] / small[1]) / math.log(mid[0] / small[0])
+        e2 = math.log(r_full / mid[1]) / math.log(n_full / mid[0])
+        assert f"{e1:.2f}" == "0.87" and f"{e2:.2f}" == "0.49"
+        assert "0.87" in report and "0.49" in report
+        # The registered interval was 2.2-3.2% and must be recorded as a miss.
+        assert r_full * 100 < 2.2
+        assert "**missed low**" in report
+
+    def test_counts_buy_less_as_the_corpus_grows(self, report):
+        b = dump("results/overnight10/fingerprint_ambiguity_full.json")["bands"]["all"]
+        c = dump("results/overnight10/fingerprint_ambiguity_full_counts.json")["bands"]["all"]
+        cut = b["ambiguous_rate"] / c["ambiguous_rate"]
+        assert f"{cut:.1f}×" == "4.4×"
+        assert "**4.4×**" in report
+
+
+class TestFinalModelOnTheCommonProtocol:
+    """The best model's comparable headline, scored after three review rounds."""
+
+    def test_both_temperatures_and_both_rankings(self):
+        t06 = dump("results/overnight10/comparison_common_t06_6p.json")
+        t10 = dump("results/overnight10/comparison_common_t10_6p.json")
+        for d, label in ((t06, "T=0.6"), (t10, "T=1.0")):
+            sl = d["runs"]["small_full_6p"]["report"]["slices"]["fp_unseen"]
+            assert sl["n_queries"] == 1956, label
+            # Ranking cannot change rec@20: the budget holds every candidate.
+            assert sl["recovery_at_k"]["20"] == sl["recovery_at_k_consensus"]["20"], label
+            # But it moves rec@1 by a lot, which is why both are always named.
+            assert sl["recovery_at_k_consensus"]["1"] > sl["recovery_at_k"]["1"], label
+        sl6 = t06["runs"]["small_full_6p"]["report"]["slices"]["fp_unseen"]
+        assert f"{sl6['recovery_at_k_consensus']['20'] * 100:.1f}" == "97.3"
+        # 90.7464, so 90.7 at one decimal. An earlier draft said 90.8.
+        assert f"{sl6['recovery_at_k_consensus']['1'] * 100:.1f}" == "90.7"
+
+
 class TestContents:
     """The table of contents is generated, so it must not drift from the headings.
 
